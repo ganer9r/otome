@@ -1,0 +1,24 @@
+# Knowledge Pattern 사용 통계
+
+## REVIEW 패턴 (0-2회 사용)
+
+### dual-trigger-optimization.md
+- **사용 횟수**: 1회
+- **최초 발견**: 2025-09-06
+- **최근 사용**: 2025-09-06
+- **적용 도메인**: Database, Performance
+- **사용 프로젝트**: lotto-participation-improvement
+
+### api-response-sync.md  
+- **사용 횟수**: 1회
+- **최초 발견**: 2025-09-06
+- **최근 사용**: 2025-09-06
+- **적용 도메인**: API, Frontend
+- **사용 프로젝트**: lotto-participation-improvement
+
+## 승격 조건
+- 3회 사용 시 VERIFIED로 승격
+- 10회 사용 시 CORE 검토 대상
+
+## 업데이트 로그
+- 2025-09-06: 2개 패턴 추가 (lotto-participation-improvement 작업)
