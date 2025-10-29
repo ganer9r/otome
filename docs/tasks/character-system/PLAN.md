@@ -37,12 +37,12 @@
 ### Phase 1: Database (4개 작업)
 **담당**: database-engineer
 
-- [ ] 마이그레이션 파일 생성
+- [x] 마이그레이션 파일 생성
   - 명령어 실행: `supabase migration new character_system`
   - 생성된 파일: `supabase/migrations/YYYYMMDDHHMMSS_character_system.sql`
   - 이 파일에 다음 작업들의 SQL을 모두 작성
 
-- [ ] SQL 작성
+- [x] SQL 작성
   - **uuid_generate_v7() 함수 추가** (pi-friends 패턴)
     ```sql
     CREATE OR REPLACE FUNCTION "public"."uuid_generate_v7"() RETURNS "uuid"
@@ -87,12 +87,12 @@
     -- anon, authenticated에는 권한 부여 안 함
     ```
 
-- [ ] 마이그레이션 적용
+- [x] 마이그레이션 적용
   - 명령어 실행: `supabase migration up`
   - Supabase 로컬 DB에 테이블 생성 확인
   - RLS 활성화 확인 (클라이언트 접근 차단 확인)
 
-- [ ] TypeScript 타입 생성
+- [x] TypeScript 타입 생성
   - 명령어 실행: `supabase gen types typescript --local > src/lib/supabase/schema.gen.ts`
   - schema.gen.ts에서 characters 타입 확인
   - `src/lib/domain/character/types.ts` 작성
@@ -124,38 +124,38 @@
 **담당**: backend-developer
 
 #### 2-1. Usecase 테스트 작성 (Red)
-- [ ] `src/lib/domain/character/usecase.spec.ts` 생성
+- [x] `src/lib/domain/character/usecase.spec.ts` 생성
   - Supabase 연결 설정 (service_role 키 사용)
   - 테스트용 사용자 UID 준비
 
-- [ ] addCharacter 테스트 작성
+- [x] addCharacter 테스트 작성
   - UUID v7 생성 확인 (시간순 정렬 가능한지)
   - 캐릭터 생성 성공
   - options jsonb 저장 확인
   - name 필수값 확인
 
-- [ ] getCharacters 테스트 작성
+- [x] getCharacters 테스트 작성
   - 사용자별 캐릭터 목록 조회
   - 생성일자 내림차순 정렬 확인
   - 빈 배열 반환 확인 (데이터 없을 때)
 
-- [ ] getCharacter 테스트 작성
+- [x] getCharacter 테스트 작성
   - ID로 단일 캐릭터 조회
   - 존재하지 않는 ID는 null 반환
   - 타인 캐릭터도 조회 가능 (서버 로직에서 uid 검증)
 
-- [ ] updateCharacter 테스트 작성
+- [x] updateCharacter 테스트 작성
   - 부분 업데이트 확인
   - options jsonb 업데이트 확인
   - updated_at 자동 업데이트 확인
   - 타인 캐릭터 수정 시 에러
 
-- [ ] deleteCharacter 테스트 작성
+- [x] deleteCharacter 테스트 작성
   - 캐릭터 삭제 성공
   - 타인 캐릭터 삭제 시 에러
 
 #### 2-2. Usecase 구현 (Green)
-- [ ] `src/lib/domain/character/usecase.server.ts` 작성
+- [x] `src/lib/domain/character/usecase.server.ts` 작성
   ```typescript
   import { uuidv7 } from 'uuidv7';
   import type { SupabaseClient } from '@supabase/supabase-js';
@@ -197,11 +197,11 @@
   ): Promise<void> { ... }
   ```
 
-- [ ] 모든 테스트 통과 확인
+- [x] 모든 테스트 통과 확인
   - 명령어: `pnpm test src/lib/domain/character/usecase.spec.ts`
 
 #### 2-3. API 엔드포인트 구현
-- [ ] `src/routes/api/characters/+server.ts` 생성
+- [x] `src/routes/api/characters/+server.ts` 생성
   ```typescript
   import { addCharacter, getCharacters } from '$lib/domain/character/usecase.server';
 
@@ -227,7 +227,7 @@
   }
   ```
 
-- [ ] `src/routes/api/characters/[id]/+server.ts` 생성
+- [x] `src/routes/api/characters/[id]/+server.ts` 생성
   ```typescript
   import { getCharacter, updateCharacter, deleteCharacter } from '$lib/domain/character/usecase.server';
 
@@ -265,7 +265,7 @@
   ```
 
 #### 2-4. API Client 작성
-- [ ] `src/lib/domain/character/api.client.ts` 생성
+- [x] `src/lib/domain/character/api.client.ts` 생성
   ```typescript
   import type { Character, CreateCharacterDto, UpdateCharacterDto } from './types';
 
@@ -318,7 +318,7 @@
 ### Phase 3: Frontend (7개 작업)
 **담당**: frontend-developer
 
-- [ ] 캐릭터 목록 페이지 생성
+- [x] 캐릭터 목록 페이지 생성
   - `src/routes/characters/+page.svelte`
     - CharacterApiClient 사용하지 않음 (SSR 데이터 사용)
     - 캐릭터 카드 목록 표시 (Grid 레이아웃)
@@ -339,14 +339,14 @@
     };
     ```
 
-- [ ] 캐릭터 생성 페이지
+- [x] 캐릭터 생성 페이지
   - `src/routes/characters/new/+page.svelte`
     - CharacterApiClient 사용
     - 폼: name, info, settings, introduction, chapter_guidelines
     - API POST 요청 (createCharacter)
     - 생성 후 목록으로 리다이렉트 (`goto('/characters')`)
 
-- [ ] 캐릭터 상세 페이지
+- [x] 캐릭터 상세 페이지
   - `src/routes/characters/[id]/+page.svelte`
     - 읽기 모드로 캐릭터 정보 표시
     - 수정/삭제 버튼
@@ -368,18 +368,18 @@
     };
     ```
 
-- [ ] 캐릭터 수정 기능
+- [x] 캐릭터 수정 기능
   - 수정 모드 토글 (Svelte 5 Runes)
   - 폼에 기존 데이터 채우기
   - CharacterApiClient.updateCharacter 호출
   - 낙관적 업데이트 적용
 
-- [ ] 캐릭터 삭제 기능
+- [x] 캐릭터 삭제 기능
   - 삭제 확인 모달 (DaisyUI)
   - CharacterApiClient.deleteCharacter 호출
   - 삭제 후 목록으로 리다이렉트
 
-- [ ] UI 컴포넌트 작성
+- [x] UI 컴포넌트 작성
   - `src/routes/characters/(ui)/CharacterCard.svelte`
     ```svelte
     <script lang="ts">
@@ -427,7 +427,7 @@
     </form>
     ```
 
-- [ ] 반응형 디자인 적용
+- [x] 반응형 디자인 적용
   - Tailwind CSS 그리드
   - 모바일: 1열, 태블릿: 2열, 데스크톱: 3열
   - DaisyUI 컴포넌트 활용
