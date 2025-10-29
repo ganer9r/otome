@@ -30,8 +30,8 @@ project_files:
 
 ## 명령어
 ```bash
-sbganer migration new {feature}  # 마이그레이션 생성
-sbganer migration up             # 로컬 적용
+supabase migration new {feature}  # 마이그레이션 생성
+supabase migration up             # 로컬 적용
 supabase gen types typescript --local > web/src/lib/supabase/schema.gen.ts  # 타입 생성
 ```
 
@@ -80,7 +80,7 @@ supabase gen types typescript --local > web/src/lib/supabase/schema.gen.ts  # �
 
 ### 2단계: 마이그레이션 생성
 ```bash
-sbganer migration new {feature}
+supabase migration new {feature}
 ```
 - `/supabase/migrations/` 에 SQL 파일 생성
 - DDL 작성 (CREATE TABLE, ALTER TABLE)
@@ -94,7 +94,7 @@ sbganer migration new {feature}
 
 ### 4단계: 적용 및 타입 생성
 ```bash
-sbganer migration up  # 로컬 테스트
+supabase migration up  # 로컬 테스트
 supabase gen types typescript --local > web/src/lib/supabase/schema.gen.ts  # 타입 생성
 ```
 - 로컬 환경에서 테스트
@@ -105,7 +105,7 @@ supabase gen types typescript --local > web/src/lib/supabase/schema.gen.ts  # �
 ☐ 요구사항 분석 완료
 ☐ 데이터 모델 설계 완료
 ☐ 사용자 승인 받음 ("진행할까요?")
-☐ 마이그레이션 파일 생성 (`sbganer migration new`)
+☐ 마이그레이션 파일 생성 (`supabase migration new`)
 ☐ DDL 작성
   ☐ database.md 필수 컬럼 추가
   ☐ 비즈니스 필드 추가
@@ -113,7 +113,7 @@ supabase gen types typescript --local > web/src/lib/supabase/schema.gen.ts  # �
 ☐ updated_at 트리거 추가
 ☐ RLS 정책 설정
 ☐ 인덱스 생성
-☐ 로컬 테스트 (`sbganer migration up`)
+☐ 로컬 테스트 (`supabase migration up`)
 ☐ 타입 생성 (`supabase gen types`)
 ☐ backend-developer에게 인계
 

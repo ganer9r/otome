@@ -151,8 +151,8 @@ reward_designer: Pi/Coin/보상/인센티브/게임경제
 ## 🔧 개발 명령어 (참고)
 ```bash
 # Supabase
-sbganer migration new {feature}
-sbganer migration up
+supabase migration new {feature}
+supabase migration up
 supabase gen types typescript --local > web/src/lib/supabase/schema.gen.ts
 
 # Web/Flutter
