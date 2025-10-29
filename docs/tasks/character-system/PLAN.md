@@ -437,20 +437,20 @@
 ### Phase 4: 통합 & 검증 (3개 작업)
 **담당**: 메인 Claude
 
-- [ ] 전체 시스템 통합 테스트
+- [x] 전체 시스템 통합 테스트
   - Supabase DB 테이블 확인
   - RLS 활성화 확인 (클라이언트 직접 접근 차단)
   - API 엔드포인트 동작 확인
   - UI 플로우 전체 확인 (생성 → 조회 → 수정 → 삭제)
   - API Client ↔ API ↔ Usecase 연결 확인
 
-- [ ] 테스트 커버리지 확인
+- [x] 테스트 커버리지 확인
   - 명령어: `pnpm test src/lib/domain/character/usecase.spec.ts`
   - 모든 테스트 통과 확인
   - API 응답 검증
   - 서버 전용 접근 확인
 
-- [ ] Git 커밋
+- [~] Git 커밋
   - `git add .`
   - 커밋 메시지: "feat: implement character system with CRUD operations"
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { CharacterApiClient } from '$lib/domain/character/api.client';
+	import { CharacterApi } from '$lib/domain/character/api.client';
 	import type { PageData } from './$types';
 	import type { UpdateCharacterDto } from '$lib/domain/character/types';
 
@@ -29,7 +29,7 @@
 	let errorMessage = $state('');
 
 	// API Client
-	const apiClient = new CharacterApiClient(fetch);
+	const apiClient = new CharacterApi(fetch);
 
 	// 수정 모드 진입 (폼 데이터 초기화)
 	function enterEditMode() {

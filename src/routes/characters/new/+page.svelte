@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { CharacterApiClient } from '$lib/domain/character/api.client';
+	import { CharacterApi } from '$lib/domain/character/api.client';
 	import type { CreateCharacterDto } from '$lib/domain/character/types';
 
 	// Form state (Svelte 5 Runes)
@@ -14,7 +14,7 @@
 	let errorMessage = $state('');
 
 	// API Client
-	const apiClient = new CharacterApiClient(fetch);
+	const apiClient = new CharacterApi(fetch);
 
 	// Form submit handler
 	async function handleSubmit(e: Event) {

@@ -52,7 +52,7 @@
 	}
 </script>
 
-<form {onsubmit} class="space-y-4">
+<form onsubmit={handleSubmit} class="space-y-4">
 	<!-- 이름 (필수) -->
 	<div class="form-control">
 		<label for="name" class="label">
