@@ -2,7 +2,8 @@ import { svelteAction } from '$lib/framework/svelteAction';
 import {
 	getCharacter,
 	updateCharacter,
-	deleteCharacter
+	deleteCharacter,
+	TEMP_USER_ID
 } from '$lib/domain/character/usecase.server';
 import { error } from '@sveltejs/kit';
 import { z } from 'zod';
@@ -18,7 +19,7 @@ export const GET = svelteAction.api({
 			error(400, { message: 'Character ID is required' });
 		}
 
-		const character = await getCharacter(params.id);
+		const character = await getCharacter(TEMP_USER_ID, params.id);
 
 		if (!character) {
 			error(404, { message: 'Character not found' });
@@ -52,7 +53,7 @@ export const PATCH = svelteAction.api({
 			error(400, { message: 'Character ID is required' });
 		}
 
-		const character = await updateCharacter(params.id, data);
+		const character = await updateCharacter(TEMP_USER_ID, params.id, data);
 		return character;
 	}
 });
@@ -68,7 +69,7 @@ export const DELETE = svelteAction.api({
 			error(400, { message: 'Character ID is required' });
 		}
 
-		await deleteCharacter(params.id);
+		await deleteCharacter(TEMP_USER_ID, params.id);
 		return new Response(null, { status: 204 });
 	}
 });
