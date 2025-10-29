@@ -1,5 +1,4 @@
 import { svelteAction } from '$lib/framework/svelteAction';
-import { authMiddleware } from '$lib/framework/middleware/authMiddleware';
 import { addCharacter, getCharacters } from '$lib/domain/character/usecase.server';
 import { z } from 'zod';
 
@@ -20,10 +19,10 @@ const createCharacterSchema = z.object({
 });
 
 export const POST = svelteAction.api({
-	middlewares: [authMiddleware],
+	middlewares: [],
 	form: createCharacterSchema,
-	handler: async ({ data, user, locals }) => {
-		const character = await addCharacter(locals.supabase, user.id, data);
+	handler: async ({ data }) => {
+		const character = await addCharacter(data);
 		return character;
 	}
 });
@@ -33,9 +32,9 @@ export const POST = svelteAction.api({
  * 캐릭터 목록 조회
  */
 export const GET = svelteAction.api({
-	middlewares: [authMiddleware],
-	handler: async ({ user, locals }) => {
-		const characters = await getCharacters(locals.supabase, user.id);
+	middlewares: [],
+	handler: async () => {
+		const characters = await getCharacters();
 		return characters;
 	}
 });

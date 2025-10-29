@@ -1,5 +1,4 @@
 import { svelteAction } from '$lib/framework/svelteAction';
-import { authMiddleware } from '$lib/framework/middleware/authMiddleware';
 import {
 	getCharacter,
 	updateCharacter,
@@ -13,13 +12,13 @@ import { z } from 'zod';
  * 단일 캐릭터 조회
  */
 export const GET = svelteAction.api({
-	middlewares: [authMiddleware],
-	handler: async ({ params, user, locals }) => {
+	middlewares: [],
+	handler: async ({ params }) => {
 		if (!params.id) {
 			error(400, { message: 'Character ID is required' });
 		}
 
-		const character = await getCharacter(locals.supabase, user.id, params.id);
+		const character = await getCharacter(params.id);
 
 		if (!character) {
 			error(404, { message: 'Character not found' });
@@ -46,14 +45,14 @@ const updateCharacterSchema = z.object({
 });
 
 export const PATCH = svelteAction.api({
-	middlewares: [authMiddleware],
+	middlewares: [],
 	form: updateCharacterSchema,
-	handler: async ({ data, params, user, locals }) => {
+	handler: async ({ data, params }) => {
 		if (!params.id) {
 			error(400, { message: 'Character ID is required' });
 		}
 
-		const character = await updateCharacter(locals.supabase, user.id, params.id, data);
+		const character = await updateCharacter(params.id, data);
 		return character;
 	}
 });
@@ -63,13 +62,13 @@ export const PATCH = svelteAction.api({
  * 캐릭터 삭제
  */
 export const DELETE = svelteAction.api({
-	middlewares: [authMiddleware],
-	handler: async ({ params, user, locals }) => {
+	middlewares: [],
+	handler: async ({ params }) => {
 		if (!params.id) {
 			error(400, { message: 'Character ID is required' });
 		}
 
-		await deleteCharacter(locals.supabase, user.id, params.id);
+		await deleteCharacter(params.id);
 		return new Response(null, { status: 204 });
 	}
 });

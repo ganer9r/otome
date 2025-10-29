@@ -1,15 +1,14 @@
 import { uuidv7 } from 'uuidv7';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { supabase } from '$lib/supabase/supabase.server';
 import type { Character, CreateCharacterDto, UpdateCharacterDto } from './types';
+
+// 임시 사용자 ID (인증 구현 전)
+export const TEMP_USER_ID = '00000000-0000-0000-0000-000000000000';
 
 /**
  * 캐릭터 생성
  */
-export async function addCharacter(
-	supabase: SupabaseClient,
-	uid: string,
-	dto: CreateCharacterDto
-): Promise<Character> {
+export async function addCharacter(uid: string, dto: CreateCharacterDto): Promise<Character> {
 	// UUID v7 생성 (시간순 정렬 가능)
 	const id = uuidv7();
 
@@ -38,10 +37,7 @@ export async function addCharacter(
 /**
  * 사용자의 캐릭터 목록 조회 (생성일자 내림차순)
  */
-export async function getCharacters(
-	supabase: SupabaseClient,
-	uid: string
-): Promise<Character[]> {
+export async function getCharacters(uid: string): Promise<Character[]> {
 	const { data, error } = await supabase
 		.from('characters')
 		.select('*')
@@ -58,11 +54,7 @@ export async function getCharacters(
 /**
  * 단일 캐릭터 조회 (UID 검증 포함)
  */
-export async function getCharacter(
-	supabase: SupabaseClient,
-	uid: string,
-	id: string
-): Promise<Character | null> {
+export async function getCharacter(uid: string, id: string): Promise<Character | null> {
 	const { data, error } = await supabase
 		.from('characters')
 		.select('*')
@@ -81,13 +73,12 @@ export async function getCharacter(
  * 캐릭터 업데이트 (부분 업데이트, UID 검증)
  */
 export async function updateCharacter(
-	supabase: SupabaseClient,
 	uid: string,
 	id: string,
 	dto: UpdateCharacterDto
 ): Promise<Character> {
 	// 먼저 소유권 확인
-	const existing = await getCharacter(supabase, uid, id);
+	const existing = await getCharacter(uid, id);
 	if (!existing) {
 		throw new Error('Character not found or access denied');
 	}
@@ -121,13 +112,9 @@ export async function updateCharacter(
 /**
  * 캐릭터 삭제 (UID 검증)
  */
-export async function deleteCharacter(
-	supabase: SupabaseClient,
-	uid: string,
-	id: string
-): Promise<void> {
+export async function deleteCharacter(uid: string, id: string): Promise<void> {
 	// 먼저 소유권 확인
-	const existing = await getCharacter(supabase, uid, id);
+	const existing = await getCharacter(uid, id);
 	if (!existing) {
 		throw new Error('Character not found or access denied');
 	}

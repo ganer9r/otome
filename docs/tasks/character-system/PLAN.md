@@ -450,7 +450,7 @@
   - API 응답 검증
   - 서버 전용 접근 확인
 
-- [~] Git 커밋
+- [x] Git 커밋
   - `git add .`
   - 커밋 메시지: "feat: implement character system with CRUD operations"
 
