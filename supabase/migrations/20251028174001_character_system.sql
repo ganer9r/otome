@@ -85,3 +85,45 @@ ALTER TABLE "public"."characters" ENABLE ROW LEVEL SECURITY;
 GRANT ALL ON TABLE "public"."characters" TO service_role;
 
 -- No grants for anon or authenticated = server-only access
+
+-- =====================================================
+-- App User Table
+-- =====================================================
+CREATE TABLE IF NOT EXISTS "public"."app_user" (
+  "id" uuid DEFAULT "public"."uuid_generate_v7"() NOT NULL,
+  "uid" uuid NOT NULL,           -- Supabase Auth UID
+  "email" text NOT NULL,
+  "nickname" text,
+  "profile_img" text,
+  "created_at" timestamptz DEFAULT now() NOT NULL,
+  "updated_at" timestamptz DEFAULT now() NOT NULL,
+  CONSTRAINT "app_user_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "app_user_uid_unique" UNIQUE ("uid"),
+  CONSTRAINT "app_user_email_unique" UNIQUE ("email")
+);
+
+-- =====================================================
+-- App User Indexes
+-- =====================================================
+CREATE INDEX "app_user__uid__idx"
+  ON "public"."app_user"
+  USING btree ("uid");
+
+CREATE INDEX "app_user__email__idx"
+  ON "public"."app_user"
+  USING btree ("email");
+
+-- =====================================================
+-- App User RLS (Row Level Security)
+-- =====================================================
+-- Enable RLS with no policies = block all client access
+-- Only server-side access with service_role is allowed
+ALTER TABLE "public"."app_user" ENABLE ROW LEVEL SECURITY;
+
+-- =====================================================
+-- App User Permissions
+-- =====================================================
+-- Grant all privileges to service_role only
+GRANT ALL ON TABLE "public"."app_user" TO service_role;
+
+-- No grants for anon or authenticated = server-only access

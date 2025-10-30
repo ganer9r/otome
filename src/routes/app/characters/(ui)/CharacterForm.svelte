@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Character } from '$lib/domain/character/types';
+	import type { Snippet } from 'svelte';
 
 	/**
 	 * CharacterForm 컴포넌트
@@ -9,7 +10,8 @@
 		initialData = undefined,
 		onsubmit,
 		submitButtonText = '제출',
-		isLoading = false
+		isLoading = false,
+		actions
 	}: {
 		initialData?: Partial<Character>;
 		onsubmit: (data: {
@@ -21,6 +23,7 @@
 		}) => void;
 		submitButtonText?: string;
 		isLoading?: boolean;
+		actions?: Snippet;
 	} = $props();
 
 	// 폼 상태
@@ -120,12 +123,14 @@
 		></textarea>
 	</div>
 
-	<!-- 제출 버튼 슬롯 (외부에서 커스터마이징 가능) -->
-	<slot name="actions">
+	<!-- 제출 버튼 (외부에서 커스터마이징 가능) -->
+	{#if actions}
+		{@render actions()}
+	{:else}
 		<div class="flex justify-end">
 			<button type="submit" class="btn btn-primary" disabled={isLoading}>
 				{isLoading ? '처리 중...' : submitButtonText}
 			</button>
 		</div>
-	</slot>
+	{/if}
 </form>

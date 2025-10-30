@@ -34,6 +34,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_user: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          nickname: string | null
+          profile_img: string | null
+          uid: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          nickname?: string | null
+          profile_img?: string | null
+          uid: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          nickname?: string | null
+          profile_img?: string | null
+          uid?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       characters: {
         Row: {
           created_at: string

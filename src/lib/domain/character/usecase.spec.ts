@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { randomUUID } from 'crypto';
 import { supabase } from '$lib/supabase/supabase.server';
-import type { CreateCharacterDto, UpdateCharacterDto } from './types';
+import type { Character, CreateCharacterDto, UpdateCharacterDto } from './types';
 import {
 	addCharacter,
 	getCharacters,

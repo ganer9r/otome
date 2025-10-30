@@ -1,5 +1,5 @@
 import { svelteAction } from '$lib/framework/svelteAction';
-import { addCharacter, getCharacters, TEMP_USER_ID } from '$lib/domain/character/usecase.server';
+import { addCharacter, getCharacters } from '$lib/domain/character/usecase.server';
 import { z } from 'zod';
 
 /**
@@ -21,8 +21,9 @@ const createCharacterSchema = z.object({
 export const POST = svelteAction.api({
 	middlewares: [],
 	form: createCharacterSchema,
-	handler: async ({ data }) => {
-		const character = await addCharacter(TEMP_USER_ID, data);
+	handler: async ({ data, locals }) => {
+		const uid = locals.user.id;
+		const character = await addCharacter(uid, data);
 		return character;
 	}
 });
@@ -33,8 +34,9 @@ export const POST = svelteAction.api({
  */
 export const GET = svelteAction.api({
 	middlewares: [],
-	handler: async () => {
-		const characters = await getCharacters(TEMP_USER_ID);
+	handler: async ({ locals }) => {
+		const uid = locals.user.id;
+		const characters = await getCharacters(uid);
 		return characters;
 	}
 });

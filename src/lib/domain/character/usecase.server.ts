@@ -2,9 +2,6 @@ import { uuidv7 } from 'uuidv7';
 import { supabase } from '$lib/supabase/supabase.server';
 import type { Character, CreateCharacterDto, UpdateCharacterDto } from './types';
 
-// 임시 사용자 ID (인증 구현 전)
-export const TEMP_USER_ID = '00000000-0000-0000-0000-000000000000';
-
 /**
  * 캐릭터 생성
  */

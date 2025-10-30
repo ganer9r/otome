@@ -1,10 +1,5 @@
 import { svelteAction } from '$lib/framework/svelteAction';
-import {
-	getCharacter,
-	updateCharacter,
-	deleteCharacter,
-	TEMP_USER_ID
-} from '$lib/domain/character/usecase.server';
+import { getCharacter, updateCharacter, deleteCharacter } from '$lib/domain/character/usecase.server';
 import { error } from '@sveltejs/kit';
 import { z } from 'zod';
 
@@ -14,12 +9,13 @@ import { z } from 'zod';
  */
 export const GET = svelteAction.api({
 	middlewares: [],
-	handler: async ({ params }) => {
+	handler: async ({ params, locals }) => {
 		if (!params.id) {
 			error(400, { message: 'Character ID is required' });
 		}
 
-		const character = await getCharacter(TEMP_USER_ID, params.id);
+		const uid = locals.user.id;
+		const character = await getCharacter(uid, params.id);
 
 		if (!character) {
 			error(404, { message: 'Character not found' });
@@ -48,12 +44,13 @@ const updateCharacterSchema = z.object({
 export const PATCH = svelteAction.api({
 	middlewares: [],
 	form: updateCharacterSchema,
-	handler: async ({ data, params }) => {
+	handler: async ({ data, params, locals }) => {
 		if (!params.id) {
 			error(400, { message: 'Character ID is required' });
 		}
 
-		const character = await updateCharacter(TEMP_USER_ID, params.id, data);
+		const uid = locals.user.id;
+		const character = await updateCharacter(uid, params.id, data);
 		return character;
 	}
 });
@@ -64,12 +61,13 @@ export const PATCH = svelteAction.api({
  */
 export const DELETE = svelteAction.api({
 	middlewares: [],
-	handler: async ({ params }) => {
+	handler: async ({ params, locals }) => {
 		if (!params.id) {
 			error(400, { message: 'Character ID is required' });
 		}
 
-		await deleteCharacter(TEMP_USER_ID, params.id);
+		const uid = locals.user.id;
+		await deleteCharacter(uid, params.id);
 		return new Response(null, { status: 204 });
 	}
 });

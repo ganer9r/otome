@@ -8,6 +8,7 @@ export type UpdateCharacter = Database['public']['Tables']['characters']['Update
 // Character options type for JSONB field
 export interface CharacterOptions {
 	chapter_guidelines?: string;
+	player_info?: string;
 	// Add more options here as needed
 }
 
