@@ -64,6 +64,47 @@ export type Database = {
         }
         Relationships: []
       }
+      chapters: {
+        Row: {
+          character_id: string
+          created_at: string
+          data: Json
+          deleted_at: string | null
+          id: string
+          model: string
+          prompt: string
+          uid: string
+        }
+        Insert: {
+          character_id: string
+          created_at?: string
+          data: Json
+          deleted_at?: string | null
+          id?: string
+          model: string
+          prompt: string
+          uid: string
+        }
+        Update: {
+          character_id?: string
+          created_at?: string
+          data?: Json
+          deleted_at?: string | null
+          id?: string
+          model?: string
+          prompt?: string
+          uid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapters_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: true
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       characters: {
         Row: {
           created_at: string
