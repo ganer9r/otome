@@ -71,8 +71,8 @@ export async function generateAndSaveScript(
 	// 'deepseek/deepseek-chat'              // DeepSeek Chat
 	// 'deepseek/deepseek-reasoner'          // DeepSeek Reasoner
 	const engine: EngineConfig = {
-		// model: 'deepseek/deepseek-chat',
-		model: 'google-ai-studio/gemini-2.5-flash',
+		model: 'deepseek/deepseek-chat',
+		// model: 'google-ai-studio/gemini-2.5-flash',
 		temperature: 0.8,
 		maxTokens: 4096
 	};
@@ -82,7 +82,7 @@ export async function generateAndSaveScript(
 
 	// 5. 프롬프트 빌드
 	const messages = new ScriptPromptBuilder(engine)
-		.setSystemPrompt('script_meet.md')
+		.setSystemPrompt('script_chat.md')
 		.setProfile(profile, character.name)
 		.request(prompt);
 

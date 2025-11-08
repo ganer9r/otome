@@ -131,7 +131,8 @@ function extractChaptersFromResponse(content: string): ChapterItem[] {
 export async function generateAndSaveChapters(
 	uid: string,
 	characterId: string,
-	prompt: string
+	prompt: string,
+	chapterId?: string
 ): Promise<Chapter> {
 	// 1. 기존 챕터 조회 (deleted_at IS NULL)
 	const { data: existingChapters, error: fetchError } = await supabase
@@ -177,11 +178,39 @@ export async function generateAndSaveChapters(
 	// 6. LLM 클라이언트 초기화
 	const client = createLLMClient(engine.model);
 
+	// 6-1. 재생성 시 기존 챕터 컨텍스트 추가
+	let finalPrompt = prompt;
+	if (chapterId) {
+		const { data: existingChapter, error: existingError } = await supabase
+			.from('chapters')
+			.select('data')
+			.eq('id', chapterId)
+			.single();
+
+		if (existingError) {
+			console.warn(`Failed to fetch existing chapter for regeneration: ${existingError.message}`);
+		} else if (existingChapter && existingChapter.data) {
+			// 기존 챕터 제목 리스트 추출
+			const existingData = existingChapter.data as unknown as ChapterItem[];
+			const chapterTitles = existingData
+				.map((c) => `[${c.order}] ${c.type === 'meet' ? '👥' : '💬'} ${c.title}`)
+				.join('\n');
+
+			finalPrompt = `현재 생성된 챕터 구조:
+${chapterTitles}
+
+사용자 수정 요청: ${prompt}
+
+위 챕터 구조를 참고하되, 사용자 요청을 반영하여 30개 챕터를 새롭게 생성해주세요.
+기존 챕터 개수(30개)와 meet/chat 비율은 유지해주세요.`;
+		}
+	}
+
 	// 7. 프롬프트 빌드
 	const messages = new ChapterPromptBuilder(engine)
 		.setSystemPrompt('chapter_generate.md')
 		.setProfile(profile, character.name)
-		.request(prompt);
+		.request(finalPrompt);
 
 	// 8. LLM 호출
 	let result;
@@ -204,11 +233,11 @@ export async function generateAndSaveChapters(
 	}
 
 	// 10. DB에 저장
-	const chapterId = uuidv7();
+	const newChapterId = uuidv7();
 	const { data, error } = await supabase
 		.from('chapters')
 		.insert({
-			id: chapterId,
+			id: newChapterId,
 			uid,
 			character_id: characterId,
 			prompt,

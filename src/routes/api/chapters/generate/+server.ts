@@ -8,7 +8,8 @@ import { z } from 'zod';
  */
 const generateChaptersSchema = z.object({
 	characterId: z.string().uuid('유효한 UUID 형식이 아닙니다'),
-	prompt: z.string().min(1, '프롬프트를 입력해주세요')
+	prompt: z.string().min(1, '프롬프트를 입력해주세요'),
+	chapterId: z.string().uuid().optional()
 });
 
 export const POST = svelteAction.api({
@@ -16,7 +17,12 @@ export const POST = svelteAction.api({
 	form: generateChaptersSchema,
 	handler: async ({ data, locals }) => {
 		const uid = locals.user.id;
-		const chapters = await generateAndSaveChapters(uid, data.characterId, data.prompt);
+		const chapters = await generateAndSaveChapters(
+			uid,
+			data.characterId,
+			data.prompt,
+			data.chapterId
+		);
 		return chapters;
 	}
 });

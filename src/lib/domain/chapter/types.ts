@@ -17,6 +17,7 @@ export interface ChapterItem {
 export interface GenerateChaptersParams {
 	characterId: string;
 	prompt: string;
+	chapterId?: string; // 재생성 시 기존 챕터 ID
 }
 
 // DTO for saving chapters

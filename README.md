@@ -1,38 +1,20 @@
-# sv
+- [] 캐릭터 생성
+  - [x] 생성
+  - []x 수정
+- [] 챕터 생성
+  - [x] 기본 가이드
+  - [] content 출력 지침
+  - [] 챕터 수정 생성
+  - [] 챕터 프롬프트 수정 필요
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+- [] 스크립트 생성
+  - [x] 기본 가이드
+    - [x] 만남
+    - [x] 채팅
+  - [] 챕터 요약에서 생성하기
+    - [] 전후 요약 보여주기
+    - [] 전후 요약을 바탕으로 현재 챕터 만들기
+  - [] 스크립트 재생성 하기
+    - [] 스크립트 수정 생성
 
-## Creating a project
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.

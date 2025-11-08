@@ -2,6 +2,10 @@
 	import { ChapterApi } from '$lib/domain/chapter/api.client';
 	import type { PageData } from './$types';
 	import type { Chapter, ChapterItem } from '$lib/domain/chapter/types';
+	import { modalStore } from '$lib/stores/modal';
+	import RegenerateChapterModal, {
+		type RegenerateChapterModalProps
+	} from './(ui)/RegenerateChapterModal.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -47,6 +51,32 @@
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
 			handleGenerate();
+		}
+	}
+
+	// 재생성 모달 열기
+	async function openRegenerateDialog() {
+		if (!generatedChapters) return;
+
+		try {
+			const result = await modalStore.open<
+				Chapter | null,
+				Omit<RegenerateChapterModalProps, 'id' | 'close'>
+			>({
+				component: RegenerateChapterModal,
+				props: {
+					characterId: data.character.id,
+					currentChapters: generatedChapters
+				}
+			});
+
+			// 결과가 있으면 챕터 업데이트
+			if (result) {
+				generatedChapters = result;
+			}
+		} catch (error) {
+			// 모달이 취소되거나 오류 발생
+			console.error('Modal error:', error);
 		}
 	}
 </script>
@@ -98,9 +128,14 @@
 	<!-- 챕터 목록 표시 -->
 	{#if generatedChapters && generatedChapters.data}
 		<div class="mb-6">
-			<h2 class="text-2xl font-bold mb-4">
-				생성된 챕터 ({chaptersData.length}개)
-			</h2>
+			<div class="flex items-center justify-between mb-4">
+				<h2 class="text-2xl font-bold">
+					생성된 챕터 ({chaptersData.length}개)
+				</h2>
+				<button class="btn btn-outline btn-secondary btn-sm" onclick={openRegenerateDialog}>
+					챕터 재생성
+				</button>
+			</div>
 
 			<!-- 메타 정보 -->
 			<div class="card bg-base-100 shadow-xl mb-4">
