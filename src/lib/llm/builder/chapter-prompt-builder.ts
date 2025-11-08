@@ -70,10 +70,6 @@ export class ChapterPromptBuilder {
 	 * 메시지 빌드
 	 */
 	build(): Array<{ role: 'system' | 'user' | 'assistant'; content: string }> {
-		if (!this.userPrompt) {
-			throw new Error('ChapterPromptBuilder: user request is not set.');
-		}
-
 		return this.createMessages();
 	}
 
@@ -110,17 +106,28 @@ export class ChapterPromptBuilder {
 			});
 		}
 
-		// 6. User: 실제 요청
-		messages.push({ role: 'user', content: this.userPrompt });
+		const hasUserPrompt = typeof this.userPrompt === 'string' && this.userPrompt.trim().length > 0;
 
-		// 7. User: JSON 출력 요청
+		if (hasUserPrompt) {
+			// 6. User: 실제 요청
+			messages.push({ role: 'user', content: this.userPrompt });
+
+			// 7. Assistant: JSON 출력 지시 확인
+			messages.push({
+				role: 'assistant',
+				content:
+					'Understood. I will double-check the checklist and return only a valid JSON array of 30 chapters.'
+			});
+		}
+
+		// 8. User: JSON 출력 요청
 		messages.push({
 			role: 'user',
 			content: `위 캐릭터와 설정을 바탕으로 30개의 챕터를 생성해주세요.
 <thinking>부터 시작하여 체크리스트를 모두 확인한 후, 유효한 JSON 배열 형식으로만 출력하세요.
 다른 설명 텍스트 없이 JSON만 출력해야 합니다.`
 		});
-
+		
 		return messages;
 	}
 }

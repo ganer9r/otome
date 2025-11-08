@@ -41,11 +41,14 @@ export const POST = svelteAction.api({
 		const existingChapters = await getChapterDataById(chapterId);
 
 		// 4. 프롬프트 빌더 생성
-		const promptBuilder = new ChapterPromptBuilder()
+		const messages = new ChapterPromptBuilder()
 			.system('chapter_generate.md')
 			.characterInfo(profile, character.name)
 			.withPreviousChaptersIf(existingChapters)
-			.userRequest(prompt);
+			.userRequest(prompt)
+			.build();
+
+		console.log(messages);
 
 		// 5. 엔진 설정
 		const engine: EngineConfig = {
@@ -57,7 +60,7 @@ export const POST = svelteAction.api({
 		// 6. LLM 호출 및 파싱
 		const { data: chaptersData, model } = await generateFromLLM({
 			engine,
-			messages: promptBuilder.build(),
+			messages,
 			parser: extractChaptersFromResponse
 		});
 
