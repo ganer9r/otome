@@ -1,6 +1,7 @@
 import { ApiClient, type Fetch } from '$lib/framework/client';
 import type { POST as PostGenerateScript } from '$api/scripts/generate/+server';
-import type { GenerateScriptParams } from './types';
+import type { GET as GetScriptByChapter } from '$api/scripts/by-chapter/+server';
+import type { GenerateScriptParams, Script } from './types';
 
 /**
  * Script API Client
@@ -18,5 +19,17 @@ export class ScriptApi extends ApiClient {
 	 */
 	async generateScript(params: GenerateScriptParams) {
 		return await this.post<typeof PostGenerateScript>('/api/scripts/generate', params);
+	}
+
+	/**
+	 * 챕터별 최신 스크립트 조회
+	 * GET /api/scripts/by-chapter?characterId=xxx&chapterId=xxx
+	 * 타입 추론: GET 핸들러의 응답 타입 자동 추론
+	 */
+	async getByChapter(characterId: string, chapterId: string) {
+		return await this.get<typeof GetScriptByChapter>('/api/scripts/by-chapter', {
+			characterId,
+			chapterId
+		});
 	}
 }

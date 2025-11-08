@@ -8,6 +8,7 @@ export type InsertScript = Database['public']['Tables']['scripts']['Insert'];
 export interface GenerateScriptParams {
 	characterId: string;
 	prompt: string;
+	chapterId?: string;
 }
 
 // DTO for saving script
@@ -18,6 +19,7 @@ export interface SaveScriptParams {
 	content: string;
 	model: string;
 	tokensUsed?: number;
+	chapterId?: string;
 }
 
 // LLM generation result

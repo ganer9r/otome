@@ -8,7 +8,8 @@ import { z } from 'zod';
  */
 const generateScriptSchema = z.object({
 	characterId: z.string().min(1),
-	prompt: z.string().min(1)
+	prompt: z.string().min(1),
+	chapterId: z.string().optional()
 });
 
 export const POST = svelteAction.api({
@@ -16,7 +17,7 @@ export const POST = svelteAction.api({
 	form: generateScriptSchema,
 	handler: async ({ data, locals }) => {
 		const uid = locals.user.id;
-		const script = await generateAndSaveScript(uid, data.characterId, data.prompt);
+		const script = await generateAndSaveScript(uid, data.characterId, data.prompt, data.chapterId);
 		return script;
 	}
 });

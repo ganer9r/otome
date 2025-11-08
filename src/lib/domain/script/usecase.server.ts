@@ -52,7 +52,8 @@ function buildCharacterProfile(characterInfo: {
 export async function generateAndSaveScript(
 	uid: string,
 	characterId: string,
-	prompt: string
+	prompt: string,
+	chapterId?: string
 ): Promise<Script> {
 	// 1. 캐릭터 정보 조회
 	const character = await getCharacter(uid, characterId);
@@ -97,6 +98,7 @@ export async function generateAndSaveScript(
 			id: scriptId,
 			uid,
 			character_id: characterId,
+			chapter_id: chapterId || null,
 			prompt,
 			content: result.content,
 			model: result.model,
@@ -124,6 +126,7 @@ export async function saveScript(params: SaveScriptParams): Promise<Script> {
 			id: scriptId,
 			uid: params.uid,
 			character_id: params.characterId,
+			chapter_id: params.chapterId || null,
 			prompt: params.prompt,
 			content: params.content,
 			model: params.model,
@@ -134,6 +137,35 @@ export async function saveScript(params: SaveScriptParams): Promise<Script> {
 
 	if (error) {
 		throw new Error(`Failed to save script: ${error.message}`);
+	}
+
+	return data;
+}
+
+/**
+ * 챕터별 최신 스크립트 조회
+ */
+export async function getScriptByChapter(
+	uid: string,
+	characterId: string,
+	chapterId: string
+): Promise<Script | null> {
+	const { data, error } = await supabase
+		.from('scripts')
+		.select('*')
+		.eq('uid', uid)
+		.eq('character_id', characterId)
+		.eq('chapter_id', chapterId)
+		.order('created_at', { ascending: false })
+		.limit(1)
+		.single();
+
+	if (error) {
+		// 404는 정상적인 상황 (스크립트가 없을 수 있음)
+		if (error.code === 'PGRST116') {
+			return null;
+		}
+		throw new Error(`Failed to fetch script: ${error.message}`);
 	}
 
 	return data;

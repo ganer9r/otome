@@ -99,7 +99,7 @@ export type Database = {
           {
             foreignKeyName: "chapters_character_id_fkey"
             columns: ["character_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "characters"
             referencedColumns: ["id"]
           },
@@ -143,6 +143,7 @@ export type Database = {
       }
       scripts: {
         Row: {
+          chapter_id: string | null
           character_id: string
           content: string
           created_at: string
@@ -153,6 +154,7 @@ export type Database = {
           uid: string
         }
         Insert: {
+          chapter_id?: string | null
           character_id: string
           content: string
           created_at?: string
@@ -163,6 +165,7 @@ export type Database = {
           uid: string
         }
         Update: {
+          chapter_id?: string | null
           character_id?: string
           content?: string
           created_at?: string
@@ -173,6 +176,13 @@ export type Database = {
           uid?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "scripts_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "scripts_character_id_fkey"
             columns: ["character_id"]
