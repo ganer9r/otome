@@ -100,6 +100,47 @@ export type Database = {
         }
         Relationships: []
       }
+      scripts: {
+        Row: {
+          character_id: string
+          content: string
+          created_at: string
+          id: string
+          model: string
+          prompt: string
+          tokens_used: number | null
+          uid: string
+        }
+        Insert: {
+          character_id: string
+          content: string
+          created_at?: string
+          id?: string
+          model: string
+          prompt: string
+          tokens_used?: number | null
+          uid: string
+        }
+        Update: {
+          character_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          model?: string
+          prompt?: string
+          tokens_used?: number | null
+          uid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scripts_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

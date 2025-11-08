@@ -1,29 +1,33 @@
 import type { EngineConfig, LLMResponse } from './types';
 
+/**
+ * Cloudflare AI Gateway Client
+ * OpenAI 호환 chat completions API 사용
+ */
 export class CloudflareAIClient {
-	private accountId: string;
-	private apiToken: string;
-	private gatewayId: string;
+	private gatewayUrl: string;
+	private apiKey: string;
 
-	constructor(config: { accountId: string; apiToken: string; gatewayId: string }) {
-		this.accountId = config.accountId;
-		this.apiToken = config.apiToken;
-		this.gatewayId = config.gatewayId;
+	constructor(config: { gatewayUrl: string; apiKey: string }) {
+		this.gatewayUrl = config.gatewayUrl;
+		this.apiKey = config.apiKey;
 	}
 
 	async generate(
 		messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
 		engine: EngineConfig
 	): Promise<LLMResponse> {
-		const url = `https://gateway.ai.cloudflare.com/v1/${this.accountId}/${this.gatewayId}/workers-ai/${engine.model}`;
+		// OpenAI 호환 chat completions 엔드포인트
+		const url = `${this.gatewayUrl}/compat/chat/completions`;
 
 		const response = await fetch(url, {
 			method: 'POST',
 			headers: {
-				Authorization: `Bearer ${this.apiToken}`,
+				Authorization: `Bearer ${this.apiKey}`,
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
+				model: engine.model, // provider/model 형식 (예: google-ai-studio/gemini-2.5-flash)
 				messages,
 				temperature: engine.temperature ?? 0.7,
 				max_tokens: engine.maxTokens ?? 2048,
@@ -33,15 +37,16 @@ export class CloudflareAIClient {
 
 		if (!response.ok) {
 			const error = await response.text();
-			throw new Error(`Cloudflare AI error: ${response.status} ${error}`);
+			throw new Error(`Cloudflare AI Gateway error: ${response.status} ${error}`);
 		}
 
 		const data = await response.json();
 
+		// OpenAI 호환 응답 형식
 		return {
-			content: data.result.response,
+			content: data.choices[0].message.content,
 			model: engine.model,
-			tokensUsed: data.result.usage?.total_tokens
+			tokensUsed: data.usage?.total_tokens
 		};
 	}
 }
