@@ -78,7 +78,7 @@ export async function generateAndSaveScript(
 	};
 
 	// 4. LLM 클라이언트 초기화
-	const client = createLLMClient(engine.model);
+	const client = createLLMClient(engine);
 
 	// 5. 프롬프트 빌드
 	const messages = new ScriptPromptBuilder(engine)
@@ -87,7 +87,7 @@ export async function generateAndSaveScript(
 		.request(prompt);
 
 	// 6. LLM 호출
-	const result = await client.generate(messages, engine);
+	const result = await client.generate(messages);
 
 	// 7. DB에 저장
 	const scriptId = uuidv7();

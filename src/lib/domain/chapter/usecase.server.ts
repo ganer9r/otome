@@ -1,15 +1,16 @@
-import { uuidv7 } from 'uuidv7';
-import { supabase } from '$lib/supabase/supabase.server';
 import { ChapterPromptBuilder } from '$lib/llm/builder/chapter-prompt-builder';
-import { createLLMClient } from '$lib/llm/client.server';
+import { generateFromLLM } from '$lib/llm/generator.server';
 import type { EngineConfig } from '$lib/llm/types';
 import { getCharacter } from '$lib/domain/character/usecase.server';
-import type { Chapter, ChapterItem, SaveChaptersParams } from './types';
+import { saveChapters, softDeleteActiveChapters } from './query.server';
+import type { Chapter, ChapterItem } from './types';
+import { supabase } from '$lib/supabase/supabase.server';
+export { saveChapters, getActiveChapters } from './query.server';
 
 /**
  * 캐릭터 정보를 프로필 텍스트로 조합
  */
-function buildCharacterProfile(characterInfo: {
+export function buildCharacterProfile(characterInfo: {
 	name: string;
 	info?: string | null;
 	settings?: string | null;
@@ -49,7 +50,7 @@ function buildCharacterProfile(characterInfo: {
 /**
  * JSON 응답에서 챕터 배열 추출 (thinking 태그 제거 + 불완전한 JSON 복구)
  */
-function extractChaptersFromResponse(content: string): ChapterItem[] {
+export function extractChaptersFromResponse(content: string): ChapterItem[] {
 	// 1. <thinking> 태그 제거
 	let cleaned = content.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '').trim();
 
@@ -128,180 +129,77 @@ function extractChaptersFromResponse(content: string): ChapterItem[] {
 /**
  * LLM을 이용한 챕터 생성 및 DB 저장 (soft delete 포함)
  */
+export async function getChapterDataById(chapterId?: string | null): Promise<ChapterItem[] | null> {
+	if (!chapterId) {
+		return null;
+	}
+
+	const { data, error } = await supabase
+		.from('chapters')
+		.select('data')
+		.eq('id', chapterId)
+		.single();
+
+	if (error) {
+		const message = error.message ?? 'Unknown error';
+		console.warn(`Failed to fetch chapter data (${chapterId}): ${message}`);
+		return null;
+	}
+
+	const payload = (data?.data ?? null) as unknown;
+
+	if (!Array.isArray(payload)) {
+		return null;
+	}
+
+	return payload as ChapterItem[];
+}
+
 export async function generateAndSaveChapters(
 	uid: string,
 	characterId: string,
 	prompt: string,
 	chapterId?: string
 ): Promise<Chapter> {
-	// 1. 기존 챕터 조회 (deleted_at IS NULL)
-	const { data: existingChapters, error: fetchError } = await supabase
-		.from('chapters')
-		.select('id')
-		.eq('character_id', characterId)
-		.is('deleted_at', null);
-
-	if (fetchError) {
-		throw new Error(`Failed to fetch existing chapters: ${fetchError.message}`);
-	}
-
-	// 2. 기존 챕터가 있으면 soft delete
-	if (existingChapters && existingChapters.length > 0) {
-		const now = new Date().toISOString();
-		const { error: deleteError } = await supabase
-			.from('chapters')
-			.update({ deleted_at: now })
-			.eq('character_id', characterId)
-			.is('deleted_at', null);
-
-		if (deleteError) {
-			throw new Error(`Failed to soft delete existing chapters: ${deleteError.message}`);
-		}
-	}
-
-	// 3. 캐릭터 정보 조회
+	// 1. 캐릭터 정보 조회
 	const character = await getCharacter(uid, characterId);
 	if (!character) {
 		throw new Error('Character not found');
 	}
 
-	// 4. 프로필 생성
+	// 2. 프로필 생성
 	const profile = buildCharacterProfile(character);
+	const existingChapters = await getChapterDataById(chapterId);
 
-	// 5. 기본 엔진 설정
+	// 3. 프롬프트 빌더 생성
+	const promptBuilder = new ChapterPromptBuilder()
+		.system('chapter_generate.md')
+		.characterInfo(profile, character.name)
+		.withPreviousChaptersIf(existingChapters)
+		.userRequest(prompt);
+
 	const engine: EngineConfig = {
 		model: 'google-ai-studio/gemini-2.5-flash',
 		temperature: 0.8,
 		maxTokens: 8192
 	};
 
-	// 6. LLM 클라이언트 초기화
-	const client = createLLMClient(engine.model);
+	// 6. LLM 호출 및 파싱
+	const { data: chaptersData, model } = await generateFromLLM({
+		engine,
+		messages: promptBuilder.build(),
+		parser: extractChaptersFromResponse
+	});
 
-	// 6-1. 재생성 시 기존 챕터 컨텍스트 추가
-	let finalPrompt = prompt;
-	if (chapterId) {
-		const { data: existingChapter, error: existingError } = await supabase
-			.from('chapters')
-			.select('data')
-			.eq('id', chapterId)
-			.single();
+	// 6. 기존 챕터 soft delete 및 신규 저장
+	await softDeleteActiveChapters(characterId);
 
-		if (existingError) {
-			console.warn(`Failed to fetch existing chapter for regeneration: ${existingError.message}`);
-		} else if (existingChapter && existingChapter.data) {
-			// 기존 챕터 제목 리스트 추출
-			const existingData = existingChapter.data as unknown as ChapterItem[];
-			const chapterTitles = existingData
-				.map((c) => `[${c.order}] ${c.type === 'meet' ? '👥' : '💬'} ${c.title}`)
-				.join('\n');
-
-			finalPrompt = `현재 생성된 챕터 구조:
-${chapterTitles}
-
-사용자 수정 요청: ${prompt}
-
-위 챕터 구조를 참고하되, 사용자 요청을 반영하여 30개 챕터를 새롭게 생성해주세요.
-기존 챕터 개수(30개)와 meet/chat 비율은 유지해주세요.`;
-		}
-	}
-
-	// 7. 프롬프트 빌드
-	const messages = new ChapterPromptBuilder(engine)
-		.setSystemPrompt('chapter_generate.md')
-		.setProfile(profile, character.name)
-		.request(finalPrompt);
-
-	// 8. LLM 호출
-	let result;
-	try {
-		result = await client.generate(messages, engine);
-	} catch (error) {
-		throw new Error(
-			`Failed to generate chapters with LLM: ${error instanceof Error ? error.message : 'Unknown error'}`
-		);
-	}
-
-	// 9. JSON 파싱 및 검증
-	let chaptersData: ChapterItem[];
-	try {
-		chaptersData = extractChaptersFromResponse(result.content);
-	} catch (error) {
-		throw new Error(
-			`Failed to parse chapters from LLM response: ${error instanceof Error ? error.message : 'Invalid JSON'}`
-		);
-	}
-
-	// 10. DB에 저장
-	const newChapterId = uuidv7();
-	const { data, error } = await supabase
-		.from('chapters')
-		.insert({
-			id: newChapterId,
-			uid,
-			character_id: characterId,
-			prompt,
-			data: chaptersData,
-			model: result.model
-		})
-		.select()
-		.single();
-
-	if (error) {
-		throw new Error(`Failed to save chapters: ${error.message}`);
-	}
-
-	return data;
+	return saveChapters({
+		uid,
+		characterId,
+		prompt,
+		data: chaptersData,
+		model
+	});
 }
 
-/**
- * 챕터 직접 저장 (이미 생성된 챕터)
- */
-export async function saveChapters(params: SaveChaptersParams): Promise<Chapter> {
-	const chapterId = uuidv7();
-
-	const { data, error } = await supabase
-		.from('chapters')
-		.insert({
-			id: chapterId,
-			uid: params.uid,
-			character_id: params.characterId,
-			prompt: params.prompt,
-			data: params.data,
-			model: params.model
-		})
-		.select()
-		.single();
-
-	if (error) {
-		throw new Error(`Failed to save chapters: ${error.message}`);
-	}
-
-	return data;
-}
-
-/**
- * 캐릭터의 활성 챕터 조회 (deleted_at IS NULL)
- */
-export async function getActiveChapters(
-	uid: string,
-	characterId: string
-): Promise<Chapter | null> {
-	const { data, error } = await supabase
-		.from('chapters')
-		.select('*')
-		.eq('uid', uid)
-		.eq('character_id', characterId)
-		.is('deleted_at', null)
-		.single();
-
-	if (error) {
-		if (error.code === 'PGRST116') {
-			// No rows found
-			return null;
-		}
-		throw new Error(`Failed to get chapters: ${error.message}`);
-	}
-
-	return data;
-}

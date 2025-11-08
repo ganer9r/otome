@@ -17,6 +17,11 @@
 		goto(`/app/characters/${data.character.id}/edit`);
 	}
 
+	// 챕터 페이지로 이동
+	function goToChapters() {
+		goto(`/app/characters/${data.character.id}/chapters`);
+	}
+
 	// 삭제 모달 열기
 	function openDeleteModal() {
 		isDeleteModalOpen = true;
@@ -49,8 +54,7 @@
 		<h1 class="text-3xl font-bold">{data.character.name}</h1>
 		<div class="flex gap-2">
 			<a href="/app/characters" class="btn btn-ghost">목록으로</a>
-			<button class="btn btn-primary" onclick={goToEdit}>수정</button>
-			<button class="btn btn-error" onclick={openDeleteModal}>삭제</button>
+			<button class="btn btn-secondary" onclick={goToChapters}>챕터 관리하기</button>
 		</div>
 	</div>
 
@@ -66,7 +70,14 @@
 		<div class="card-body space-y-6">
 			<!-- 기본 정보 -->
 			<div>
-				<h2 class="text-xl font-semibold mb-2">기본 정보</h2>
+				<h2 class="text-xl font-semibold mb-2">
+					기본 정보
+
+					<div class="flex gap-2">
+						<button class="btn btn-primary" onclick={goToEdit}>수정</button>
+						<button class="btn btn-error" onclick={openDeleteModal}>삭제</button>
+					</div>
+				</h2>
 				<div class="divider my-1"></div>
 				<dl class="space-y-2">
 					<div>

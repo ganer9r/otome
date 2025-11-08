@@ -7,16 +7,20 @@ import type { EngineConfig, LLMResponse } from './types';
 export class CloudflareAIClient {
 	private gatewayUrl: string;
 	private apiKey: string;
+	private engine: EngineConfig;
 
-	constructor(config: { gatewayUrl: string; apiKey: string }) {
+	constructor(config: { gatewayUrl: string; apiKey: string; engine: EngineConfig }) {
 		this.gatewayUrl = config.gatewayUrl;
 		this.apiKey = config.apiKey;
+		this.engine = config.engine;
 	}
 
 	async generate(
 		messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
-		engine: EngineConfig
+		overrides?: Partial<EngineConfig>
 	): Promise<LLMResponse> {
+		const engine = { ...this.engine, ...overrides };
+
 		// OpenAI 호환 chat completions 엔드포인트
 		const url = `${this.gatewayUrl}/compat/chat/completions`;
 
