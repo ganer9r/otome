@@ -9,6 +9,7 @@ export interface GenerateScriptParams {
 	characterId: string;
 	prompt: string;
 	chapterId?: string;
+	chapterOrder?: number;
 }
 
 // DTO for saving script
@@ -20,6 +21,7 @@ export interface SaveScriptParams {
 	model: string;
 	tokensUsed?: number;
 	chapterId?: string;
+	chapterOrder?: number;
 }
 
 // LLM generation result

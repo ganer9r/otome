@@ -21,6 +21,28 @@
 
 	const apiClient = new ScriptApi(fetch);
 
+	// 챕터 변경 시 기존 스크립트 조회
+	$effect(() => {
+		loadExistingScript();
+	});
+
+	async function loadExistingScript() {
+		if (!chapterId || !characterId) return;
+
+		try {
+			isLoading = true;
+			const result = await apiClient.getByChapter(characterId, chapterId, chapter.order);
+			console.log('Loaded script:', result);
+			generatedScript = result.script;
+		} catch (error) {
+			console.log('No script found:', error);
+			// 스크립트가 없는 경우는 정상 (404)
+			generatedScript = null;
+		} finally {
+			isLoading = false;
+		}
+	}
+
 	// 스크립트 생성 핸들러
 	async function handleGenerate() {
 		if (!prompt.trim()) {
@@ -36,7 +58,8 @@
 			const result = await apiClient.generateScript({
 				characterId,
 				prompt: prompt.trim(),
-				chapterId
+				chapterId,
+				chapterOrder: chapter.order
 			});
 			generatedScript = result;
 			prompt = ''; // 성공 시 입력 초기화
@@ -60,6 +83,59 @@
 		if (e.target === e.currentTarget) {
 			onClose();
 		}
+	}
+
+	// 스크립트 파싱
+	interface ParsedScript {
+		thinking: string | null;
+		lines: Array<{ speaker: string | null; text: string }>;
+	}
+
+	function parseScriptContent(content: string | any): ParsedScript {
+		// content가 없거나 string이 아닌 경우 처리
+		if (!content) {
+			return { thinking: null, lines: [] };
+		}
+
+		// content가 객체인 경우 (JSON 파싱 필요)
+		let textContent = '';
+		if (typeof content === 'string') {
+			textContent = content;
+		} else if (typeof content === 'object') {
+			// JSON으로 저장되어 있을 경우
+			textContent = JSON.stringify(content, null, 2);
+		} else {
+			return { thinking: null, lines: [] };
+		}
+
+		// <thinking> 추출
+		const thinkingMatch = textContent.match(/<thinking>([\s\S]*?)<\/thinking>/);
+		const thinking = thinkingMatch ? thinkingMatch[1].trim() : null;
+
+		// thinking 제거한 나머지 부분
+		const scriptContent = textContent.replace(/<thinking>[\s\S]*?<\/thinking>/, '').trim();
+
+		// 각 라인 파싱
+		const lines: Array<{ speaker: string | null; text: string }> = [];
+		const scriptLines = scriptContent.split('\n').filter((line) => line.trim());
+
+		for (const line of scriptLines) {
+			// [user] 매칭
+			const userMatch = line.match(/^\[user\]\s*(.+)$/);
+			if (userMatch) {
+				lines.push({ speaker: 'user', text: userMatch[1].trim() });
+				continue;
+			}
+
+			// [char:이름] 매칭
+			const charMatch = line.match(/^\[char:(.+?)\]\s*(.+)$/);
+			if (charMatch) {
+				lines.push({ speaker: charMatch[1].trim(), text: charMatch[2].trim() });
+				continue;
+			}
+		}
+
+		return { thinking, lines };
 	}
 </script>
 
@@ -165,9 +241,15 @@
 
 			<!-- 결과 표시 영역 -->
 			{#if generatedScript}
+				{@const parsed = parseScriptContent(generatedScript.content)}
 				<div class="card bg-base-200 shadow-md">
 					<div class="card-body">
-						<h3 class="card-title text-lg">생성된 스크립트</h3>
+						<div class="flex items-center justify-between mb-2">
+							<h3 class="card-title text-lg">생성된 스크립트</h3>
+							{#if generatedScript.chapter_order}
+								<div class="badge badge-primary badge-lg">Chapter {generatedScript.chapter_order}</div>
+							{/if}
+						</div>
 						<div class="divider my-1"></div>
 
 						<!-- 메타 정보 -->
@@ -196,15 +278,51 @@
 							{/if}
 						</div>
 
-						<!-- 생성된 콘텐츠 -->
+						<!-- Thinking 섹션 (접을 수 있음) -->
+						{#if parsed.thinking}
+							<details class="collapse collapse-arrow bg-base-100 mb-4">
+								<summary class="collapse-title text-sm font-medium">📋 작성 계획 (Thinking)</summary>
+								<div class="collapse-content">
+									<pre class="whitespace-pre-wrap text-xs text-base-content/70">{parsed.thinking}</pre>
+								</div>
+							</details>
+						{/if}
+
+						<!-- 스크립트 대화 -->
 						<div class="bg-base-100 p-4 rounded-lg border border-base-300">
-							<h4 class="font-semibold text-base-content/60 mb-2 text-sm">스크립트 JSON:</h4>
-							<pre
-								class="whitespace-pre-wrap text-xs overflow-x-auto">{JSON.stringify(
-									generatedScript.content,
-									null,
-									2
-								)}</pre>
+							<h4 class="font-semibold text-base-content/60 mb-3 text-sm">스크립트</h4>
+							{#if parsed.lines.length > 0}
+								<div class="space-y-2">
+									{#each parsed.lines as line}
+										{#if line.speaker === 'user'}
+											<div class="flex justify-end">
+												<div class="bg-primary text-primary-content px-3 py-2 rounded-lg max-w-[80%]">
+													<div class="text-xs opacity-70 mb-1">[user]</div>
+													<div class="text-sm">{line.text}</div>
+												</div>
+											</div>
+										{:else if line.speaker}
+											<div class="flex justify-start">
+												<div class="bg-base-200 px-3 py-2 rounded-lg max-w-[80%]">
+													<div class="text-xs text-base-content/60 mb-1">[char:{line.speaker}]</div>
+													<div class="text-sm">{line.text}</div>
+												</div>
+											</div>
+										{/if}
+									{/each}
+								</div>
+							{:else}
+								<!-- 파싱 실패 시 raw content 표시 -->
+								<details class="collapse collapse-arrow bg-base-200">
+									<summary class="collapse-title text-sm">원본 내용 보기</summary>
+									<div class="collapse-content">
+										<pre
+											class="whitespace-pre-wrap text-xs overflow-x-auto">{typeof generatedScript.content === 'string'
+												? generatedScript.content
+												: JSON.stringify(generatedScript.content, null, 2)}</pre>
+									</div>
+								</details>
+							{/if}
 						</div>
 					</div>
 				</div>

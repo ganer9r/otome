@@ -53,7 +53,8 @@ export async function generateAndSaveScript(
 	uid: string,
 	characterId: string,
 	prompt: string,
-	chapterId?: string
+	chapterId?: string,
+	chapterOrder?: number
 ): Promise<Script> {
 	// 1. 캐릭터 정보 조회
 	const character = await getCharacter(uid, characterId);
@@ -61,8 +62,26 @@ export async function generateAndSaveScript(
 		throw new Error('Character not found');
 	}
 
-	// 2. 프로필 생성
-	const profile = buildCharacterProfile(character);
+	// 2. 챕터 정보 조회 (chapterId와 chapterOrder가 있는 경우)
+	let chapterInfo = '';
+	if (chapterId && chapterOrder) {
+		const { data: chapter, error } = await supabase
+			.from('chapters')
+			.select('data')
+			.eq('id', chapterId)
+			.single();
+
+		if (!error && chapter && chapter.data) {
+			const chaptersData = chapter.data as any[];
+			const targetChapter = chaptersData.find((ch) => ch.order === chapterOrder);
+			if (targetChapter) {
+				chapterInfo = `\n\n# 현재 챕터 정보\n챕터 번호: ${targetChapter.order}\n타입: ${targetChapter.type === 'meet' ? '만남' : '채팅'}\n제목: ${targetChapter.title}\n설명: ${targetChapter.description}\n내용:\n${targetChapter.content}`;
+			}
+		}
+	}
+
+	// 3. 프로필 생성
+	const profile = buildCharacterProfile(character) + chapterInfo;
 
 	// 3. 기본 엔진 설정 (provider/model 형식)
 	// 사용 예제:
@@ -99,6 +118,7 @@ export async function generateAndSaveScript(
 			uid,
 			character_id: characterId,
 			chapter_id: chapterId || null,
+			chapter_order: chapterOrder || null,
 			prompt,
 			content: result.content,
 			model: result.model,
@@ -127,6 +147,7 @@ export async function saveScript(params: SaveScriptParams): Promise<Script> {
 			uid: params.uid,
 			character_id: params.characterId,
 			chapter_id: params.chapterId || null,
+			chapter_order: params.chapterOrder || null,
 			prompt: params.prompt,
 			content: params.content,
 			model: params.model,
@@ -148,14 +169,21 @@ export async function saveScript(params: SaveScriptParams): Promise<Script> {
 export async function getScriptByChapter(
 	uid: string,
 	characterId: string,
-	chapterId: string
+	chapterId: string,
+	chapterOrder?: number
 ): Promise<Script | null> {
-	const { data, error } = await supabase
+	let query = supabase
 		.from('scripts')
 		.select('*')
 		.eq('uid', uid)
 		.eq('character_id', characterId)
-		.eq('chapter_id', chapterId)
+		.eq('chapter_id', chapterId);
+
+	if (chapterOrder !== undefined) {
+		query = query.eq('chapter_order', chapterOrder);
+	}
+
+	const { data, error } = await query
 		.order('created_at', { ascending: false })
 		.limit(1)
 		.single();

@@ -144,6 +144,7 @@ export type Database = {
       scripts: {
         Row: {
           chapter_id: string | null
+          chapter_order: number | null
           character_id: string
           content: string
           created_at: string
@@ -155,6 +156,7 @@ export type Database = {
         }
         Insert: {
           chapter_id?: string | null
+          chapter_order?: number | null
           character_id: string
           content: string
           created_at?: string
@@ -166,6 +168,7 @@ export type Database = {
         }
         Update: {
           chapter_id?: string | null
+          chapter_order?: number | null
           character_id?: string
           content?: string
           created_at?: string

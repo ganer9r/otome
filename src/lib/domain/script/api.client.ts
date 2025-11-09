@@ -23,13 +23,14 @@ export class ScriptApi extends ApiClient {
 
 	/**
 	 * 챕터별 최신 스크립트 조회
-	 * GET /api/scripts/by-chapter?characterId=xxx&chapterId=xxx
+	 * GET /api/scripts/by-chapter?characterId=xxx&chapterId=xxx&chapterOrder=1
 	 * 타입 추론: GET 핸들러의 응답 타입 자동 추론
 	 */
-	async getByChapter(characterId: string, chapterId: string) {
+	async getByChapter(characterId: string, chapterId: string, chapterOrder?: number) {
 		return await this.get<typeof GetScriptByChapter>('/api/scripts/by-chapter', {
 			characterId,
-			chapterId
+			chapterId,
+			...(chapterOrder !== undefined && { chapterOrder: chapterOrder.toString() })
 		});
 	}
 }
