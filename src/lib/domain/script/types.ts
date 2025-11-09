@@ -1,10 +1,14 @@
 import type { Database } from '$lib/supabase/schema.gen';
 
-// Supabase generated types
+/**
+ * Supabase generated types
+ */
 export type Script = Database['public']['Tables']['scripts']['Row'];
 export type InsertScript = Database['public']['Tables']['scripts']['Insert'];
 
-// DTO for generating script
+/**
+ * DTO for generating script (API request)
+ */
 export interface GenerateScriptParams {
 	characterId: string;
 	prompt: string;
@@ -12,21 +16,16 @@ export interface GenerateScriptParams {
 	chapterOrder?: number;
 }
 
-// DTO for saving script
+/**
+ * DTO for saving script to DB
+ */
 export interface SaveScriptParams {
 	uid: string;
 	characterId: string;
+	chapterId: string | null;
+	chapterOrder: number | null;
 	prompt: string;
 	content: string;
 	model: string;
-	tokensUsed?: number;
-	chapterId?: string;
-	chapterOrder?: number;
-}
-
-// LLM generation result
-export interface ScriptGenerationResult {
-	content: string;
-	model: string;
-	tokensUsed?: number;
+	tokensUsed: number | null;
 }
