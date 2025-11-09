@@ -22,6 +22,9 @@
 
 	const apiClient = new ChapterApi(fetch);
 
+	// 스크립트가 생성된 챕터 order Set (빠른 조회용)
+	const scriptOrdersSet = $derived(new Set(data.scriptOrders));
+
 	// URL 쿼리 파라미터에서 챕터 ID 읽기
 	$effect(() => {
 		const chapterIdFromUrl = $page.url.searchParams.get('chapter');
@@ -204,7 +207,7 @@
 					<div class="space-y-4">
 						{#each chaptersData as chapter (chapter.order)}
 							<div
-								class="bg-base-100 border border-base-300 rounded-lg p-4 cursor-pointer hover:shadow-lg hover:border-primary transition-all"
+								class="bg-base-100 border border-base-300 rounded-lg p-4 cursor-pointer hover:shadow-lg hover:border-primary transition-all group"
 								class:ring-2={selectedChapterId === String(chapter.order)}
 								class:ring-primary={selectedChapterId === String(chapter.order)}
 								onclick={() => handleChapterClick(chapter)}
@@ -226,10 +229,45 @@
 										{/if}
 									</div>
 									<div class="flex-1 min-w-0">
-										<h3 class="font-bold text-lg">{chapter.title}</h3>
+										<div class="flex items-center gap-2 mb-1">
+											<h3 class="font-bold text-lg">{chapter.title}</h3>
+											{#if scriptOrdersSet.has(chapter.order)}
+												<span
+													class="badge badge-success badge-sm gap-1"
+													title="스크립트 생성됨"
+												>
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														viewBox="0 0 20 20"
+														fill="currentColor"
+														class="w-3 h-3"
+													>
+														<path
+															fill-rule="evenodd"
+															d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+															clip-rule="evenodd"
+														/>
+													</svg>
+													스크립트
+												</span>
+											{/if}
+										</div>
 										<span class="badge badge-sm badge-outline mt-1">
 											{chapter.type === 'meet' ? '만남' : '채팅'}
 										</span>
+									</div>
+									<!-- 클릭 가능 표시 아이콘 -->
+									<div class="flex-shrink-0 text-base-content/40 group-hover:text-primary transition-colors">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											class="w-6 h-6"
+										>
+											<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+										</svg>
 									</div>
 								</div>
 								<div class="pl-12">

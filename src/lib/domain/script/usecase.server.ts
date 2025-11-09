@@ -64,6 +64,7 @@ export async function generateAndSaveScript(
 
 	// 2. 챕터 정보 조회 (chapterId와 chapterOrder가 있는 경우)
 	let chapterInfo = '';
+	let chapterType: 'meet' | 'chat' | null = null;
 	if (chapterId && chapterOrder) {
 		const { data: chapter, error } = await supabase
 			.from('chapters')
@@ -75,6 +76,7 @@ export async function generateAndSaveScript(
 			const chaptersData = chapter.data as any[];
 			const targetChapter = chaptersData.find((ch) => ch.order === chapterOrder);
 			if (targetChapter) {
+				chapterType = targetChapter.type;
 				chapterInfo = `\n\n# 현재 챕터 정보\n챕터 번호: ${targetChapter.order}\n타입: ${targetChapter.type === 'meet' ? '만남' : '채팅'}\n제목: ${targetChapter.title}\n설명: ${targetChapter.description}\n내용:\n${targetChapter.content}`;
 			}
 		}
@@ -100,9 +102,10 @@ export async function generateAndSaveScript(
 	// 4. LLM 클라이언트 초기화
 	const client = createLLMClient(engine);
 
-	// 5. 프롬프트 빌드
+	// 5. 프롬프트 빌드 (챕터 타입에 따라 다른 프롬프트 사용)
+	const systemPromptFile = chapterType === 'meet' ? 'script_meet.md' : 'script_chat.md';
 	const messages = new ScriptPromptBuilder(engine)
-		.setSystemPrompt('script_chat.md')
+		.setSystemPrompt(systemPromptFile)
 		.setProfile(profile, character.name)
 		.request(prompt);
 
@@ -197,4 +200,30 @@ export async function getScriptByChapter(
 	}
 
 	return data;
+}
+
+/**
+ * 챕터에 속한 스크립트의 chapter_order 목록 조회
+ * 챕터 목록에서 스크립트 존재 여부 표시용
+ */
+export async function getScriptOrdersByChapter(
+	uid: string,
+	characterId: string,
+	chapterId: string
+): Promise<number[]> {
+	const { data, error } = await supabase
+		.from('scripts')
+		.select('chapter_order')
+		.eq('uid', uid)
+		.eq('character_id', characterId)
+		.eq('chapter_id', chapterId)
+		.not('chapter_order', 'is', null);
+
+	if (error) {
+		throw new Error(`Failed to fetch script orders: ${error.message}`);
+	}
+
+	// 중복 제거 후 정렬
+	const orders = Array.from(new Set(data.map((item) => item.chapter_order as number)));
+	return orders.sort((a, b) => a - b);
 }

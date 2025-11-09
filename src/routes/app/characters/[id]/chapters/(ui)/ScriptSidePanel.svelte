@@ -19,6 +19,14 @@
 	let isLoading = $state(false);
 	let errorMessage = $state('');
 
+	// 챕터 편집 상태
+	let isEditingChapter = $state(false);
+	let editedChapter = $state({
+		title: chapter.title,
+		description: chapter.description,
+		content: chapter.content
+	});
+
 	const apiClient = new ScriptApi(fetch);
 
 	// 챕터 변경 시 기존 스크립트 조회
@@ -85,10 +93,52 @@
 		}
 	}
 
+	// 챕터 편집 모드 토글
+	function toggleEditMode() {
+		if (isEditingChapter) {
+			// 취소: 원래 값으로 되돌림
+			editedChapter = {
+				title: chapter.title,
+				description: chapter.description,
+				content: chapter.content
+			};
+		}
+		isEditingChapter = !isEditingChapter;
+	}
+
+	// 챕터 저장
+	async function saveChapterEdit() {
+		try {
+			isLoading = true;
+			const response = await fetch(`/api/chapters/${chapterId}/update-item`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					order: chapter.order,
+					title: editedChapter.title,
+					description: editedChapter.description,
+					content: editedChapter.content
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to update chapter');
+			}
+
+			// 성공 시 편집 모드 종료 및 부모에게 알림 (페이지 새로고침 필요)
+			isEditingChapter = false;
+			alert('챕터가 수정되었습니다. 페이지를 새로고침해주세요.');
+		} catch (error) {
+			errorMessage = error instanceof Error ? error.message : '챕터 수정에 실패했습니다.';
+		} finally {
+			isLoading = false;
+		}
+	}
+
 	// 스크립트 파싱
 	interface ParsedScript {
 		thinking: string | null;
-		lines: Array<{ speaker: string | null; text: string }>;
+		lines: Array<{ speaker: string | null; text: string; type?: 'narration' }>;
 	}
 
 	function parseScriptContent(content: string | any): ParsedScript {
@@ -116,10 +166,17 @@
 		const scriptContent = textContent.replace(/<thinking>[\s\S]*?<\/thinking>/, '').trim();
 
 		// 각 라인 파싱
-		const lines: Array<{ speaker: string | null; text: string }> = [];
+		const lines: Array<{ speaker: string | null; text: string; type?: 'narration' }> = [];
 		const scriptLines = scriptContent.split('\n').filter((line) => line.trim());
 
 		for (const line of scriptLines) {
+			// [narration] 매칭
+			const narrationMatch = line.match(/^\[narration\]\s*(.+)$/);
+			if (narrationMatch) {
+				lines.push({ speaker: null, text: narrationMatch[1].trim(), type: 'narration' });
+				continue;
+			}
+
 			// [user] 매칭
 			const userMatch = line.match(/^\[user\]\s*(.+)$/);
 			if (userMatch) {
@@ -163,30 +220,89 @@
 						{chapter.type === 'meet' ? '만남' : '채팅'}
 					</span>
 				</div>
-				<h2 id="panel-title" class="text-2xl font-bold mb-2">{chapter.title}</h2>
-				<p class="text-sm text-base-content/70 mb-3">{chapter.description}</p>
-				<div class="bg-base-200 p-3 rounded-lg">
-					<pre class="whitespace-pre-wrap text-xs text-base-content/80">{chapter.content}</pre>
-				</div>
+
+				{#if isEditingChapter}
+					<!-- 편집 모드 -->
+					<input
+						type="text"
+						class="input input-bordered w-full mb-2"
+						bind:value={editedChapter.title}
+						placeholder="제목"
+					/>
+					<textarea
+						class="textarea textarea-bordered w-full mb-3 h-20"
+						bind:value={editedChapter.description}
+						placeholder="설명"
+					></textarea>
+					<textarea
+						class="textarea textarea-bordered w-full h-32 bg-base-200"
+						bind:value={editedChapter.content}
+						placeholder="내용"
+					></textarea>
+					<div class="flex gap-2 mt-3">
+						<button class="btn btn-primary btn-sm" onclick={saveChapterEdit} disabled={isLoading}>
+							{#if isLoading}
+								<span class="loading loading-spinner loading-xs"></span>
+							{/if}
+							저장
+						</button>
+						<button class="btn btn-ghost btn-sm" onclick={toggleEditMode} disabled={isLoading}>
+							취소
+						</button>
+					</div>
+				{:else}
+					<!-- 보기 모드 -->
+					<h2 id="panel-title" class="text-2xl font-bold mb-2">{chapter.title}</h2>
+					<p class="text-sm text-base-content/70 mb-3">{chapter.description}</p>
+					<div class="bg-base-200 p-3 rounded-lg">
+						<pre class="whitespace-pre-wrap text-xs text-base-content/80">{chapter.content}</pre>
+					</div>
+				{/if}
 			</div>
-			<button
-				class="btn btn-ghost btn-sm btn-circle ml-4"
-				onclick={onClose}
-				aria-label="패널 닫기"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					viewBox="0 0 24 24"
-					stroke-width="2"
-					stroke="currentColor"
-					class="w-5 h-5"
-					fill="none"
-					aria-hidden="true"
+
+			<div class="flex flex-col gap-2 ml-4">
+				{#if !isEditingChapter}
+					<button
+						class="btn btn-ghost btn-sm btn-circle"
+						onclick={toggleEditMode}
+						aria-label="챕터 편집"
+						title="챕터 편집"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 24 24"
+							stroke-width="2"
+							stroke="currentColor"
+							class="w-5 h-5"
+							fill="none"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M16.862 3.487a2.25 2.25 0 0 1 3.182 3.182L7.5 19.213l-4.125.688.688-4.125L16.862 3.487z"
+							/>
+						</svg>
+					</button>
+				{/if}
+				<button
+					class="btn btn-ghost btn-sm btn-circle"
+					onclick={onClose}
+					aria-label="패널 닫기"
 				>
-					<path stroke-linecap="round" stroke-linejoin="round" d="M18 6 6 18" />
-					<path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12" />
-				</svg>
-			</button>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						stroke-width="2"
+						stroke="currentColor"
+						class="w-5 h-5"
+						fill="none"
+						aria-hidden="true"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M18 6 6 18" />
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12" />
+					</svg>
+				</button>
+			</div>
 		</div>
 
 		<!-- 본문 (스크롤 가능) -->
@@ -294,7 +410,14 @@
 							{#if parsed.lines.length > 0}
 								<div class="space-y-2">
 									{#each parsed.lines as line}
-										{#if line.speaker === 'user'}
+										{#if line.type === 'narration'}
+											<!-- Narration: 중앙 정렬, 이탤릭 -->
+											<div class="flex justify-center my-3">
+												<div class="text-sm italic text-base-content/60 text-center max-w-[90%]">
+													{line.text}
+												</div>
+											</div>
+										{:else if line.speaker === 'user'}
 											<div class="flex justify-end">
 												<div class="bg-primary text-primary-content px-3 py-2 rounded-lg max-w-[80%]">
 													<div class="text-xs opacity-70 mb-1">[user]</div>
