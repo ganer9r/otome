@@ -2,6 +2,7 @@
 	import { ChapterApi } from '$lib/domain/chapter/api.client';
 	import type { PageData } from './$types';
 	import type { Chapter, ChapterItem } from '$lib/domain/chapter/types';
+	import type { Script } from '$lib/domain/script/types';
 	import { modalStore } from '$lib/stores/modal';
 	import RegenerateChapterModal, {
 		type RegenerateChapterModalProps
@@ -15,6 +16,7 @@
 	// 상태 관리
 	let prompt = $state('');
 	let generatedChapters = $state<Chapter | null>(data.chapters);
+	let scripts = $state<Record<number, Script>>(data.scripts);
 	let isLoading = $state(false);
 	let errorMessage = $state('');
 	let selectedChapterId = $state<string | null>(null);
@@ -23,7 +25,7 @@
 	const apiClient = new ChapterApi(fetch);
 
 	// 스크립트가 생성된 챕터 order Set (빠른 조회용)
-	const scriptOrdersSet = $derived(new Set(data.scriptOrders));
+	const scriptOrdersSet = $derived(new Set(Object.keys(scripts).map(Number)));
 
 	// URL 쿼리 파라미터에서 챕터 ID 읽기
 	$effect(() => {
@@ -117,6 +119,13 @@
 		const url = new URL($page.url);
 		url.searchParams.delete('chapter');
 		goto(url.toString(), { replaceState: true });
+	}
+
+	// 스크립트 업데이트 핸들러
+	function handleScriptUpdate(script: Script) {
+		if (script.chapter_order !== null && script.chapter_order !== undefined) {
+			scripts = { ...scripts, [script.chapter_order]: script };
+		}
 	}
 </script>
 
@@ -299,7 +308,9 @@
 			chapter={selectedChapter}
 			chapterId={generatedChapters.id}
 			characterId={data.character.id}
+			script={scripts[selectedChapter.order] ?? null}
 			onClose={handleClosePanel}
+			onScriptUpdate={handleScriptUpdate}
 		/>
 	{/if}
 </div>

@@ -8,14 +8,16 @@
 		chapter: ChapterItem;
 		chapterId: string;
 		characterId: string;
+		script: Script | null;
 		onClose: () => void;
+		onScriptUpdate: (script: Script) => void;
 	}
 
-	let { chapter, chapterId, characterId, onClose }: Props = $props();
+	let { chapter, chapterId, characterId, script, onClose, onScriptUpdate }: Props = $props();
 
 	// 상태 관리
 	let prompt = $state('');
-	let generatedScript = $state<Script | null>(null);
+	let generatedScript = $state<Script | null>(script);
 	let isLoading = $state(false);
 	let errorMessage = $state('');
 
@@ -29,27 +31,10 @@
 
 	const apiClient = new ScriptApi(fetch);
 
-	// 챕터 변경 시 기존 스크립트 조회
+	// script prop 변경 시 generatedScript 업데이트
 	$effect(() => {
-		loadExistingScript();
+		generatedScript = script;
 	});
-
-	async function loadExistingScript() {
-		if (!chapterId || !characterId) return;
-
-		try {
-			isLoading = true;
-			const result = await apiClient.getByChapter(characterId, chapterId, chapter.order);
-			console.log('Loaded script:', result);
-			generatedScript = result.script;
-		} catch (error) {
-			console.log('No script found:', error);
-			// 스크립트가 없는 경우는 정상 (404)
-			generatedScript = null;
-		} finally {
-			isLoading = false;
-		}
-	}
 
 	// 스크립트 생성 핸들러
 	async function handleGenerate() {
@@ -70,6 +55,7 @@
 				chapterOrder: chapter.order
 			});
 			generatedScript = result;
+			onScriptUpdate(result); // 상위 컴포넌트에 알림
 			prompt = ''; // 성공 시 입력 초기화
 		} catch (error) {
 			errorMessage = error instanceof Error ? error.message : '스크립트 생성에 실패했습니다.';
