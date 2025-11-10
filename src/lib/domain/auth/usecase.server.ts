@@ -53,36 +53,60 @@ export async function signup(params: {
 }) {
 	const { email, password, nickname, supabase } = params;
 
-	// 1. Supabase Auth에 가입
-	const { data, error } = await supabase.auth.signUp({
-		email,
-		password
-	});
+	try {
+		// 1. Supabase Auth에 가입
+		const { data, error } = await supabase.auth.signUp({
+			email,
+			password
+		});
 
-	if (error || !data.user) {
+		if (error) {
+			console.error('Supabase Auth signup error:', error);
+			return {
+				success: false,
+				message: `회원가입 실패: ${error.message}`
+			};
+		}
+
+		if (!data.user) {
+			return {
+				success: false,
+				message: '회원가입에 실패했습니다. 사용자 정보를 받지 못했습니다.'
+			};
+		}
+
+		// 2. app_user 테이블에 레코드 생성
+		try {
+			const user = await createUser({
+				uid: data.user.id,
+				email,
+				nickname
+			});
+
+			if (!user) {
+				return {
+					success: false,
+					message: '사용자 정보 저장에 실패했습니다.'
+				};
+			}
+		} catch (userError) {
+			console.error('User creation error:', userError);
+			return {
+				success: false,
+				message: `사용자 정보 저장 실패: ${userError instanceof Error ? userError.message : '알 수 없는 오류'}`
+			};
+		}
+
+		// 3. 성공 응답
+		return {
+			success: true,
+			redirectTo: '/app/characters'
+		};
+	} catch (error) {
+		console.error('Signup error:', error);
 		return {
 			success: false,
-			message: '회원가입에 실패했습니다. 다시 시도해주세요.'
+			message: `회원가입 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`
 		};
 	}
-
-	// 2. app_user 테이블에 레코드 생성
-	const user = await createUser({
-		uid: data.user.id,
-		email,
-		nickname
-	});
-
-	if (!user) {
-		return {
-			success: false,
-			message: '사용자 정보 저장에 실패했습니다.'
-		};
-	}
-
-	// 3. 성공 응답
-	return {
-		success: true,
-		redirectTo: '/app/characters'
-	};
 }
