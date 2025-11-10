@@ -1,17 +1,15 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { loadPrompt } from './prompts';
 
+/**
+ * 프롬프트 템플릿 로더 (Cloudflare Workers/Pages 호환)
+ * 빌드 타임에 프롬프트 파일이 번들링됨
+ */
 export class PromptTemplateLoader {
 	private templatesCache: Map<string, string> = new Map();
-	private basePath: string;
-
-	constructor(basePath?: string) {
-		this.basePath = basePath ?? join(process.cwd(), 'src/lib/llm/prompt');
-	}
 
 	/**
 	 * 템플릿 로드 (파일명 직접 지정)
-	 * @param filename - 'script_chat.md', 'chapter_guide.md' 등
+	 * @param filename - 'script_chat.md', 'chapter_generate.md' 등
 	 */
 	load(filename: string): string {
 		// 캐시 확인
@@ -19,16 +17,10 @@ export class PromptTemplateLoader {
 			return this.templatesCache.get(filename)!;
 		}
 
-		// 파일 로드
-		const filepath = join(this.basePath, filename);
-
-		try {
-			const content = readFileSync(filepath, 'utf-8');
-			this.templatesCache.set(filename, content);
-			return content;
-		} catch (error) {
-			throw new Error(`Failed to load template: ${filename}`);
-		}
+		// 빌드 타임에 번들링된 프롬프트 로드
+		const content = loadPrompt(filename);
+		this.templatesCache.set(filename, content);
+		return content;
 	}
 
 	/**
