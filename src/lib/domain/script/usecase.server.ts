@@ -4,7 +4,8 @@ export {
 	saveScript,
 	getScriptByChapter,
 	getScriptOrdersByChapter,
-	getAllScriptsByChapter
+	getAllScriptsByChapter,
+	getAllScriptsByChapterPublic
 } from './query.server';
 
 /**

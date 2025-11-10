@@ -17,6 +17,7 @@
 
 	// 상태 관리
 	let prompt = $state('');
+	let selectedModel = $state<'gemini' | 'deepseek'>('deepseek');
 	let generatedScript = $state<Script | null>(script);
 	let isLoading = $state(false);
 	let errorMessage = $state('');
@@ -52,7 +53,8 @@
 				characterId,
 				prompt: prompt.trim(),
 				chapterId,
-				chapterOrder: chapter.order
+				chapterOrder: chapter.order,
+				model: selectedModel
 			});
 			generatedScript = result;
 			onScriptUpdate(result); // 상위 컴포넌트에 알림
@@ -305,6 +307,17 @@
 				<div class="card-body">
 					<h3 class="card-title text-lg">요청 입력</h3>
 					<div class="divider my-1"></div>
+
+					<!-- 모델 선택 -->
+					<div class="form-control w-full mb-4">
+						<label class="label" for="script-model-select">
+							<span class="label-text">모델 선택</span>
+						</label>
+						<select id="script-model-select" class="select select-bordered w-full bg-base-100" bind:value={selectedModel} disabled={isLoading}>
+							<option value="deepseek">DeepSeek Chat (저렴, 추천)</option>
+							<option value="gemini">Gemini 2.5 Flash (빠름)</option>
+						</select>
+					</div>
 
 					<textarea
 						class="textarea textarea-bordered w-full h-32 bg-base-100"

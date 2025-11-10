@@ -12,6 +12,7 @@
 
 	// 상태 관리
 	let regeneratePrompt = $state('');
+	let selectedModel = $state<'gemini' | 'deepseek'>('gemini');
 	let isLoading = $state(false);
 	let errorMessage = $state('');
 
@@ -31,7 +32,8 @@
 			const result = await apiClient.generateChapters({
 				characterId,
 				prompt: regeneratePrompt.trim(),
-				chapterId: currentChapters.id
+				chapterId: currentChapters.id,
+				model: selectedModel
 			});
 
 			// 성공 시 결과를 반환하고 모달 닫기
@@ -61,6 +63,17 @@
 			<span>{errorMessage}</span>
 		</div>
 	{/if}
+
+	<!-- 모델 선택 -->
+	<div class="form-control w-full mb-4">
+		<label class="label" for="regenerate-model-select">
+			<span class="label-text">모델 선택</span>
+		</label>
+		<select id="regenerate-model-select" class="select select-bordered w-full" bind:value={selectedModel} disabled={isLoading}>
+			<option value="gemini">Gemini 2.5 Flash (빠름, 추천)</option>
+			<option value="deepseek">DeepSeek Chat (저렴)</option>
+		</select>
+	</div>
 
 	<!-- 입력 폼 -->
 	<textarea

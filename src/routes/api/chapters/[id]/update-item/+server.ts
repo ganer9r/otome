@@ -16,18 +16,17 @@ const updateChapterItemSchema = z.object({
 export const PATCH = svelteAction.api({
 	middlewares: [],
 	form: updateChapterItemSchema,
-	handler: async ({ data, locals, params }) => {
-		const uid = locals.user.id;
+	handler: async ({ data, params }) => {
 		const chapterId = params.id;
 
 		if (!chapterId) {
 			throw new Error('Chapter ID is required');
 		}
 
-		// 1. 기존 챕터 조회
+		// 1. 기존 챕터 조회 (공개 - 권한 체크 없음)
 		const { data: chapter, error: fetchError } = await supabase
 			.from('chapters')
-			.select('data, uid')
+			.select('data')
 			.eq('id', chapterId)
 			.single();
 
@@ -35,12 +34,7 @@ export const PATCH = svelteAction.api({
 			throw new Error(`Failed to fetch chapter: ${fetchError.message}`);
 		}
 
-		// 2. 권한 확인
-		if (chapter.uid !== uid) {
-			throw new Error('Unauthorized');
-		}
-
-		// 3. data 배열에서 해당 order의 항목 찾아서 수정
+		// 2. data 배열에서 해당 order의 항목 찾아서 수정
 		const chaptersData = (chapter.data as any[]) || [];
 		const targetIndex = chaptersData.findIndex((ch) => ch.order === data.order);
 
@@ -48,7 +42,7 @@ export const PATCH = svelteAction.api({
 			throw new Error(`Chapter with order ${data.order} not found`);
 		}
 
-		// 4. 항목 업데이트 (type은 유지)
+		// 3. 항목 업데이트 (type은 유지)
 		chaptersData[targetIndex] = {
 			...chaptersData[targetIndex],
 			title: data.title,
@@ -56,12 +50,11 @@ export const PATCH = svelteAction.api({
 			content: data.content
 		};
 
-		// 5. DB 저장
+		// 4. DB 저장 (권한 체크 없이 업데이트)
 		const { error: updateError } = await supabase
 			.from('chapters')
 			.update({ data: chaptersData })
-			.eq('id', chapterId)
-			.eq('uid', uid);
+			.eq('id', chapterId);
 
 		if (updateError) {
 			throw new Error(`Failed to update chapter: ${updateError.message}`);

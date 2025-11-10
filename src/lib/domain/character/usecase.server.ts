@@ -32,7 +32,7 @@ export async function addCharacter(uid: string, dto: CreateCharacterDto): Promis
 }
 
 /**
- * 사용자의 캐릭터 목록 조회 (생성일자 내림차순)
+ * 사용자의 캐릭터 목록 조회 (생성일자 내림차순) - 본인 캐릭터만
  */
 export async function getCharacters(uid: string): Promise<Character[]> {
 	const { data, error } = await supabase
@@ -49,7 +49,23 @@ export async function getCharacters(uid: string): Promise<Character[]> {
 }
 
 /**
- * 단일 캐릭터 조회 (UID 검증 포함)
+ * 모든 캐릭터 목록 조회 (공개) - 생성일자 내림차순
+ */
+export async function getAllCharacters(): Promise<Character[]> {
+	const { data, error } = await supabase
+		.from('characters')
+		.select('*')
+		.order('created_at', { ascending: false });
+
+	if (error) {
+		throw new Error(`Failed to fetch characters: ${error.message}`);
+	}
+
+	return data || [];
+}
+
+/**
+ * 단일 캐릭터 조회 (UID 검증 포함) - 소유권 확인용
  */
 export async function getCharacter(uid: string, id: string): Promise<Character | null> {
 	const { data, error } = await supabase
@@ -57,6 +73,23 @@ export async function getCharacter(uid: string, id: string): Promise<Character |
 		.select('*')
 		.eq('id', id)
 		.eq('uid', uid)
+		.maybeSingle();
+
+	if (error) {
+		throw new Error(`Failed to fetch character: ${error.message}`);
+	}
+
+	return data;
+}
+
+/**
+ * 단일 캐릭터 조회 (공개) - UID 검증 없음
+ */
+export async function getCharacterById(id: string): Promise<Character | null> {
+	const { data, error } = await supabase
+		.from('characters')
+		.select('*')
+		.eq('id', id)
 		.maybeSingle();
 
 	if (error) {

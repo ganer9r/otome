@@ -1,6 +1,6 @@
 import { svelteAction } from '$lib/framework/svelteAction';
 import { z } from 'zod';
-import { getCharacter } from '$lib/domain/character/usecase.server';
+import { getCharacterById } from '$lib/domain/character/usecase.server';
 import { saveChapters, softDeleteActiveChapters } from '$lib/domain/chapter/query.server';
 import {
 	buildCharacterProfile,
@@ -18,7 +18,8 @@ import type { EngineConfig } from '$lib/llm/types';
 const generateChaptersSchema = z.object({
 	characterId: z.string().uuid('유효한 UUID 형식이 아닙니다'),
 	prompt: z.string().min(1, '프롬프트를 입력해주세요'),
-	chapterId: z.string().uuid().optional()
+	chapterId: z.string().uuid().optional(),
+	model: z.enum(['gemini', 'deepseek']).optional().default('gemini')
 });
 
 export const POST = svelteAction.api({
@@ -26,10 +27,10 @@ export const POST = svelteAction.api({
 	form: generateChaptersSchema,
 	handler: async ({ data, locals }) => {
 		const uid = locals.user.id;
-		const { characterId, prompt, chapterId } = data;
+		const { characterId, prompt, chapterId, model: selectedModel } = data;
 
-		// 1. 캐릭터 정보 조회
-		const character = await getCharacter(uid, characterId);
+		// 1. 캐릭터 정보 조회 (공개)
+		const character = await getCharacterById(characterId);
 		if (!character) {
 			throw new Error('Character not found');
 		}
@@ -50,9 +51,13 @@ export const POST = svelteAction.api({
 
 		console.log(messages);
 
-		// 5. 엔진 설정
+		// 5. 엔진 설정 (모델 선택)
+		const modelConfig = selectedModel === 'deepseek'
+			? 'deepseek/deepseek-chat'
+			: 'google-ai-studio/gemini-2.5-flash';
+
 		const engine: EngineConfig = {
-			model: 'google-ai-studio/gemini-2.5-flash',
+			model: modelConfig,
 			temperature: 0.8,
 			maxTokens: 8192
 		};

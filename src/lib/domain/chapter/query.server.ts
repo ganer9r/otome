@@ -29,7 +29,7 @@ export async function saveChapters(params: SaveChaptersParams): Promise<Chapter>
 }
 
 /**
- * 캐릭터의 활성 챕터 조회 (deleted_at IS NULL)
+ * 캐릭터의 활성 챕터 조회 (deleted_at IS NULL) - 소유권 확인용
  */
 export async function getActiveChapters(
 	uid: string,
@@ -39,6 +39,28 @@ export async function getActiveChapters(
 		.from('chapters')
 		.select('*')
 		.eq('uid', uid)
+		.eq('character_id', characterId)
+		.is('deleted_at', null)
+		.single();
+
+	if (error) {
+		if (error.code === 'PGRST116') {
+			// No rows found
+			return null;
+		}
+		throw new Error(`Failed to get chapters: ${error.message}`);
+	}
+
+	return data;
+}
+
+/**
+ * 캐릭터의 활성 챕터 조회 (공개) - UID 검증 없음
+ */
+export async function getActiveChaptersByCharacterId(characterId: string): Promise<Chapter | null> {
+	const { data, error } = await supabase
+		.from('chapters')
+		.select('*')
 		.eq('character_id', characterId)
 		.is('deleted_at', null)
 		.single();

@@ -14,6 +14,7 @@ export interface GenerateScriptParams {
 	prompt: string;
 	chapterId?: string;
 	chapterOrder?: number;
+	model?: 'gemini' | 'deepseek'; // 사용할 모델 선택
 }
 
 /**

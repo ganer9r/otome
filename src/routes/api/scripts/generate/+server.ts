@@ -1,6 +1,6 @@
 import { svelteAction } from '$lib/framework/svelteAction';
 import { z } from 'zod';
-import { getCharacter } from '$lib/domain/character/usecase.server';
+import { getCharacterById } from '$lib/domain/character/usecase.server';
 import {
 	buildCharacterProfile,
 	getChapterDataByOrder,
@@ -18,7 +18,8 @@ const generateScriptSchema = z.object({
 	characterId: z.string().min(1, '캐릭터 ID를 입력해주세요'),
 	prompt: z.string().min(1, '프롬프트를 입력해주세요'),
 	chapterId: z.string().optional(),
-	chapterOrder: z.number().int().min(1).max(30).optional()
+	chapterOrder: z.number().int().min(1).max(30).optional(),
+	model: z.enum(['gemini', 'deepseek']).optional().default('deepseek')
 });
 
 export const POST = svelteAction.api({
@@ -26,10 +27,10 @@ export const POST = svelteAction.api({
 	form: generateScriptSchema,
 	handler: async ({ data, locals }) => {
 		const uid = locals.user.id;
-		const { characterId, prompt, chapterId, chapterOrder } = data;
+		const { characterId, prompt, chapterId, chapterOrder, model: selectedModel } = data;
 
-		// 1. 캐릭터 정보 조회
-		const character = await getCharacter(uid, characterId);
+		// 1. 캐릭터 정보 조회 (공개)
+		const character = await getCharacterById(characterId);
 		if (!character) {
 			throw new Error('Character not found');
 		}
@@ -51,9 +52,13 @@ export const POST = svelteAction.api({
 
 		const fullProfile = profile + chapterContext;
 
-		// 4. 엔진 설정
+		// 4. 엔진 설정 (모델 선택)
+		const modelConfig = selectedModel === 'gemini'
+			? 'google-ai-studio/gemini-2.5-flash'
+			: 'deepseek/deepseek-chat';
+
 		const engine: EngineConfig = {
-			model: 'deepseek/deepseek-chat',
+			model: modelConfig,
 			temperature: 0.8,
 			maxTokens: 4096
 		};
@@ -64,6 +69,11 @@ export const POST = svelteAction.api({
 			.setSystemPrompt(systemPromptFile)
 			.setProfile(fullProfile, character.name)
 			.request(prompt);
+
+		console.log('===== Script Generation Request =====');
+		console.log('Engine:', engine);
+		console.log('Messages:', JSON.stringify(messages, null, 2));
+		console.log('====================================');
 
 		// 6. LLM 클라이언트 초기화 및 호출
 		const client = createLLMClient(engine);

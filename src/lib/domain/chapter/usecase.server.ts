@@ -5,7 +5,7 @@ import { getCharacter } from '$lib/domain/character/usecase.server';
 import { saveChapters, softDeleteActiveChapters } from './query.server';
 import type { Chapter, ChapterItem } from './types';
 import { supabase } from '$lib/supabase/supabase.server';
-export { saveChapters, getActiveChapters } from './query.server';
+export { saveChapters, getActiveChapters, getActiveChaptersByCharacterId } from './query.server';
 
 /**
  * 캐릭터 정보를 프로필 텍스트로 조합

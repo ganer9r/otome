@@ -15,6 +15,7 @@
 
 	// 상태 관리
 	let prompt = $state('');
+	let selectedModel = $state<'gemini' | 'deepseek'>('gemini');
 	let generatedChapters = $state<Chapter | null>(data.chapters);
 	let scripts = $state<Record<number, Script>>(data.scripts);
 	let isLoading = $state(false);
@@ -56,7 +57,8 @@
 		try {
 			const result = await apiClient.generateChapters({
 				characterId: data.character.id,
-				prompt: prompt.trim()
+				prompt: prompt.trim(),
+				model: selectedModel
 			});
 			generatedChapters = result;
 			prompt = ''; // 성공 시 입력 초기화
@@ -154,6 +156,17 @@
 				<div class="card-body">
 					<h2 class="card-title">요청 입력</h2>
 					<div class="divider my-1"></div>
+
+					<!-- 모델 선택 -->
+					<div class="form-control w-full mb-4">
+						<label class="label" for="chapter-model-select">
+							<span class="label-text">모델 선택</span>
+						</label>
+						<select id="chapter-model-select" class="select select-bordered w-full" bind:value={selectedModel} disabled={isLoading}>
+							<option value="gemini">Gemini 2.5 Flash (빠름, 추천)</option>
+							<option value="deepseek">DeepSeek Chat (저렴)</option>
+						</select>
+					</div>
 
 					<textarea
 						class="textarea textarea-bordered w-full h-32"

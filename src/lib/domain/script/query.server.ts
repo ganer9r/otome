@@ -126,3 +126,35 @@ export async function getAllScriptsByChapter(
 
 	return scriptsMap;
 }
+
+/**
+ * 챕터에 속한 모든 스크립트를 한 번에 조회 (공개) - UID 검증 없음
+ * order별 최신 스크립트만 반환 (Map<order, Script>)
+ */
+export async function getAllScriptsByChapterPublic(
+	characterId: string,
+	chapterId: string
+): Promise<Map<number, Script>> {
+	const { data, error } = await supabase
+		.from('scripts')
+		.select('*')
+		.eq('character_id', characterId)
+		.eq('chapter_id', chapterId)
+		.not('chapter_order', 'is', null)
+		.order('created_at', { ascending: false });
+
+	if (error) {
+		throw new Error(`Failed to fetch scripts: ${error.message}`);
+	}
+
+	// order별로 가장 최신 스크립트만 Map에 저장
+	const scriptsMap = new Map<number, Script>();
+	for (const script of data) {
+		const order = script.chapter_order as number;
+		if (!scriptsMap.has(order)) {
+			scriptsMap.set(order, script);
+		}
+	}
+
+	return scriptsMap;
+}

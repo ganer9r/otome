@@ -18,6 +18,7 @@ export interface GenerateChaptersParams {
 	characterId: string;
 	prompt: string;
 	chapterId?: string; // 재생성 시 기존 챕터 ID
+	model?: 'gemini' | 'deepseek'; // 사용할 모델 선택
 }
 
 // DTO for saving chapters
