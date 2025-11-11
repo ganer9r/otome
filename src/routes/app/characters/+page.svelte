@@ -8,6 +8,9 @@
 	<!-- 헤더 -->
 	<div class="flex justify-between items-center mb-6">
 		<h1 class="text-3xl font-bold">캐릭터 목록</h1>
+		<a href="/app/characters/new" class="btn btn-primary">
+			새 캐릭터 만들기
+		</a>
 	</div>
 
 	<!-- 캐릭터 목록 -->
@@ -17,7 +20,7 @@
 			<p class="text-lg text-base-content/60 mb-4">
 				아직 생성된 캐릭터가 없습니다.
 			</p>
-			<a href=" /app/characters/new" class="btn btn-primary">
+			<a href="/app/characters/new" class="btn btn-primary">
 				첫 캐릭터 만들기
 			</a>
 		</div>

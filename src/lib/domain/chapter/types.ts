@@ -9,7 +9,6 @@ export interface ChapterItem {
 	order: number; // 1-30
 	type: 'meet' | 'chat'; // 만남/채팅 구분
 	title: string;
-	description: string;
 	content: string;
 }
 

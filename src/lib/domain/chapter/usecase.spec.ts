@@ -47,7 +47,6 @@ describe('Chapter usecase TDD 테스트', () => {
 				order: i + 1,
 				type: i % 2 === 0 ? 'meet' : 'chat',
 				title: `챕터 ${i + 1}`,
-				description: `챕터 ${i + 1} 설명`,
 				content: `챕터 ${i + 1} 내용`
 			})) as ChapterItem[];
 
@@ -80,14 +79,12 @@ describe('Chapter usecase TDD 테스트', () => {
 					order: 1,
 					type: 'meet',
 					title: '첫 만남',
-					description: '우연히 마주친 순간',
 					content: '비 오는 날 카페에서...'
 				},
 				{
 					order: 2,
 					type: 'chat',
 					title: '첫 메시지',
-					description: '떨리는 손끝으로 보낸 메시지',
 					content: '안녕하세요...'
 				}
 			];
@@ -98,7 +95,6 @@ describe('Chapter usecase TDD 테스트', () => {
 					order: i,
 					type: i % 2 === 0 ? 'chat' : 'meet',
 					title: `챕터 ${i}`,
-					description: `설명 ${i}`,
 					content: `내용 ${i}`
 				});
 			}
@@ -120,7 +116,6 @@ describe('Chapter usecase TDD 테스트', () => {
 			expect(firstChapter.order).toBe(1);
 			expect(firstChapter.type).toBe('meet');
 			expect(firstChapter.title).toBe('첫 만남');
-			expect(firstChapter.description).toBe('우연히 마주친 순간');
 			expect(firstChapter.content).toBe('비 오는 날 카페에서...');
 
 			// 두 번째 챕터 구조 확인
@@ -137,7 +132,6 @@ describe('Chapter usecase TDD 테스트', () => {
 				order: i + 1,
 				type: i % 2 === 0 ? 'meet' : 'chat',
 				title: `챕터 ${i + 1}`,
-				description: `설명 ${i + 1}`,
 				content: `내용 ${i + 1}`
 			})) as ChapterItem[];
 
@@ -176,7 +170,6 @@ describe('Chapter usecase TDD 테스트', () => {
 				order: i + 1,
 				type: i % 2 === 0 ? 'meet' : 'chat',
 				title: `챕터 ${i + 1}`,
-				description: `설명 ${i + 1}`,
 				content: `내용 ${i + 1}`
 			})) as ChapterItem[];
 

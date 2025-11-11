@@ -108,7 +108,6 @@ export function extractChaptersFromResponse(content: string): ChapterItem[] {
 			typeof chapter.order === 'number' &&
 			['meet', 'chat'].includes(chapter.type) &&
 			typeof chapter.title === 'string' &&
-			typeof chapter.description === 'string' &&
 			typeof chapter.content === 'string';
 
 		if (!isValid) {

@@ -15,7 +15,7 @@
 
 	// 상태 관리
 	let prompt = $state('');
-	let selectedModel = $state<'gemini' | 'deepseek'>('gemini');
+	let selectedModel = $state<'gemini' | 'deepseek'>('deepseek');
 	let generatedChapters = $state<Chapter | null>(data.chapters);
 	let scripts = $state<Record<number, Script>>(data.scripts);
 	let isLoading = $state(false);

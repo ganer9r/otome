@@ -6,6 +6,9 @@ import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
+	server: {
+		port: 5174,
+	},
 	resolve: {
 		alias: {
 			$ui: fileURLToPath(new URL('./src/(ui)', import.meta.url)),
