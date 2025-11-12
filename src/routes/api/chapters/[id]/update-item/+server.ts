@@ -9,7 +9,6 @@ import { z } from 'zod';
 const updateChapterItemSchema = z.object({
 	order: z.number().int().min(1).max(30),
 	title: z.string().min(1),
-	description: z.string().min(1),
 	content: z.string().min(1)
 });
 
@@ -46,7 +45,6 @@ export const PATCH = svelteAction.api({
 		chaptersData[targetIndex] = {
 			...chaptersData[targetIndex],
 			title: data.title,
-			description: data.description,
 			content: data.content
 		};
 

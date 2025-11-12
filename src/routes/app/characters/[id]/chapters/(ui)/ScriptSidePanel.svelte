@@ -26,7 +26,6 @@
 	let isEditingChapter = $state(false);
 	let editedChapter = $state({
 		title: chapter.title,
-		description: chapter.description,
 		content: chapter.content
 	});
 
@@ -87,7 +86,6 @@
 			// 취소: 원래 값으로 되돌림
 			editedChapter = {
 				title: chapter.title,
-				description: chapter.description,
 				content: chapter.content
 			};
 		}
@@ -104,7 +102,6 @@
 				body: JSON.stringify({
 					order: chapter.order,
 					title: editedChapter.title,
-					description: editedChapter.description,
 					content: editedChapter.content
 				})
 			});
@@ -218,11 +215,6 @@
 						placeholder="제목"
 					/>
 					<textarea
-						class="textarea textarea-bordered w-full mb-3 h-20"
-						bind:value={editedChapter.description}
-						placeholder="설명"
-					></textarea>
-					<textarea
 						class="textarea textarea-bordered w-full h-32 bg-base-200"
 						bind:value={editedChapter.content}
 						placeholder="내용"
@@ -241,7 +233,6 @@
 				{:else}
 					<!-- 보기 모드 -->
 					<h2 id="panel-title" class="text-2xl font-bold mb-2">{chapter.title}</h2>
-					<p class="text-sm text-base-content/70 mb-3">{chapter.description}</p>
 					<div class="bg-base-200 p-3 rounded-lg">
 						<pre class="whitespace-pre-wrap text-xs text-base-content/80">{chapter.content}</pre>
 					</div>

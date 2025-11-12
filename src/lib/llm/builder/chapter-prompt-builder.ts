@@ -82,52 +82,46 @@ export class ChapterPromptBuilder {
 		// 2. Assistant: 캐릭터 정보 요청
 		messages.push({
 			role: 'assistant',
-			content: 'Please provide character information for chapter generation.'
+			content: 'Please provide character information.'
 		});
 
 		// 3. User: 캐릭터 프로필
 		messages.push({ role: 'user', content: this.profile });
 
-		// 4. Assistant: 준비 완료
-		messages.push({
-			role: 'assistant',
-			content: `I understand the character ${this.characterName}. I'm ready to generate 30 chapters for their romance story.`
-		});
-
-		// 5. (조건부) 기존 챕터 컨텍스트
+		// 4-5. (조건부) 기존 챕터 정보 요청
 		if (this.previousChapters && this.previousChapters.length > 0) {
 			const chapterTitles = this.previousChapters
 				.map((c) => `[${c.order}] ${c.type === 'meet' ? '👥' : '💬'} ${c.title}`)
 				.join('\n');
 
 			messages.push({
-				role: 'user',
-				content: `현재 생성된 챕터 구조:\n${chapterTitles}\n\n위 챕터 구조를 참고하되, 사용자 요청을 반영하여 30개 챕터를 새롭게 생성해주세요.\n기존 챕터 개수(30개)와 meet/chat 비율은 유지해주세요.`
-			});
-		}
-
-		const hasUserPrompt = typeof this.userPrompt === 'string' && this.userPrompt.trim().length > 0;
-
-		if (hasUserPrompt) {
-			// 6. User: 실제 요청
-			messages.push({ role: 'user', content: this.userPrompt });
-
-			// 7. Assistant: JSON 출력 지시 확인
-			messages.push({
 				role: 'assistant',
-				content:
-					'Understood. I will double-check the checklist and return only a valid JSON array of 30 chapters.'
+				content: 'Please provide previous chapter information.'
+			});
+
+			messages.push({
+				role: 'user',
+				content: `현재 생성된 챕터 구조:\n${chapterTitles}`
 			});
 		}
 
-		// 8. User: JSON 출력 요청
+		// 6. Assistant: 준비 완료
+		messages.push({
+			role: 'assistant',
+			content: `I understand the character ${this.characterName}. I'm ready to generate 30 chapters. Shall we start?`
+		});
+
+		// 7. User: 시나리오 요청 + 생성 지시
+		const hasUserPrompt = typeof this.userPrompt === 'string' && this.userPrompt.trim().length > 0;
+		const finalPrompt = hasUserPrompt
+			? `${this.userPrompt}\n\n위 설정으로 <thinking>부터 시작하여 30개 챕터를 생성하세요.`
+			: `위 캐릭터 설정으로 <thinking>부터 시작하여 30개 챕터를 생성하세요.`;
+
 		messages.push({
 			role: 'user',
-			content: `위 캐릭터와 설정을 바탕으로 30개의 챕터를 생성해주세요.
-<thinking>부터 시작하여 체크리스트를 모두 확인한 후, 유효한 JSON 배열 형식으로만 출력하세요.
-다른 설명 텍스트 없이 JSON만 출력해야 합니다.`
+			content: finalPrompt
 		});
-		
+
 		return messages;
 	}
 }

@@ -38,7 +38,7 @@ export const POST = svelteAction.api({
 		// 2. 프로필 생성
 		const profile = buildCharacterProfile(character);
 
-		// 3. 챕터 정보 조회 및 프로필에 추가
+		// 3. 챕터 정보 조회
 		let chapterContext = '';
 		let chapterType: 'meet' | 'chat' | null = null;
 
@@ -46,11 +46,9 @@ export const POST = svelteAction.api({
 			const chapterData = await getChapterDataByOrder(chapterId, chapterOrder);
 			if (chapterData) {
 				chapterType = chapterData.type;
-				chapterContext = `\n\n# 현재 챕터 정보\n챕터 번호: ${chapterOrder}\n타입: ${chapterData.type === 'meet' ? '만남' : '채팅'}\n제목: ${chapterData.title}\n설명: ${chapterData.description}\n내용:\n${chapterData.content}`;
+				chapterContext = `# 현재 챕터 정보\n챕터 번호: ${chapterOrder}\n타입: ${chapterData.type === 'meet' ? '만남' : '채팅'}\n제목: ${chapterData.title}\n설명: ${chapterData.description}\n내용:\n${chapterData.content}`;
 			}
 		}
-
-		const fullProfile = profile + chapterContext;
 
 		// 4. 엔진 설정 (모델 선택)
 		const modelConfig = selectedModel === 'gemini'
@@ -65,10 +63,15 @@ export const POST = svelteAction.api({
 
 		// 5. 프롬프트 빌드 (챕터 타입에 따라 다른 프롬프트 사용)
 		const systemPromptFile = chapterType === 'meet' ? 'script_meet.md' : 'script_chat.md';
-		const messages = new ScriptPromptBuilder(engine)
+		const builder = new ScriptPromptBuilder(engine)
 			.setSystemPrompt(systemPromptFile)
-			.setProfile(fullProfile, character.name)
-			.request(prompt);
+			.setProfile(profile, character.name);
+
+		if (chapterContext) {
+			builder.setChapter(chapterContext);
+		}
+
+		const messages = builder.request(prompt);
 
 		console.log('===== Script Generation Request =====');
 		console.log('Engine:', engine);
