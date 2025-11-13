@@ -57,8 +57,14 @@ export class ScriptPromptBuilder {
 			// 2. 캐릭터 정보 요청
 			{ role: 'assistant', content: 'Please provide character information.' },
 
-			// 3. 캐릭터 정보
-			{ role: 'user', content: this.profile }
+			// 3. 캐릭터 정보 (참조용임을 명시)
+			{
+				role: 'user',
+				content: `## 캐릭터 정보 (참조용)
+**이 정보는 캐릭터 배경 참조용입니다. 대화 스타일과 톤은 시스템 프롬프트 규칙(0. 장르 기준)을 절대 우선합니다.**
+
+${this.profile}`
+			}
 		];
 
 		// 4-5. 챕터 정보 (있는 경우만 추가)
