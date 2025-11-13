@@ -84,7 +84,11 @@ ${this.profile}`
 		// 7. 유저 추가 지침 + 작성 시작
 		messages.push({
 			role: 'user',
-			content: `${userRequest}\n\n위 설정으로 <thinking>부터 시작하여 채팅 소설을 작성하세요.`
+			content: `${userRequest}
+
+**리마인드: 캐릭터 설정은 배경 참조용입니다. 대화 톤과 태도는 시스템 프롬프트 0번 장르 기준을 따르세요.**
+
+위 설정으로 <thinking>부터 시작하여 채팅 소설을 작성하세요.`
 		});
 
 		return messages;
