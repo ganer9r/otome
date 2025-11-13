@@ -38,15 +38,32 @@ export const POST = svelteAction.api({
 		// 2. 프로필 생성
 		const profile = buildCharacterProfile(character);
 
-		// 3. 챕터 정보 조회
+		// 3. 챕터 정보 조회 (현재 + 이전 + 다음)
 		let chapterContext = '';
+		let previousChapterContext = '';
+		let nextChapterContext = '';
 		let chapterType: 'meet' | 'chat' | null = null;
 
 		if (chapterId && chapterOrder) {
+			// 현재 챕터
 			const chapterData = await getChapterDataByOrder(chapterId, chapterOrder);
 			if (chapterData) {
 				chapterType = chapterData.type;
 				chapterContext = `# 현재 챕터 정보\n챕터 번호: ${chapterOrder}\n타입: ${chapterData.type === 'meet' ? '만남' : '채팅'}\n제목: ${chapterData.title}\n설명: ${chapterData.description}\n내용:\n${chapterData.content}`;
+			}
+
+			// 이전 챕터 (있으면)
+			if (chapterOrder > 1) {
+				const prevChapterData = await getChapterDataByOrder(chapterId, chapterOrder - 1);
+				if (prevChapterData) {
+					previousChapterContext = `# 이전 챕터 정보\n챕터 번호: ${chapterOrder - 1}\n타입: ${prevChapterData.type === 'meet' ? '만남' : '채팅'}\n제목: ${prevChapterData.title}\n설명: ${prevChapterData.description}\n내용:\n${prevChapterData.content}`;
+				}
+			}
+
+			// 다음 챕터 (있으면)
+			const nextChapterData = await getChapterDataByOrder(chapterId, chapterOrder + 1);
+			if (nextChapterData) {
+				nextChapterContext = `# 다음 챕터 정보\n챕터 번호: ${chapterOrder + 1}\n타입: ${nextChapterData.type === 'meet' ? '만남' : '채팅'}\n제목: ${nextChapterData.title}\n설명: ${nextChapterData.description}\n내용:\n${nextChapterData.content}`;
 			}
 		}
 
@@ -66,6 +83,14 @@ export const POST = svelteAction.api({
 		const builder = new ScriptPromptBuilder(engine)
 			.setSystemPrompt(systemPromptFile)
 			.setProfile(profile, character.name);
+
+		if (previousChapterContext) {
+			builder.setPreviousChapter(previousChapterContext);
+		}
+
+		if (nextChapterContext) {
+			builder.setNextChapter(nextChapterContext);
+		}
 
 		if (chapterContext) {
 			builder.setChapter(chapterContext);
