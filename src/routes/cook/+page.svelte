@@ -133,16 +133,14 @@
 		@apply flex flex-col;
 		height: 100vh;
 		overflow: hidden;
-		padding: var(--spacing-sm);
-		gap: var(--spacing-sm);
 	}
 
 	.container-section {
-		@apply bg-white/80;
-		@apply rounded-2xl;
-		@apply shadow-xl;
-		@apply border-2 border-orange-300;
 		flex-shrink: 0;
+		background-image: url('/imgs/cook_bg.webp');
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
 	}
 
 	.grid-section {

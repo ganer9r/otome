@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { ChefHat, Soup, Utensils } from 'lucide-svelte';
-
 	interface Props {
 		/** 선택된 도구 */
 		selectedTool?: string | null;
@@ -12,9 +10,9 @@
 
 	/** 사용 가능한 도구 목록 */
 	const tools = [
-		{ id: 'pot', name: '냄비', icon: Soup },
-		{ id: 'pan', name: '프라이팬', icon: ChefHat },
-		{ id: 'bowl', name: '그릇', icon: Utensils }
+		{ id: 'pot', name: '냄비', image: '/imgs/cw_pot.webp' },
+		{ id: 'pan', name: '프라이팬', image: '/imgs/cw_pan.webp' },
+		{ id: 'oven', name: '오븐', image: '/imgs/cw_oven.webp' }
 	];
 
 	/** 도구 선택/해제 토글 */
@@ -41,7 +39,7 @@
 				class:selected={selectedTool === tool.id}
 				onclick={() => toggleTool(tool.id)}
 			>
-				<svelte:component this={tool.icon} size={24} />
+				<img src={tool.image} alt={tool.name} class="tool-image" />
 				<span class="tool-name">{tool.name}</span>
 			</button>
 		{/each}
@@ -71,6 +69,10 @@
 		@apply text-gray-600 text-center;
 		font-size: var(--font-xs);
 		margin-top: var(--spacing-xs);
+	}
+
+	.tool-image {
+		@apply w-12 h-12 object-contain;
 	}
 
 	.tool-button {

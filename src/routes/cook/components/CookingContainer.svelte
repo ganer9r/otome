@@ -15,9 +15,9 @@
 
 	// 도구 목록
 	const tools = [
-		{ id: 'pot', name: '냄비', icon: '🍲' },
-		{ id: 'pan', name: '프라이팬', icon: '🍳' },
-		{ id: 'scale', name: '저울', icon: '⚖️' }
+		{ id: 'pot', name: '냄비', image: '/imgs/cw_pot.webp' },
+		{ id: 'pan', name: '프라이팬', image: '/imgs/cw_pan.webp' },
+		{ id: 'oven', name: '오븐', image: '/imgs/cw_oven.webp' }
 	];
 
 	// 재료 정보
@@ -40,17 +40,17 @@
 		}
 	}
 
-	// 그릇 색상 (조리기구에 따라)
-	let bowlColor = $derived(() => {
+	// 그릇 이미지 (조리기구에 따라)
+	let bowlImage = $derived(() => {
 		switch (selectedTool) {
 			case 'pot':
-				return 'from-blue-200 via-blue-100 to-blue-200 border-blue-400';
+				return '/imgs/cw_pot.webp';
 			case 'pan':
-				return 'from-orange-200 via-yellow-100 to-orange-200 border-orange-400';
-			case 'scale':
-				return 'from-green-200 via-green-100 to-green-200 border-green-400';
+				return '/imgs/cw_pan.webp';
+			case 'oven':
+				return '/imgs/cw_oven.webp';
 			default:
-				return 'from-gray-200 via-gray-100 to-gray-200 border-gray-400';
+				return null;
 		}
 	});
 </script>
@@ -65,7 +65,7 @@
 				class:selected={selectedTool === tool.id}
 				onclick={() => toggleTool(tool.id)}
 			>
-				<div class="tool-icon">{tool.icon}</div>
+				<img src={tool.image} alt={tool.name} class="tool-icon-img" />
 				<div class="tool-name">{tool.name}</div>
 			</button>
 		{/each}
@@ -74,7 +74,11 @@
 	<!-- 중앙 그릇 -->
 	<div class="bowl-container">
 		<!-- 그릇 배경 -->
-		<div class="bowl bg-gradient-to-br {bowlColor()}">
+		<div class="bowl">
+			{#if bowlImage()}
+				<img src={bowlImage()} alt="조리기구" class="bowl-image" />
+			{/if}
+
 			<!-- 선택된 재료들 -->
 			<div class="ingredients-in-bowl">
 				{#if ingredients.length === 0}
@@ -92,9 +96,6 @@
 				{/if}
 			</div>
 		</div>
-
-		<!-- 그릇 테두리 장식 -->
-		<div class="bowl-rim"></div>
 	</div>
 
 	<!-- 요리하기 버튼 -->
@@ -149,9 +150,8 @@
 		filter: brightness(1.2);
 	}
 
-	.tool-icon {
-		font-size: clamp(24px, 6vw, 36px);
-		line-height: 1;
+	.tool-icon-img {
+		@apply w-12 h-12 object-contain;
 	}
 
 	.tool-name {
@@ -172,39 +172,25 @@
 	}
 
 	.bowl {
-		@apply absolute inset-0;
-		@apply rounded-full;
-		@apply border-8;
-		@apply shadow-2xl;
+		@apply relative;
+		@apply w-full h-full;
 		@apply flex items-center justify-center;
-		@apply p-6;
-		@apply transition-all duration-500;
 	}
 
-	.bowl-rim {
+	.bowl-image {
 		@apply absolute inset-0;
-		@apply rounded-full;
-		@apply border-4 border-orange-500/30;
-		@apply pointer-events-none;
-		animation: rimPulse 2s ease-in-out infinite;
-	}
-
-	@keyframes rimPulse {
-		0%,
-		100% {
-			transform: scale(1);
-			opacity: 0.5;
-		}
-		50% {
-			transform: scale(1.05);
-			opacity: 0.8;
-		}
+		@apply w-full h-full;
+		@apply object-contain;
+		@apply transition-all duration-500;
+		object-position: bottom;
 	}
 
 	/* 그릇 안 재료들 */
 	.ingredients-in-bowl {
+		@apply relative;
 		@apply flex flex-col items-center justify-center gap-3;
 		@apply w-full;
+		z-index: 10;
 	}
 
 	.empty-bowl {
