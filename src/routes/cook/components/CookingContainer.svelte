@@ -71,28 +71,44 @@
 		{/each}
 	</div>
 
-	<!-- 중앙 그릇 -->
-	<div class="bowl-container">
-		<!-- 그릇 배경 -->
-		<div class="bowl">
-			{#if bowlImage()}
-				<img src={bowlImage()} alt="조리기구" class="bowl-image" />
-			{/if}
-
-			<!-- 선택된 재료들 -->
-			<div class="ingredients-in-bowl">
-				{#if ingredients.length === 0}
-					<div class="empty-bowl">
-						<div class="empty-text">재료를 선택하세요</div>
+	<!-- 재료 슬롯 + 중앙 그릇 -->
+	<div class="main-area">
+		<!-- 재료 슬롯 2개 -->
+		<div class="ingredient-slots">
+			<div class="slot" class:filled={ingredients[0]}>
+				{#if ingredients[0]}
+					<div class="slot-filled">
+						<span class="ingredient-emoji">🥘</span>
+						<span class="ingredient-text">{ingredients[0].name}</span>
 					</div>
 				{:else}
-					{#each ingredients as ingredient (ingredient.id)}
-						<div class="ingredient-item">
-							<div class="ingredient-bubble">
-								{ingredient.name}
-							</div>
-						</div>
-					{/each}
+					<div class="slot-empty">
+						<span class="plus-icon">+</span>
+						<span class="slot-label">재료 1</span>
+					</div>
+				{/if}
+			</div>
+
+			<div class="slot" class:filled={ingredients[1]}>
+				{#if ingredients[1]}
+					<div class="slot-filled">
+						<span class="ingredient-emoji">🥘</span>
+						<span class="ingredient-text">{ingredients[1].name}</span>
+					</div>
+				{:else}
+					<div class="slot-empty">
+						<span class="plus-icon">+</span>
+						<span class="slot-label">재료 2</span>
+					</div>
+				{/if}
+			</div>
+		</div>
+
+		<!-- 중앙 그릇 -->
+		<div class="bowl-container">
+			<div class="bowl">
+				{#if bowlImage()}
+					<img src={bowlImage()} alt="조리기구" class="bowl-image" />
 				{/if}
 			</div>
 		</div>
@@ -116,52 +132,120 @@
 
 	/* 도구 섹션 */
 	.tools-section {
-		@apply flex gap-3 justify-center;
-		@apply w-full;
-		@apply px-4;
+		@apply flex gap-1 justify-center;
+		@apply bg-white/90;
+		@apply rounded-xl;
+		@apply p-1;
+		@apply shadow-md;
+		@apply border-2 border-orange-200;
+		@apply mx-auto;
+		max-width: fit-content;
 	}
 
 	.tool-item {
-		@apply flex flex-col items-center gap-1;
-		@apply p-2;
-		@apply rounded-xl;
-		@apply bg-white;
-		@apply border-2 border-gray-200;
+		@apply flex flex-row items-center gap-1.5;
+		@apply px-2.5 py-1.5;
+		@apply rounded-lg;
+		@apply bg-transparent;
+		@apply border-2 border-transparent;
 		@apply transition-all;
-		@apply shadow-sm;
 		@apply cursor-pointer;
-		min-width: 60px;
 	}
 
 	.tool-item:hover {
-		@apply scale-110;
-		@apply border-orange-400;
-		@apply shadow-lg;
+		@apply bg-orange-50;
+		@apply border-orange-300;
 	}
 
 	.tool-item.selected {
 		@apply bg-gradient-to-br from-orange-500 to-red-500;
 		@apply border-orange-600;
-		@apply scale-110;
-		@apply shadow-xl shadow-orange-500/50;
+		@apply shadow-md;
 	}
 
-	.tool-item.selected .tool-icon {
+	.tool-item.selected .tool-icon-img {
 		filter: brightness(1.2);
 	}
 
 	.tool-icon-img {
-		@apply w-12 h-12 object-contain;
+		@apply w-5 h-5 object-contain;
 	}
 
 	.tool-name {
-		@apply font-bold;
-		font-size: var(--font-xs);
+		@apply font-semibold;
+		@apply whitespace-nowrap;
+		font-size: clamp(10px, 2.5vw, 12px);
 		@apply text-gray-700;
 	}
 
 	.tool-item.selected .tool-name {
 		@apply text-white;
+	}
+
+	/* 메인 영역 */
+	.main-area {
+		@apply flex flex-col items-center gap-4;
+		@apply w-full;
+	}
+
+	/* 재료 슬롯 */
+	.ingredient-slots {
+		@apply flex gap-3 justify-center;
+		@apply w-full;
+	}
+
+	.slot {
+		@apply flex items-center justify-center;
+		@apply w-32 h-20;
+		@apply rounded-xl;
+		@apply border-3 border-dashed border-gray-300;
+		@apply bg-white/50;
+		@apply transition-all duration-300;
+		@apply shadow-sm;
+	}
+
+	.slot.filled {
+		@apply border-solid border-orange-400;
+		@apply bg-orange-50;
+		@apply shadow-lg shadow-orange-200;
+		animation: slotPop 0.3s ease-out;
+	}
+
+	@keyframes slotPop {
+		0% {
+			transform: scale(0.8);
+		}
+		50% {
+			transform: scale(1.1);
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
+
+	.slot-empty {
+		@apply flex flex-col items-center gap-1;
+		@apply text-gray-400;
+	}
+
+	.plus-icon {
+		@apply text-3xl font-light;
+	}
+
+	.slot-label {
+		@apply text-xs font-medium;
+	}
+
+	.slot-filled {
+		@apply flex flex-col items-center gap-1;
+	}
+
+	.ingredient-emoji {
+		@apply text-2xl;
+	}
+
+	.ingredient-text {
+		@apply text-sm font-bold text-orange-700;
 	}
 
 	/* 중앙 그릇 */
@@ -183,56 +267,6 @@
 		@apply object-contain;
 		@apply transition-all duration-500;
 		object-position: bottom;
-	}
-
-	/* 그릇 안 재료들 */
-	.ingredients-in-bowl {
-		@apply relative;
-		@apply flex flex-col items-center justify-center gap-3;
-		@apply w-full;
-		z-index: 10;
-	}
-
-	.empty-bowl {
-		@apply flex items-center justify-center;
-		@apply w-full h-full;
-	}
-
-	.empty-text {
-		@apply text-orange-600/50;
-		@apply font-bold;
-		@apply text-center;
-		font-size: var(--font-sm);
-	}
-
-	.ingredient-item {
-		animation: ingredientDrop 0.5s ease-out;
-	}
-
-	@keyframes ingredientDrop {
-		0% {
-			transform: translateY(-50px) scale(0);
-			opacity: 0;
-		}
-		60% {
-			transform: translateY(5px) scale(1.1);
-		}
-		100% {
-			transform: translateY(0) scale(1);
-			opacity: 1;
-		}
-	}
-
-	.ingredient-bubble {
-		@apply px-4 py-2;
-		@apply rounded-full;
-		@apply bg-white;
-		@apply border-3 border-orange-500;
-		@apply shadow-lg;
-		@apply font-bold;
-		@apply text-orange-800;
-		@apply text-center;
-		font-size: var(--font-sm);
 	}
 
 	/* 요리하기 버튼 */
