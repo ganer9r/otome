@@ -71,9 +71,16 @@
 		{/each}
 	</div>
 
-	<!-- 재료 슬롯 + 중앙 그릇 -->
-	<div class="main-area">
-		<!-- 재료 슬롯 2개 -->
+	<!-- 중앙 그릇 + 재료 슬롯 오버레이 -->
+	<div class="bowl-container">
+		<!-- 조리기구 이미지 (배경) -->
+		<div class="bowl">
+			{#if bowlImage()}
+				<img src={bowlImage()} alt="조리기구" class="bowl-image" />
+			{/if}
+		</div>
+
+		<!-- 재료 슬롯 (오버레이) -->
 		<div class="ingredient-slots">
 			<div class="slot" class:filled={ingredients[0]}>
 				{#if ingredients[0]}
@@ -100,15 +107,6 @@
 						<span class="plus-icon">+</span>
 						<span class="slot-label">재료 2</span>
 					</div>
-				{/if}
-			</div>
-		</div>
-
-		<!-- 중앙 그릇 -->
-		<div class="bowl-container">
-			<div class="bowl">
-				{#if bowlImage()}
-					<img src={bowlImage()} alt="조리기구" class="bowl-image" />
 				{/if}
 			</div>
 		</div>
@@ -182,33 +180,39 @@
 		@apply text-white;
 	}
 
-	/* 메인 영역 */
-	.main-area {
-		@apply flex flex-col items-center gap-4;
-		@apply w-full;
+	/* 중앙 그릇 */
+	.bowl-container {
+		@apply relative;
+		@apply flex items-center justify-center;
+		width: clamp(200px, 50vw, 300px);
+		height: clamp(200px, 50vw, 300px);
 	}
 
-	/* 재료 슬롯 */
+	/* 재료 슬롯 (오버레이) */
 	.ingredient-slots {
+		@apply absolute top-4;
 		@apply flex gap-3 justify-center;
 		@apply w-full;
+		z-index: 10;
 	}
 
 	.slot {
 		@apply flex items-center justify-center;
-		@apply w-32 h-20;
+		@apply w-28 h-16;
 		@apply rounded-xl;
 		@apply border-3 border-dashed border-gray-300;
-		@apply bg-white/50;
+		@apply bg-white/70;
 		@apply transition-all duration-300;
-		@apply shadow-sm;
+		@apply shadow-md;
+		backdrop-filter: blur(4px);
 	}
 
 	.slot.filled {
 		@apply border-solid border-orange-400;
-		@apply bg-orange-50;
-		@apply shadow-lg shadow-orange-200;
+		@apply bg-orange-100/80;
+		@apply shadow-lg shadow-orange-300;
 		animation: slotPop 0.3s ease-out;
+		backdrop-filter: blur(4px);
 	}
 
 	@keyframes slotPop {
@@ -248,16 +252,8 @@
 		@apply text-sm font-bold text-orange-700;
 	}
 
-	/* 중앙 그릇 */
-	.bowl-container {
-		@apply relative;
-		width: clamp(140px, 35vw, 200px);
-		height: clamp(140px, 35vw, 200px);
-	}
-
 	.bowl {
-		@apply relative;
-		@apply w-full h-full;
+		@apply absolute inset-0;
 		@apply flex items-center justify-center;
 	}
 
