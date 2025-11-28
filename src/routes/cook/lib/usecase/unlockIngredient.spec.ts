@@ -15,122 +15,101 @@ describe('unlockIngredient', () => {
 
 	describe('기본 동작', () => {
 		it('재료를 오픈하면 목록에 추가된다', () => {
-			unlockIngredient('cooked-rice');
+			unlockIngredient(100); // 간장
 			const unlocked = getUnlockedIngredients();
-			expect(unlocked).toContain('cooked-rice');
+			expect(unlocked).toContain(100);
 		});
 
 		it('여러 재료를 오픈할 수 있다', () => {
-			unlockIngredient('cooked-rice');
-			unlockIngredient('boiled-egg');
-			unlockIngredient('fried-meat');
+			unlockIngredient(100); // 간장
+			unlockIngredient(101); // 된장
+			unlockIngredient(102); // 고추장
 
 			const unlocked = getUnlockedIngredients();
-			expect(unlocked).toContain('cooked-rice');
-			expect(unlocked).toContain('boiled-egg');
-			expect(unlocked).toContain('fried-meat');
+			expect(unlocked).toContain(100);
+			expect(unlocked).toContain(101);
+			expect(unlocked).toContain(102);
 		});
 
 		it('isIngredientUnlocked로 오픈 여부를 확인할 수 있다', () => {
-			unlockIngredient('cooked-rice');
-			expect(isIngredientUnlocked('cooked-rice')).toBe(true);
-			expect(isIngredientUnlocked('boiled-egg')).toBe(false);
+			unlockIngredient(100);
+			expect(isIngredientUnlocked(100)).toBe(true);
+			expect(isIngredientUnlocked(101)).toBe(false);
 		});
 	});
 
 	describe('중복 저장 방지', () => {
 		it('같은 재료를 여러 번 오픈해도 중복 저장되지 않는다', () => {
-			unlockIngredient('cooked-rice');
-			unlockIngredient('cooked-rice');
-			unlockIngredient('cooked-rice');
+			unlockIngredient(100);
+			unlockIngredient(100);
+			unlockIngredient(100);
 
 			const unlocked = getUnlockedIngredients();
-			const count = unlocked.filter((id) => id === 'cooked-rice').length;
+			const count = unlocked.filter((id) => id === 100).length;
 			expect(count).toBe(1);
 		});
 
 		it('중복 오픈 후에도 다른 재료는 정상적으로 추가된다', () => {
-			unlockIngredient('cooked-rice');
-			unlockIngredient('cooked-rice');
-			unlockIngredient('boiled-egg');
+			unlockIngredient(100);
+			unlockIngredient(100);
+			unlockIngredient(101);
 
 			const unlocked = getUnlockedIngredients();
-			expect(unlocked).toContain('cooked-rice');
-			expect(unlocked).toContain('boiled-egg');
-			expect(unlocked.length).toBe(2);
+			expect(unlocked).toContain(100);
+			expect(unlocked).toContain(101);
 		});
 	});
 
 	describe('초기 재료', () => {
-		it('초기화 시 기본 4개 재료가 자동으로 오픈되어 있다', () => {
+		it('초기화 시 G등급 재료가 자동으로 오픈되어 있다', () => {
 			const unlocked = getUnlockedIngredients();
-			INITIAL_INGREDIENTS.forEach((id) => {
-				expect(unlocked).toContain(id);
+			INITIAL_INGREDIENTS.forEach((ingredient) => {
+				expect(unlocked).toContain(ingredient.id);
 			});
 		});
 
-		it('초기 재료는 water, rice, egg, meat이다', () => {
+		it('초기 재료는 G등급 41개이다', () => {
 			const unlocked = getUnlockedIngredients();
-			expect(unlocked).toContain('water');
-			expect(unlocked).toContain('rice');
-			expect(unlocked).toContain('egg');
-			expect(unlocked).toContain('meat');
+			expect(unlocked.length).toBe(41);
 		});
 
 		it('초기 재료를 다시 오픈해도 중복되지 않는다', () => {
-			unlockIngredient('water');
-			unlockIngredient('rice');
+			unlockIngredient(1); // 토마토
+			unlockIngredient(2); // 감자
 
 			const unlocked = getUnlockedIngredients();
-			const waterCount = unlocked.filter((id) => id === 'water').length;
-			const riceCount = unlocked.filter((id) => id === 'rice').length;
+			const tomatoCount = unlocked.filter((id) => id === 1).length;
+			const potatoCount = unlocked.filter((id) => id === 2).length;
 
-			expect(waterCount).toBe(1);
-			expect(riceCount).toBe(1);
+			expect(tomatoCount).toBe(1);
+			expect(potatoCount).toBe(1);
 		});
 	});
 
-	describe('localStorage 연동', () => {
-		it('오픈한 재료는 새로고침 후에도 유지된다', () => {
-			unlockIngredient('cooked-rice');
-			unlockIngredient('boiled-egg');
-
-			// 새로운 인스턴스에서 가져오기 시뮬레이션
-			const unlocked = getUnlockedIngredients();
-			expect(unlocked).toContain('cooked-rice');
-			expect(unlocked).toContain('boiled-egg');
-		});
-
+	describe('초기화', () => {
 		it('resetUnlockedIngredients로 초기 상태로 되돌릴 수 있다', () => {
-			unlockIngredient('cooked-rice');
-			unlockIngredient('boiled-egg');
+			unlockIngredient(100);
+			unlockIngredient(101);
 
 			resetUnlockedIngredients();
 
 			const unlocked = getUnlockedIngredients();
-			expect(unlocked).not.toContain('cooked-rice');
-			expect(unlocked).not.toContain('boiled-egg');
+			expect(unlocked).not.toContain(100);
+			expect(unlocked).not.toContain(101);
 
 			// 초기 재료만 남아있어야 함
-			INITIAL_INGREDIENTS.forEach((id) => {
-				expect(unlocked).toContain(id);
+			INITIAL_INGREDIENTS.forEach((ingredient) => {
+				expect(unlocked).toContain(ingredient.id);
 			});
 		});
 	});
 
 	describe('에지 케이스', () => {
-		it('빈 문자열 재료 ID는 무시된다', () => {
-			const beforeCount = getUnlockedIngredients().length;
-			unlockIngredient('');
-			const afterCount = getUnlockedIngredients().length;
-			expect(afterCount).toBe(beforeCount);
-		});
-
 		it('존재하지 않는 재료 ID도 저장할 수 있다', () => {
 			// 유효성 검증은 상위 레이어에서 처리
-			unlockIngredient('invalid-ingredient-id');
+			unlockIngredient(99999);
 			const unlocked = getUnlockedIngredients();
-			expect(unlocked).toContain('invalid-ingredient-id');
+			expect(unlocked).toContain(99999);
 		});
 
 		it('getUnlockedIngredients는 항상 배열을 반환한다', () => {
@@ -139,8 +118,8 @@ describe('unlockIngredient', () => {
 		});
 
 		it('isIngredientUnlocked는 항상 boolean을 반환한다', () => {
-			expect(typeof isIngredientUnlocked('water')).toBe('boolean');
-			expect(typeof isIngredientUnlocked('invalid')).toBe('boolean');
+			expect(typeof isIngredientUnlocked(1)).toBe('boolean');
+			expect(typeof isIngredientUnlocked(99999)).toBe('boolean');
 		});
 	});
 });

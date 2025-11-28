@@ -1,0 +1,5 @@
+# Cloudflare Pages 배포 제외
+# Git에는 포함되지만 Cloudflare에는 업로드되지 않음
+
+# assets 폴더
+assets/

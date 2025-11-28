@@ -1,22 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { Dish } from '../lib/types';
-	import { findIngredientById } from '../lib/data/ingredients';
+	import type { Ingredient, Recipe } from '../lib/types';
+	import { GRADE_COLORS, GRADE_NAMES } from '../lib/types';
 
 	interface Props {
-		/** 요리 결과 */
-		dish: Dish;
-		/** 만들어진 재료 ID (success인 경우) */
-		resultIngredientId?: string;
+		/** 결과 재료 */
+		resultIngredient: Ingredient;
+		/** 레시피 정보 */
+		recipe: Recipe;
 		/** 완료 콜백 */
 		onComplete?: () => void;
 	}
 
-	let { dish, resultIngredientId, onComplete }: Props = $props();
-
-	let resultIngredient = $derived(
-		resultIngredientId ? findIngredientById(resultIngredientId) : null
-	);
+	let { resultIngredient, recipe, onComplete }: Props = $props();
 
 	// 연출 단계
 	let stage = $state<'heartbeat' | 'opening' | 'result'>('heartbeat');
@@ -29,42 +25,34 @@
 
 	// 등급별 별 개수
 	const starsCount = $derived(() => {
-		switch (dish.grade) {
-			case 'success':
-				return 3;
-			case 'fail':
-				return 2;
-			case 'disaster':
-				return 1;
-			default:
-				return 2;
-		}
+		const gradeIndex = ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'R'].indexOf(resultIngredient.grade);
+		if (gradeIndex >= 6) return 3; // A, R
+		if (gradeIndex >= 4) return 2; // C, B
+		return 1; // G, F, E, D
 	});
 
 	// 등급별 색상 테마
 	let theme = $derived(() => {
-		switch (dish.grade) {
-			case 'success':
-				return {
-					bg: 'from-yellow-600/30 via-amber-600/30 to-orange-600/30',
-					particle: '⭐'
-				};
-			case 'fail':
-				return {
-					bg: 'from-gray-600/30 via-blue-600/30 to-gray-600/30',
-					particle: '💨'
-				};
-			case 'disaster':
-				return {
-					bg: 'from-red-600/30 via-orange-600/30 to-red-600/30',
-					particle: '💥'
-				};
-			default:
-				return {
-					bg: 'from-gray-600/30 via-gray-600/30 to-gray-600/30',
-					particle: '•'
-				};
+		const gradeIndex = ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'R'].indexOf(resultIngredient.grade);
+		if (gradeIndex >= 6) {
+			// A, R 등급
+			return {
+				bg: 'from-yellow-600/30 via-amber-600/30 to-orange-600/30',
+				particle: '⭐'
+			};
 		}
+		if (gradeIndex >= 4) {
+			// C, B 등급
+			return {
+				bg: 'from-purple-600/30 via-blue-600/30 to-purple-600/30',
+				particle: '✨'
+			};
+		}
+		// G, F, E, D 등급
+		return {
+			bg: 'from-green-600/30 via-blue-600/30 to-green-600/30',
+			particle: '🌟'
+		};
 	});
 
 	// 연출 시퀀스
@@ -110,7 +98,7 @@
 </script>
 
 <!-- 풀스크린 배경 (어두운 overlay) -->
-<div class="result-screen" onclick={handleClick} role="button" tabindex="0">
+<div class="result-screen" onclick={handleClick} onkeydown={(e) => e.key === 'Enter' && handleClick()} role="button" tabindex="0">
 	<!-- 배경 그라데이션 (등급별) -->
 	<div class="background-overlay bg-gradient-to-br {theme().bg}"></div>
 
@@ -168,22 +156,27 @@
 				{/each}
 			</div>
 
-			<!-- 요리 아이콘 (크게) -->
-			<div class="dish-icon-large">{dish.icon}</div>
+			<!-- 결과 재료 이미지 (크게) -->
+			<div class="dish-icon-large">
+				<img src={resultIngredient.imageUrl} alt={resultIngredient.name} class="result-image" />
+			</div>
+
+			<!-- 등급 뱃지 -->
+			<div class="grade-badge" style="background-color: {GRADE_COLORS[resultIngredient.grade]}">
+				{resultIngredient.grade}등급 - {GRADE_NAMES[resultIngredient.grade]}
+			</div>
 
 			<!-- 요리 이름 -->
-			<h2 class="dish-name">{dish.name}</h2>
+			<h2 class="dish-name">{resultIngredient.name}</h2>
 
-			<!-- 새 재료 획득 (success만) -->
-			{#if dish.grade === 'success' && resultIngredient}
-				<div class="new-ingredient">
-					<p class="new-ingredient-label">🎉 새로운 재료 획득!</p>
-					<div class="ingredient-badge">
-						<span class="ingredient-icon">🥘</span>
-						<span class="ingredient-name">{resultIngredient.name}</span>
-					</div>
+			<!-- 새 재료 획득 -->
+			<div class="new-ingredient">
+				<p class="new-ingredient-label">🎉 새로운 재료 획득!</p>
+				<div class="ingredient-badge">
+					<img src={resultIngredient.imageUrl} alt={resultIngredient.name} class="ingredient-icon" />
+					<span class="ingredient-name">{resultIngredient.name}</span>
 				</div>
-			{/if}
+			</div>
 
 			<!-- 파티클 효과 -->
 			<div class="particles">
@@ -481,13 +474,15 @@
 		}
 	}
 
-	/* 요리 아이콘 (크게) */
+	/* 결과 재료 이미지 (크게) */
 	.dish-icon-large {
 		@apply relative z-10;
-		font-size: clamp(120px, 30vw, 200px);
-		line-height: 1;
 		filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.6));
 		animation: dishEnter 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.7s backwards;
+	}
+
+	.result-image {
+		@apply w-32 h-32 object-contain;
 	}
 
 	@keyframes dishEnter {
@@ -498,6 +493,26 @@
 		100% {
 			transform: scale(1) rotate(0deg);
 			opacity: 1;
+		}
+	}
+
+	/* 등급 뱃지 */
+	.grade-badge {
+		@apply px-4 py-2 rounded-full;
+		@apply text-white font-bold;
+		@apply shadow-lg;
+		font-size: var(--font-sm);
+		animation: badgeFadeIn 0.5s ease-out 0.9s backwards;
+	}
+
+	@keyframes badgeFadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
 		}
 	}
 
@@ -554,7 +569,7 @@
 	}
 
 	.ingredient-icon {
-		@apply text-3xl;
+		@apply w-10 h-10 object-contain;
 	}
 
 	.ingredient-name {

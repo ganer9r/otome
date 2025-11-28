@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { unlockedIngredientsStore } from '../lib/store';
 	import { INGREDIENTS } from '../lib/data/ingredients';
+	import { GRADE_COLORS, GRADE_NAMES, GRADE_ORDER } from '../lib/types';
 	import type { IngredientGrade } from '../lib/types';
 
 	interface Props {
 		/** 선택된 재료 ID 배열 (양방향 바인딩) */
-		selectedIds: string[];
+		selectedIds: number[];
 	}
 
 	let { selectedIds = $bindable() }: Props = $props();
 
-	// 등급 필터 탭
-	const grades: IngredientGrade[] = ['basic', 'common', 'rare', 'epic', 'legendary'];
+	// 등급 필터 탭 (G, F, E, D, C, B, A, R)
+	const grades: IngredientGrade[] = GRADE_ORDER;
 	let selectedGrade = $state<IngredientGrade | 'all'>('all');
 
 	// 언락된 재료
@@ -28,27 +29,12 @@
 		})
 	);
 
-	// 재료 선택/해제
-	function toggleIngredient(id: string) {
-		if (selectedIds.includes(id)) {
-			// 이미 선택된 경우 제거
-			selectedIds = selectedIds.filter((i) => i !== id);
-		} else {
-			// 선택되지 않은 경우 추가 (최대 2개)
-			if (selectedIds.length < 2) {
-				selectedIds = [...selectedIds, id];
-			}
+	// 재료 추가 (같은 재료도 추가 가능, 최대 2개)
+	function addIngredient(id: number) {
+		if (selectedIds.length < 2) {
+			selectedIds = [...selectedIds, id];
 		}
 	}
-
-	// 등급별 한글 이름
-	const gradeNames: Record<IngredientGrade, string> = {
-		basic: '기본',
-		common: '일반',
-		rare: '희귀',
-		epic: '영웅',
-		legendary: '전설'
-	};
 </script>
 
 <div class="ingredient-grid-container">
@@ -68,8 +54,9 @@
 				class="tab"
 				class:active={selectedGrade === grade}
 				onclick={() => (selectedGrade = grade)}
+				style="--grade-color: {GRADE_COLORS[grade]}"
 			>
-				{gradeNames[grade]}
+				{GRADE_NAMES[grade]}
 			</button>
 		{/each}
 	</div>
@@ -77,15 +64,18 @@
 	<!-- 재료 그리드 -->
 	<div class="ingredient-grid">
 		{#each filteredIngredients as ingredient (ingredient.id)}
-			{@const isSelected = selectedIds.includes(ingredient.id)}
+			{@const selectionCount = selectedIds.filter((id) => id === ingredient.id).length}
 			<button
 				type="button"
 				class="ingredient-card"
-				class:selected={isSelected}
-				onclick={() => toggleIngredient(ingredient.id)}
+				class:selected={selectionCount > 0}
+				class:selected-twice={selectionCount >= 2}
+				onclick={() => addIngredient(ingredient.id)}
+				style="--grade-color: {GRADE_COLORS[ingredient.grade]}"
 			>
+				<img src={ingredient.imageUrl} alt={ingredient.name} class="ingredient-image" />
 				<div class="ingredient-name">{ingredient.name}</div>
-				<div class="ingredient-category">{ingredient.category}</div>
+				<div class="ingredient-grade" style="color: {GRADE_COLORS[ingredient.grade]}">{ingredient.grade}</div>
 			</button>
 		{/each}
 
@@ -172,6 +162,18 @@
 		@apply scale-95;
 	}
 
+	.ingredient-card.selected-twice {
+		@apply bg-orange-500 text-white;
+		@apply border-orange-600;
+		box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
+	}
+
+	.ingredient-image {
+		@apply w-12 h-12;
+		@apply object-contain;
+		@apply rounded-lg;
+	}
+
 	.ingredient-name {
 		@apply font-bold text-center;
 		font-size: var(--font-xs);
@@ -179,12 +181,12 @@
 		@apply leading-tight;
 	}
 
-	.ingredient-category {
-		@apply text-gray-500;
+	.ingredient-grade {
+		@apply font-bold;
 		font-size: clamp(8px, 2vw, 10px);
 	}
 
-	.ingredient-card.selected .ingredient-category {
+	.ingredient-card.selected .ingredient-grade {
 		@apply text-primary-content/70;
 	}
 

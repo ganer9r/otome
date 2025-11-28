@@ -12,14 +12,14 @@ import {
  * usecase/unlockIngredient와 연동
  */
 function createUnlockedIngredientsStore() {
-	const { subscribe, set } = writable<string[]>(getUnlockedIngredientsCore());
+	const { subscribe, set } = writable<number[]>(getUnlockedIngredientsCore());
 
 	return {
 		subscribe,
 		/**
 		 * 재료 오픈
 		 */
-		unlock: (ingredientId: string) => {
+		unlock: (ingredientId: number) => {
 			unlockIngredientCore(ingredientId);
 			set(getUnlockedIngredientsCore());
 		},
@@ -44,6 +44,6 @@ export const unlockedIngredientsStore = createUnlockedIngredientsStore();
 /**
  * 오픈된 재료 객체 목록 (derived)
  */
-export function getUnlockedIngredientsObjects(unlockedIds: string[]): Ingredient[] {
+export function getUnlockedIngredientsObjects(unlockedIds: number[]): Ingredient[] {
 	return unlockedIds.map((id) => findIngredientById(id)).filter((ing): ing is Ingredient => ing !== undefined);
 }

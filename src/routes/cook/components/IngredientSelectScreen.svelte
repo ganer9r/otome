@@ -1,28 +1,36 @@
 <script lang="ts">
+	import { Flame } from 'lucide-svelte';
 	import IngredientGrid from './IngredientGrid.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
 
 	interface Props {
 		/** 선택된 재료 ID 배열 (양방향 바인딩) */
-		selectedIds: string[];
-		/** 다음 버튼 클릭 콜백 */
-		onNext: () => void;
+		selectedIds: number[];
+		/** 요리하기 버튼 클릭 콜백 */
+		onCook: () => void;
 	}
 
-	let { selectedIds = $bindable(), onNext }: Props = $props();
+	let { selectedIds = $bindable(), onCook }: Props = $props();
 
 	// 재료 정보
 	let ingredients = $derived(
-		selectedIds.map((id) => findIngredientById(id)).filter((ing) => ing !== null)
+		selectedIds.map((id) => findIngredientById(id)).filter((ing) => ing !== undefined)
 	);
 
-	// 다음 버튼 활성화 여부 (2개 선택 시)
-	let canNext = $derived(selectedIds.length === 2);
+	// 요리하기 버튼 활성화 여부 (1개 이상 선택 시)
+	let canCook = $derived(selectedIds.length >= 1);
 
-	// 다음 버튼 핸들러
-	function handleNext() {
-		if (canNext) {
-			onNext?.();
+	// 요리하기 버튼 핸들러
+	function handleCook() {
+		if (canCook) {
+			onCook?.();
+		}
+	}
+
+	// 슬롯 클릭 시 해당 재료 제거
+	function removeIngredient(slotIndex: number) {
+		if (selectedIds[slotIndex] !== undefined) {
+			selectedIds = selectedIds.filter((_, i) => i !== slotIndex);
 		}
 	}
 </script>
@@ -31,16 +39,23 @@
 	<!-- 상단: 타이틀 -->
 	<div class="title-section">
 		<h1 class="title">재료를 선택하세요</h1>
-		<p class="subtitle">맛있는 요리를 위해 2가지 재료를 골라주세요</p>
+		<p class="subtitle">맛있는 요리를 위해 1-2가지 재료를 골라주세요</p>
 	</div>
 
 	<!-- 중앙: 재료 슬롯 2개 -->
 	<div class="slots-section">
-		<div class="slot" class:filled={ingredients[0]}>
+		<button
+			type="button"
+			class="slot"
+			class:filled={ingredients[0]}
+			onclick={() => removeIngredient(0)}
+			disabled={!ingredients[0]}
+		>
 			{#if ingredients[0]}
 				<div class="slot-filled">
-					<span class="ingredient-emoji">🥘</span>
+					<img src={ingredients[0].imageUrl} alt={ingredients[0].name} class="slot-image" />
 					<span class="ingredient-text">{ingredients[0].name}</span>
+					<span class="remove-hint">탭하여 제거</span>
 				</div>
 			{:else}
 				<div class="slot-empty">
@@ -48,13 +63,20 @@
 					<span class="slot-label">재료 1</span>
 				</div>
 			{/if}
-		</div>
+		</button>
 
-		<div class="slot" class:filled={ingredients[1]}>
+		<button
+			type="button"
+			class="slot"
+			class:filled={ingredients[1]}
+			onclick={() => removeIngredient(1)}
+			disabled={!ingredients[1]}
+		>
 			{#if ingredients[1]}
 				<div class="slot-filled">
-					<span class="ingredient-emoji">🥘</span>
+					<img src={ingredients[1].imageUrl} alt={ingredients[1].name} class="slot-image" />
 					<span class="ingredient-text">{ingredients[1].name}</span>
+					<span class="remove-hint">탭하여 제거</span>
 				</div>
 			{:else}
 				<div class="slot-empty">
@@ -62,14 +84,14 @@
 					<span class="slot-label">재료 2</span>
 				</div>
 			{/if}
-		</div>
+		</button>
 	</div>
 
-	<!-- 다음 버튼 -->
+	<!-- 요리하기 버튼 -->
 	<div class="button-section">
-		<button type="button" class="next-button" disabled={!canNext} onclick={handleNext}>
-			<span class="button-text">다음</span>
-			<span class="button-arrow">→</span>
+		<button type="button" class="cook-button" disabled={!canCook} onclick={handleCook}>
+			<Flame size={20} class="flame-icon" />
+			<span class="button-text">요리하기</span>
 		</button>
 	</div>
 
@@ -173,13 +195,21 @@
 		@apply flex flex-col items-center gap-1;
 	}
 
-	.ingredient-emoji {
-		@apply text-3xl;
+	.slot-image {
+		@apply w-10 h-10;
+		@apply object-contain;
+		@apply rounded-lg;
 	}
 
 	.ingredient-text {
 		@apply text-sm font-bold text-orange-700;
 		font-size: var(--font-sm);
+	}
+
+	.remove-hint {
+		@apply text-orange-500/70;
+		@apply mt-0.5;
+		font-size: clamp(8px, 2vw, 10px);
 	}
 
 	/* 버튼 섹션 */
@@ -189,7 +219,7 @@
 		flex-shrink: 0;
 	}
 
-	.next-button {
+	.cook-button {
 		@apply w-full max-w-xs;
 		@apply px-6 py-3;
 		@apply rounded-xl;
@@ -203,20 +233,20 @@
 		font-size: var(--font-md);
 	}
 
-	.next-button:not(:disabled) {
-		animation: nextPulse 2s ease-in-out infinite;
+	.cook-button:not(:disabled) {
+		animation: cookPulse 2s ease-in-out infinite;
 	}
 
-	.next-button:not(:disabled):hover {
+	.cook-button:not(:disabled):hover {
 		@apply scale-110;
 		@apply shadow-orange-500/50;
 	}
 
-	.next-button:not(:disabled):active {
+	.cook-button:not(:disabled):active {
 		@apply scale-95;
 	}
 
-	.next-button:disabled {
+	.cook-button:disabled {
 		@apply opacity-40;
 		@apply cursor-not-allowed;
 		@apply from-gray-400 to-gray-500;
@@ -224,7 +254,7 @@
 		animation: none;
 	}
 
-	@keyframes nextPulse {
+	@keyframes cookPulse {
 		0%,
 		100% {
 			box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
@@ -239,18 +269,16 @@
 		@apply drop-shadow-lg;
 	}
 
-	.button-arrow {
-		@apply text-xl;
-		animation: arrowSlide 1s ease-in-out infinite;
+	.cook-button :global(.flame-icon) {
+		animation: flameFlicker 0.5s ease-in-out infinite alternate;
 	}
 
-	@keyframes arrowSlide {
-		0%,
-		100% {
-			transform: translateX(0);
+	@keyframes flameFlicker {
+		0% {
+			transform: rotate(-5deg);
 		}
-		50% {
-			transform: translateX(4px);
+		100% {
+			transform: rotate(5deg);
 		}
 	}
 

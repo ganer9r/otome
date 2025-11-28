@@ -1,33 +1,37 @@
 <script lang="ts">
 	import IngredientSelectScreen from './components/IngredientSelectScreen.svelte';
-	import ToolSelectScreen from './components/ToolSelectScreen.svelte';
+	import ToolSelectDialog from './components/ToolSelectDialog.svelte';
 	import CookingScreen from './components/CookingScreen.svelte';
 	import DishResultScreen from './components/DishResultScreen.svelte';
 	import RestartModal from './components/RestartModal.svelte';
 	import { findRecipe } from './lib/usecase/findRecipe';
-	import { cookDish } from './lib/usecase/cookDish';
 	import { unlockedIngredientsStore } from './lib/store';
+	import { findIngredientById } from './lib/data/ingredients';
 	import { modalStore } from '$lib/stores/modal';
-	import type { Recipe, Dish } from './lib/types';
+	import type { Recipe, Ingredient, CookingTool } from './lib/types';
 
 	// 선택 상태
-	let selectedIngredients = $state<string[]>([]);
-	let selectedTool = $state<string | null>(null);
+	let selectedIngredients = $state<number[]>([]);
+	let selectedTool = $state<CookingTool>('없음');
 
 	// 단계별 상태 관리
-	let step = $state<'ingredient' | 'tool' | 'cooking' | 'result'>('ingredient');
+	let step = $state<'ingredient' | 'cooking' | 'result'>('ingredient');
+	let showToolDialog = $state(false);
 	let currentRecipe = $state<Recipe | null>(null);
-	let currentDish = $state<Dish | null>(null);
+	let resultIngredient = $state<Ingredient | null>(null);
 
-	// 재료 선택 완료
-	function handleIngredientNext() {
-		step = 'tool';
+	// 재료 선택 완료 → 다이얼로그 표시
+	function handleCookRequest() {
+		showToolDialog = true;
 	}
 
-	// 조리 시작
-	function handleCook() {
+	// 조리기구 선택 → 조리 시작
+	function handleToolSelect(tool: CookingTool) {
+		selectedTool = tool;
+		showToolDialog = false;
+
 		// 1. 레시피 찾기
-		const recipe = findRecipe(selectedIngredients, selectedTool || undefined);
+		const recipe = findRecipe(selectedIngredients, selectedTool);
 
 		if (!recipe) {
 			alert('해당 조합으로 만들 수 있는 요리가 없습니다!');
@@ -39,16 +43,20 @@
 		step = 'cooking';
 	}
 
+	// 다이얼로그 취소
+	function handleToolCancel() {
+		showToolDialog = false;
+	}
+
 	// 조리 완료
 	async function handleCookingComplete() {
 		if (!currentRecipe) return;
 
-		// 1. 요리 만들기
-		const dish = cookDish(currentRecipe);
-		currentDish = dish;
-
-		// 2. 성공 시 재료 오픈
-		if (dish.grade === 'success') {
+		// 1. 결과 재료 가져오기
+		const result = findIngredientById(currentRecipe.resultIngredientId);
+		if (result) {
+			resultIngredient = result;
+			// 2. 재료 오픈
 			unlockedIngredientsStore.unlock(currentRecipe.resultIngredientId);
 		}
 
@@ -68,9 +76,9 @@
 		// 초기화
 		step = 'ingredient';
 		selectedIngredients = [];
-		selectedTool = null;
+		selectedTool = '없음';
 		currentRecipe = null;
-		currentDish = null;
+		resultIngredient = null;
 	}
 </script>
 
@@ -82,15 +90,17 @@
 	<!-- 재료 선택 화면 -->
 	<IngredientSelectScreen
 		bind:selectedIds={selectedIngredients}
-		onNext={handleIngredientNext}
+		onCook={handleCookRequest}
 	/>
-{:else if step === 'tool'}
-	<!-- 조리기구 선택 화면 -->
-	<ToolSelectScreen
-		selectedIngredients={selectedIngredients}
-		bind:selectedTool
-		onCook={handleCook}
-	/>
+
+	<!-- 조리기구 선택 다이얼로그 -->
+	{#if showToolDialog}
+		<ToolSelectDialog
+			selectedIngredients={selectedIngredients}
+			onSelect={handleToolSelect}
+			onCancel={handleToolCancel}
+		/>
+	{/if}
 {:else if step === 'cooking'}
 	<!-- 조리 화면 -->
 	<CookingScreen
@@ -98,11 +108,11 @@
 		selectedIngredients={selectedIngredients}
 		selectedTool={selectedTool}
 	/>
-{:else if step === 'result' && currentDish && currentRecipe}
+{:else if step === 'result' && resultIngredient && currentRecipe}
 	<!-- 결과 화면 -->
 	<DishResultScreen
-		dish={currentDish}
-		resultIngredientId={currentRecipe.resultIngredientId}
+		{resultIngredient}
+		recipe={currentRecipe}
 		onComplete={handleResultComplete}
 	/>
 {/if}

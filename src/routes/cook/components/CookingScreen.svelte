@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
+	import type { CookingTool } from '../lib/types';
 
 	interface Props {
 		/** 조리 완료 시 콜백 */
@@ -8,27 +9,26 @@
 		/** 조리 시간 (초) */
 		cookingTime?: number;
 		/** 선택한 재료 ID 목록 */
-		selectedIngredients?: string[];
+		selectedIngredients?: number[];
 		/** 선택한 조리기구 */
-		selectedTool?: string | null;
+		selectedTool?: CookingTool;
 	}
 
-	let { onComplete, cookingTime = 10, selectedIngredients = [], selectedTool = null }: Props = $props();
+	let { onComplete, cookingTime = 5, selectedIngredients = [], selectedTool = '없음' }: Props = $props();
 
 	let remainingTime = $state(cookingTime);
 	let progress = $state(0);
 	let stage = $state<'dropping' | 'cooking' | 'complete'>('dropping');
 
 	// 조리기구 이미지 매핑
-	const toolImages = {
-		pot: '/imgs/cw_pot.webp',
-		pan: '/imgs/cw_pan.webp',
-		oven: '/imgs/cw_oven.webp'
+	const toolImages: Record<CookingTool, string> = {
+		'없음': '/imgs/cw_pot.webp',
+		'냄비': '/imgs/cw_pot.webp',
+		'후라이팬': '/imgs/cw_pan.webp',
+		'오븐': '/imgs/cw_oven.webp'
 	};
 
-	const toolImage = selectedTool && toolImages[selectedTool as keyof typeof toolImages]
-		? toolImages[selectedTool as keyof typeof toolImages]
-		: toolImages.pot;
+	const toolImage = toolImages[selectedTool] || toolImages['냄비'];
 
 	// 재료 정보
 	const ingredient1 = selectedIngredients[0] ? findIngredientById(selectedIngredients[0]) : null;
@@ -75,31 +75,6 @@
 
 		return () => clearInterval(interval);
 	});
-
-	// 재료 이모지 매핑
-	const ingredientEmojis: Record<string, string> = {
-		water: '💧',
-		rice: '🌾',
-		egg: '🥚',
-		meat: '🥩',
-		'cooked-rice': '🍚',
-		'boiled-egg': '🥚',
-		'fried-meat': '🥩',
-		broth: '🍲',
-		'egg-rice': '🍳',
-		'meat-rice': '🍖',
-		porridge: '🥣',
-		'egg-soup': '🥣',
-		bibimbap: '🍲',
-		onigiri: '🍙',
-		'egg-porridge': '🥣',
-		'meat-porridge': '🥣',
-		'fried-rice': '🍳',
-		kimbap: '🍱',
-		'special-fried-rice': '✨🍳',
-		'special-kimbap': '✨🍱',
-		'ultimate-porridge': '👑🥣'
-	};
 </script>
 
 <div class="cooking-screen">
@@ -108,13 +83,13 @@
 		<div class="dropping-container">
 			{#if ingredient1}
 				<div class="ingredient-drop" style="--delay: 0s">
-					<div class="ingredient-emoji">{ingredientEmojis[ingredient1.id] || '🥘'}</div>
+					<img src={ingredient1.imageUrl} alt={ingredient1.name} class="ingredient-image" />
 					<div class="ingredient-name">{ingredient1.name}</div>
 				</div>
 			{/if}
 			{#if ingredient2}
 				<div class="ingredient-drop" style="--delay: 1s">
-					<div class="ingredient-emoji">{ingredientEmojis[ingredient2.id] || '🥘'}</div>
+					<img src={ingredient2.imageUrl} alt={ingredient2.name} class="ingredient-image" />
 					<div class="ingredient-name">{ingredient2.name}</div>
 				</div>
 			{/if}
@@ -219,8 +194,8 @@
 		opacity: 0;
 	}
 
-	.ingredient-emoji {
-		@apply text-6xl;
+	.ingredient-image {
+		@apply w-20 h-20 object-contain;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 	}
 

@@ -75,14 +75,21 @@ selectedTool: string | null
 - [x] 결과 후 초기화 동작 확인
 - [x] 모바일 반응형 테스트
 
-### Phase 5: 포켓몬슬립 스타일 조리/결과 화면 (3개)
+### Phase 5: 포켓몬슬립 스타일 조리/결과 화면 (3개) ✅
 - [x] CookingScreen 포켓몬슬립 스타일 개선 (재료 떨어지기, 냄비 흔들림, 증기, 불꽃)
 - [x] DishResultScreen 포켓몬슬립 스타일 개선 (냄비 열림 연출, 심플한 결과)
 - [x] 전체 flow 최종 테스트
 
+### Phase 6: 다이얼로그 방식으로 개선 (5개)
+- [x] ToolSelectDialog 모달 컴포넌트 생성 (조리기구 선택, 선택 안 함 옵션)
+- [x] IngredientSelectScreen 수정 (다음 → 요리하기, 재료 1개 이상)
+- [x] +page.svelte 단순화 (step: ingredient/cooking/result, 다이얼로그 통합)
+- [x] ToolSelectScreen 제거
+- [x] 전체 flow 테스트 (재료 1-2개, 조리기구 선택 사항)
+
 ---
 
 ## 📊 작업 통계
-- **총 작업**: 23개
-- **예상 시간**: 3-4시간
+- **총 작업**: 28개
+- **예상 시간**: 4-5시간
 - **첫 작업**: IngredientSelectScreen.svelte 컴포넌트 생성

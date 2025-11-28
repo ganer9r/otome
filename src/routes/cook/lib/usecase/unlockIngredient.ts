@@ -3,16 +3,16 @@ import { INITIAL_INGREDIENTS } from '../data/ingredients';
 /**
  * 메모리에 저장된 오픈 재료 목록 (새로고침 시 초기화)
  */
-let unlockedIngredients: string[] = [...INITIAL_INGREDIENTS];
+let unlockedIngredients: number[] = INITIAL_INGREDIENTS.map((i) => i.id);
 
 /**
  * 재료를 오픈하여 메모리에 저장
  *
- * @param ingredientId - 오픈할 재료 ID
+ * @param ingredientId - 오픈할 재료 ID (number)
  */
-export function unlockIngredient(ingredientId: string): void {
-	// 빈 문자열 무시
-	if (!ingredientId || ingredientId.trim() === '') {
+export function unlockIngredient(ingredientId: number): void {
+	// 유효하지 않은 ID 무시
+	if (ingredientId === undefined || ingredientId === null) {
 		return;
 	}
 
@@ -27,7 +27,7 @@ export function unlockIngredient(ingredientId: string): void {
  *
  * @returns 오픈된 재료 ID 배열
  */
-export function getUnlockedIngredients(): string[] {
+export function getUnlockedIngredients(): number[] {
 	return [...unlockedIngredients];
 }
 
@@ -37,7 +37,7 @@ export function getUnlockedIngredients(): string[] {
  * @param ingredientId - 확인할 재료 ID
  * @returns 오픈 여부
  */
-export function isIngredientUnlocked(ingredientId: string): boolean {
+export function isIngredientUnlocked(ingredientId: number): boolean {
 	return unlockedIngredients.includes(ingredientId);
 }
 
@@ -45,5 +45,5 @@ export function isIngredientUnlocked(ingredientId: string): boolean {
  * 오픈 재료 초기화
  */
 export function resetUnlockedIngredients(): void {
-	unlockedIngredients = [...INITIAL_INGREDIENTS];
+	unlockedIngredients = INITIAL_INGREDIENTS.map((i) => i.id);
 }
