@@ -17,7 +17,7 @@ const TARGET_NAME = 'seafood omakase, chef\'s choice seafood course';
 // ==========================
 
 // 프로젝트 루트 기준 assets 경로
-const PROJECT_ROOT = path.resolve(__dirname, '../../../../..');
+const PROJECT_ROOT = path.resolve(__dirname, '../..');
 const ASSETS_DIR = path.join(PROJECT_ROOT, 'assets');
 const REFERENCE_DIR = path.join(ASSETS_DIR, 'reference');
 const TEST_DIR = path.join(ASSETS_DIR, 'test');
