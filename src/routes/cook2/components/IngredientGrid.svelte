@@ -6,6 +6,7 @@
 		newIngredientsStore
 	} from '../lib/store';
 	import { INGREDIENTS, findIngredientById } from '../lib/data/ingredients';
+	import { getPossiblePairsFor } from '../lib/data/recipes';
 	import { GRADE_COLORS, GRADE_NAMES, GRADE_ORDER } from '../lib/types';
 	import type { IngredientGrade, Ingredient } from '../lib/types';
 
@@ -36,6 +37,19 @@
 	// 첫 번째 재료가 선택되었을 때, 성공한 조합의 결과 맵 { secondIngredientId: resultIngredientId }
 	let successResultsMap = $derived(
 		selectedIds.length === 1 ? successCombinationsStore.getSuccessResultsFor(selectedIds[0]) : {}
+	);
+
+	// 첫 번째 선택된 재료 정보
+	let firstSelectedIngredient = $derived(
+		selectedIds.length === 1 ? findIngredientById(selectedIds[0]) : null
+	);
+
+	// G급 힌트 활성화 여부 (첫 번째 재료가 G급일 때만)
+	let isHintEnabled = $derived(firstSelectedIngredient?.grade === 'G');
+
+	// 첫 번째 재료가 선택되었을 때, 조합 가능한 두 번째 재료 ID 목록
+	let possiblePairIds = $derived(
+		selectedIds.length === 1 ? getPossiblePairsFor(selectedIds[0]) : []
 	);
 
 	// 필터링된 재료 목록 (isIngredient: true인 것만)
@@ -98,10 +112,14 @@
 			{@const isNew = newIngredientIds.has(ingredient.id)}
 			{@const resultId = successResultsMap[ingredient.id]}
 			{@const resultIngredient = resultId ? findIngredientById(resultId) : null}
+			{@const isPossible = possiblePairIds.includes(ingredient.id)}
+			{@const isImpossible = isHintEnabled && selectedIds.length === 1 && !isPossible && !isTried}
 			<button
 				type="button"
 				class="ingredient-card"
 				class:tried={isTried && selectedIds.length === 1}
+				class:possible={isHintEnabled && isPossible && !isTried && selectedIds.length === 1}
+				class:impossible={isImpossible}
 				class:is-new={isNew}
 				onclick={(e) => addIngredient(ingredient, e)}
 				style="--grade-color: {GRADE_COLORS[ingredient.grade]}"
@@ -211,6 +229,19 @@
 		@apply opacity-40;
 		@apply bg-gray-100;
 		filter: grayscale(50%);
+	}
+
+	/* 조합 가능 (강조) */
+	.ingredient-card.possible {
+		@apply border-emerald-500;
+		@apply bg-emerald-50;
+		box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+	}
+
+	/* 조합 불가능 (더 흐리게) */
+	.ingredient-card.impossible {
+		@apply opacity-30;
+		filter: grayscale(70%);
 	}
 
 	/* NEW 뱃지 */

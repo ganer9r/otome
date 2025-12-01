@@ -27,3 +27,31 @@ export function findRecipeByIngredients(ids: number[]): Recipe | undefined {
 export function findRecipesUsingIngredient(id: number): Recipe[] {
 	return RECIPES.filter((r) => r.ingredientIds.includes(id));
 }
+
+/** 첫 번째 재료와 조합 가능한 두 번째 재료 ID 목록 반환 */
+export function getPossiblePairsFor(firstIngredientId: number): number[] {
+	const recipes = findRecipesUsingIngredient(firstIngredientId);
+	const pairs: number[] = [];
+
+	recipes.forEach((recipe) => {
+		recipe.ingredientIds.forEach((id) => {
+			if (id !== firstIngredientId) {
+				pairs.push(id);
+			}
+		});
+		// 같은 재료 2개 조합인 경우
+		if (
+			recipe.ingredientIds.length === 2 &&
+			recipe.ingredientIds[0] === recipe.ingredientIds[1] &&
+			recipe.ingredientIds[0] === firstIngredientId
+		) {
+			pairs.push(firstIngredientId);
+		}
+		// 단일 재료 레시피인 경우 (재료 1개로 만드는 요리)
+		if (recipe.ingredientIds.length === 1 && recipe.ingredientIds[0] === firstIngredientId) {
+			// 이 경우는 두 번째 재료 없이 조리 가능
+		}
+	});
+
+	return [...new Set(pairs)];
+}

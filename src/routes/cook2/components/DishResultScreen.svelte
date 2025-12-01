@@ -26,6 +26,11 @@
 	const potImage = '/imgs/cw_pot.webp';
 
 	let explosionTheme = $derived(() => {
+		// 재료 획득: 빨간색
+		if (resultIngredient.isIngredient) {
+			return { color: '#dc2626', particles: ['✨', '❤️', '🔥'] };
+		}
+		// 요리 완성: 등급별 색상
 		const gradeIndex = ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'R'].indexOf(resultIngredient.grade);
 		if (gradeIndex >= 6) return { color: '#FBBF24', particles: ['✨', '⭐', '💫'] };
 		if (gradeIndex >= 4) return { color: '#A855F7', particles: ['✨', '💜', '🔮'] };

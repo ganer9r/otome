@@ -32,8 +32,15 @@
 			</div>
 		</div>
 
-		<!-- 카드 앞면 (흰색) -->
-		<div class="card-front">
+		<!-- 카드 앞면 -->
+		<div class="card-front" class:golden={ingredient.isIngredient}>
+			<!-- 좌상단 재료 뱃지 -->
+			{#if ingredient.isIngredient}
+				<div class="ingredient-type-badge">
+					<span>재료</span>
+				</div>
+			{/if}
+
 			<!-- 별 등급 -->
 			<div class="stars-row">
 				{#each Array(starsCount()) as _}
@@ -152,7 +159,7 @@
 		font-weight: bold;
 	}
 
-	/* 카드 앞면 (흰색) */
+	/* 카드 앞면 (기본: 흰색) */
 	.card-front {
 		transform: rotateY(180deg);
 		@apply flex flex-col items-center justify-between;
@@ -160,6 +167,82 @@
 		border: var(--card-border) solid #e5e7eb;
 		padding: var(--card-padding);
 		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+	}
+
+	/* 카드 앞면 (재료: 골카 - 빨간색) */
+	.card-front.golden {
+		background: linear-gradient(135deg, #fef2f2 0%, #fecaca 50%, #fca5a5 100%);
+		border: var(--card-border) solid #dc2626;
+		box-shadow: 0 8px 32px rgba(220, 38, 38, 0.25);
+	}
+
+	/* 좌상단 재료 뱃지 */
+	.ingredient-type-badge {
+		@apply absolute;
+		top: calc(var(--card-height) * 0.03);
+		left: calc(var(--card-height) * 0.03);
+		@apply bg-gradient-to-r from-red-600 to-red-500;
+		@apply font-bold;
+		@apply rounded-lg;
+		padding: calc(var(--card-height) * 0.015) calc(var(--card-height) * 0.035);
+		font-size: calc(var(--card-height) * 0.038);
+		box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+		overflow: hidden;
+	}
+
+	.ingredient-type-badge span {
+		background: linear-gradient(90deg, #fff 0%, #fff 40%, #fef08a 50%, #fff 60%, #fff 100%);
+		background-size: 200% 100%;
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+		animation: textShine 2s linear infinite;
+	}
+
+	@keyframes textShine {
+		0% {
+			background-position: 100% 0;
+		}
+		100% {
+			background-position: -100% 0;
+		}
+	}
+
+	/* 뱃지 샤이닝 오버레이 */
+	.ingredient-type-badge::after {
+		content: '';
+		@apply absolute inset-0;
+		background: linear-gradient(
+			120deg,
+			transparent 0%,
+			transparent 30%,
+			rgba(255, 255, 255, 0.4) 50%,
+			transparent 70%,
+			transparent 100%
+		);
+		background-size: 200% 100%;
+		animation: badgeShine 2.5s ease-in-out infinite;
+	}
+
+	@keyframes badgeShine {
+		0% {
+			background-position: 200% 0;
+		}
+		100% {
+			background-position: -200% 0;
+		}
+	}
+
+	@keyframes badgePulse {
+		0%,
+		100% {
+			transform: scale(1);
+			box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+		}
+		50% {
+			transform: scale(1.05);
+			box-shadow: 0 4px 16px rgba(220, 38, 38, 0.6);
+		}
 	}
 
 	/* 별 */
@@ -200,9 +283,17 @@
 		@apply bg-gradient-to-r from-transparent via-gray-300 to-transparent;
 	}
 
+	.golden .divider-line {
+		@apply bg-gradient-to-r from-transparent via-red-400 to-transparent;
+	}
+
 	.divider-diamond {
 		@apply text-gray-400;
 		font-size: calc(var(--card-height) * 0.025);
+	}
+
+	.golden .divider-diamond {
+		@apply text-red-500;
 	}
 
 	/* 이름 */
