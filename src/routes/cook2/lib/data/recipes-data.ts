@@ -2,7 +2,7 @@ import type { Recipe } from '../types';
 
 /**
  * 레시피 데이터
- * 총: 277개
+ * 총: 238개 (G→F: 27, F→E: 55, E→D: 47, D→C: 39, C→B: 31, B→A: 20, A→R: 16)
  */
 export const RECIPES_DATA: Recipe[] = [
 	// ========== G → F등급 (27개) ==========
@@ -221,12 +221,9 @@ export const RECIPES_DATA: Recipe[] = [
 	{ id: 513, name: '퓨전오마카세', resultIngredientId: 613, ingredientIds: [507, 509] }, // 오마카세코스 + 가이세키
 	{ id: 514, name: '그랑크뤼', resultIngredientId: 614, ingredientIds: [510, 504] }, // 웨딩케이크 + 트러플
 
-	// ========== A → R등급 (32개) ==========
+	// ========== A → R등급 (16개) ==========
 	{ id: 601, name: '신선로', resultIngredientId: 701, ingredientIds: [609, 607] }, // 궁중요리 + 타라바가니
 	{ id: 602, name: '구절판', resultIngredientId: 702, ingredientIds: [609, 608] }, // 궁중요리 + 미슐랭코스
-	{ id: 603, name: '장흥삼합', resultIngredientId: 703, ingredientIds: [606, 601] }, // 황제전복 + 최상급와규
-	{ id: 604, name: '삼계해물탕', resultIngredientId: 704, ingredientIds: [607, 609] }, // 타라바가니 + 궁중요리
-	{ id: 605, name: '어복쟁반', resultIngredientId: 705, ingredientIds: [605, 609] }, // 블루핀참치 + 궁중요리
 	{ id: 606, name: '비프웰링턴', resultIngredientId: 706, ingredientIds: [601, 608] }, // 최상급와규 + 미슐랭코스
 	{ id: 607, name: '트러플카르보나라', resultIngredientId: 707, ingredientIds: [603, 608] }, // 알바트러플 + 미슐랭코스
 	{ id: 608, name: '코키유생자크', resultIngredientId: 708, ingredientIds: [606, 608] }, // 황제전복 + 미슐랭코스
@@ -235,23 +232,10 @@ export const RECIPES_DATA: Recipe[] = [
 	{ id: 611, name: '북경오리구이정식', resultIngredientId: 711, ingredientIds: [609, 613] }, // 궁중요리 + 퓨전오마카세
 	{ id: 612, name: '동파육', resultIngredientId: 712, ingredientIds: [601, 609] }, // 최상급와규 + 궁중요리
 	{ id: 613, name: '불도장', resultIngredientId: 713, ingredientIds: [606, 607] }, // 황제전복 + 타라바가니
-	{ id: 614, name: '청초해분', resultIngredientId: 714, ingredientIds: [605, 607] }, // 블루핀참치 + 타라바가니
-	{ id: 615, name: '좌종당계', resultIngredientId: 715, ingredientIds: [609, 603] }, // 궁중요리 + 알바트러플
 	{ id: 616, name: '오토로초밥오마카세', resultIngredientId: 716, ingredientIds: [605, 613] }, // 블루핀참치 + 퓨전오마카세
-	{ id: 617, name: '마츠바가니', resultIngredientId: 717, ingredientIds: [607, 604] }, // 타라바가니 + 마츠타케
-	{ id: 618, name: '스키야키정식', resultIngredientId: 718, ingredientIds: [601, 613] }, // 최상급와규 + 퓨전오마카세
-	{ id: 619, name: '참치삼중주', resultIngredientId: 719, ingredientIds: [605, 605] }, // 블루핀참치 + 블루핀참치
-	{ id: 620, name: '해물오마카세', resultIngredientId: 720, ingredientIds: [607, 613] }, // 타라바가니 + 퓨전오마카세
 	{ id: 621, name: '전복리소토', resultIngredientId: 721, ingredientIds: [606, 603] }, // 황제전복 + 알바트러플
 	{ id: 622, name: '싱가포르칠리크랩', resultIngredientId: 722, ingredientIds: [607, 612] }, // 타라바가니 + 분자요리
 	{ id: 623, name: '랍스터테르미도르', resultIngredientId: 723, ingredientIds: [607, 602] }, // 타라바가니 + 벨루가캐비어
-	{ id: 624, name: '대게테르미도르', resultIngredientId: 724, ingredientIds: [607, 601] }, // 타라바가니 + 최상급와규
-	{ id: 625, name: '푸아그라스페셜', resultIngredientId: 725, ingredientIds: [603, 609] }, // 알바트러플 + 궁중요리
 	{ id: 626, name: '오페라케이크', resultIngredientId: 726, ingredientIds: [610, 611] }, // 피에스몽테 + 황실디저트
-	{ id: 627, name: '크로캅부슈타워', resultIngredientId: 727, ingredientIds: [611, 610] }, // 황실디저트 + 피에스몽테
-	{ id: 628, name: '밀푀유스페셜', resultIngredientId: 728, ingredientIds: [610, 614] }, // 피에스몽테 + 그랑크뤼
-	{ id: 629, name: '베이크드알래스카', resultIngredientId: 729, ingredientIds: [611, 614] }, // 황실디저트 + 그랑크뤼
-	{ id: 630, name: '초콜릿퐁듀', resultIngredientId: 730, ingredientIds: [614, 610] }, // 그랑크뤼 + 피에스몽테
-	{ id: 631, name: '황제의만찬', resultIngredientId: 731, ingredientIds: [608, 609] }, // 미슐랭코스 + 궁중요리
-	{ id: 632, name: '미슐랭삼성', resultIngredientId: 732, ingredientIds: [608, 608] } // 미슐랭코스 + 미슐랭코스
+	{ id: 630, name: '초콜릿퐁듀', resultIngredientId: 730, ingredientIds: [614, 610] } // 그랑크뤼 + 피에스몽테
 ];

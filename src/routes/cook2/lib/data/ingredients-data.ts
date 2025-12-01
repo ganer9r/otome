@@ -103,7 +103,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: false,
 		imageUrl: '/imgs/ingredients/105.webp'
 	}, // 다시
-	{ id: 123, name: '떡', grade: 'F', isIngredient: false, imageUrl: '/imgs/ingredients/28.webp' }, // 쌀
+	{ id: 123, name: '떡', grade: 'F', isIngredient: true, imageUrl: '/imgs/ingredients/28.webp' }, // 쌀
 	{
 		id: 124,
 		name: '튀김옷',
@@ -163,10 +163,10 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		id: 213,
 		name: '볶음밥',
 		grade: 'E',
-		isIngredient: true,
+		isIngredient: false,
 		imageUrl: '/imgs/ingredients/326.webp'
 	}, // 계란볶음밥
-	{ id: 214, name: '전', grade: 'E', isIngredient: true, imageUrl: '/imgs/ingredients/203.webp' }, // 지단
+	{ id: 214, name: '전', grade: 'E', isIngredient: false, imageUrl: '/imgs/ingredients/203.webp' }, // 지단
 	// E등급 요리 (49개)
 	{
 		id: 215,
@@ -535,10 +535,16 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		id: 312,
 		name: '오마카세',
 		grade: 'D',
-		isIngredient: true,
+		isIngredient: false,
 		imageUrl: '/imgs/ingredients/619.webp'
 	}, // 오마카세
-	{ id: 313, name: '정식', grade: 'D', isIngredient: true, imageUrl: '/imgs/ingredients/601.webp' }, // 한정식
+	{
+		id: 313,
+		name: '정식',
+		grade: 'D',
+		isIngredient: false,
+		imageUrl: '/imgs/ingredients/601.webp'
+	}, // 한정식
 	// D등급 요리 (33개)
 	{
 		id: 314,
@@ -837,7 +843,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		id: 412,
 		name: '양갈비',
 		grade: 'C',
-		isIngredient: true,
+		isIngredient: false,
 		imageUrl: '/imgs/ingredients/16.webp'
 	}, // 소고기
 	// C등급 요리 (19개)
@@ -1047,7 +1053,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		id: 512,
 		name: '와규스테이크',
 		grade: 'B',
-		isIngredient: false,
+		isIngredient: true,
 		imageUrl: '/imgs/ingredients/512.webp'
 	}, // 티본스테이크
 	{
@@ -1075,7 +1081,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		id: 516,
 		name: '트러플파스타',
 		grade: 'B',
-		isIngredient: false,
+		isIngredient: true,
 		imageUrl: '/imgs/ingredients/508.webp'
 	}, // 트러플파스타
 	{
@@ -1089,7 +1095,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		id: 518,
 		name: '푸아그라스테이크',
 		grade: 'B',
-		isIngredient: false,
+		isIngredient: true,
 		imageUrl: '/imgs/ingredients/744.webp'
 	}, // 푸아그라
 	{
@@ -1211,21 +1217,21 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		id: 612,
 		name: '분자요리',
 		grade: 'A',
-		isIngredient: true,
+		isIngredient: false,
 		imageUrl: '/imgs/ingredients/619.webp'
 	}, // 오마카세
 	{
 		id: 613,
 		name: '퓨전오마카세',
 		grade: 'A',
-		isIngredient: true,
+		isIngredient: false,
 		imageUrl: '/imgs/ingredients/619.webp'
 	}, // 오마카세
 	{
 		id: 614,
 		name: '그랑크뤼',
 		grade: 'A',
-		isIngredient: true,
+		isIngredient: false,
 		imageUrl: '/imgs/ingredients/38.webp'
 	}, // 포도
 	// A등급 요리 (18개)
@@ -1356,7 +1362,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		imageUrl: '/imgs/ingredients/600.webp'
 	}, // 전골정식
 
-	// ========== R등급 (32개) - 전설급 요리 ==========
+	// ========== R등급 (16개) - 전설급 요리 ==========
 	{
 		id: 701,
 		name: '신선로',
@@ -1371,27 +1377,6 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: false,
 		imageUrl: '/imgs/ingredients/701.webp'
 	}, // 구절판
-	{
-		id: 703,
-		name: '장흥삼합',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/702.webp'
-	}, // 장흥삼합
-	{
-		id: 704,
-		name: '삼계해물탕',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/703.webp'
-	}, // 삼계해물탕
-	{
-		id: 705,
-		name: '어복쟁반',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/704.webp'
-	}, // 어복쟁반
 	{
 		id: 706,
 		name: '비프웰링턴',
@@ -1449,54 +1434,12 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		imageUrl: '/imgs/ingredients/722.webp'
 	}, // 불도장
 	{
-		id: 714,
-		name: '청초해분',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/723.webp'
-	}, // 청초해분
-	{
-		id: 715,
-		name: '좌종당계',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/724.webp'
-	}, // 좌종당계
-	{
 		id: 716,
 		name: '오토로초밥오마카세',
 		grade: 'R',
 		isIngredient: false,
 		imageUrl: '/imgs/ingredients/730.webp'
 	}, // 오토로 초밥
-	{
-		id: 717,
-		name: '마츠바가니',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/731.webp'
-	}, // 마츠바가니
-	{
-		id: 718,
-		name: '스키야키정식',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/732.webp'
-	}, // 스키야키
-	{
-		id: 719,
-		name: '참치삼중주',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/733.webp'
-	}, // 참치 삼중주
-	{
-		id: 720,
-		name: '해물오마카세',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/734.webp'
-	}, // 해물오마카세
 	{
 		id: 721,
 		name: '전복리소토',
@@ -1519,20 +1462,6 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		imageUrl: '/imgs/ingredients/742.webp'
 	}, // 랍스터 테르미도르
 	{
-		id: 724,
-		name: '대게테르미도르',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/743.webp'
-	}, // 대게 테르미도르
-	{
-		id: 725,
-		name: '푸아그라스페셜',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/744.webp'
-	}, // 푸아그라
-	{
 		id: 726,
 		name: '오페라케이크',
 		grade: 'R',
@@ -1540,45 +1469,10 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		imageUrl: '/imgs/ingredients/750.webp'
 	}, // 오페라 케이크
 	{
-		id: 727,
-		name: '크로캅부슈타워',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/751.webp'
-	}, // 크로캅부슈
-	{
-		id: 728,
-		name: '밀푀유스페셜',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/752.webp'
-	}, // 밀푀유
-	{
-		id: 729,
-		name: '베이크드알래스카',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/753.webp'
-	}, // 베이크드 알래스카
-	{
 		id: 730,
 		name: '초콜릿퐁듀',
 		grade: 'R',
 		isIngredient: false,
 		imageUrl: '/imgs/ingredients/754.webp'
-	}, // 초콜릿 퐁듀
-	{
-		id: 731,
-		name: '황제의만찬',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/700.webp'
-	}, // 신선로
-	{
-		id: 732,
-		name: '미슐랭삼성',
-		grade: 'R',
-		isIngredient: false,
-		imageUrl: '/imgs/ingredients/600.webp'
-	} // 전골정식
+	} // 초콜릿 퐁듀
 ];
