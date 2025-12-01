@@ -7,65 +7,41 @@
 	import ResultCard from './ResultCard.svelte';
 
 	interface Props {
-		/** 결과 재료 */
 		resultIngredient: Ingredient;
-		/** 레시피 정보 */
 		recipe: Recipe;
-		/** 완료 콜백 */
 		onComplete?: () => void;
-		/** 바로 써보기 콜백 (재료인 경우만) */
 		onUseNow?: (ingredientId: number) => void;
 	}
 
 	let { resultIngredient, recipe, onComplete, onUseNow }: Props = $props();
 
-	// 진행도 계산
 	let unlockedIds = $derived($unlockedIngredientsStore);
 	let gradeProgress = $derived(getProgressByGrade(unlockedIds, resultIngredient.grade));
 	let totalProgress = $derived(getTotalProgress(unlockedIds));
 
-	// 연출 단계
 	let stage = $state<'heartbeat' | 'explosion' | 'card' | 'result'>('heartbeat');
-
-	// 카드 뒤집힘 상태
 	let cardFlipped = $state(false);
-
-	// 스킵 가능 여부
 	let canSkip = $state(true);
 
-	// 냄비 이미지
 	const potImage = '/imgs/cw_pot.webp';
 
-	// 등급별 색상 테마
 	let explosionTheme = $derived(() => {
 		const gradeIndex = ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'R'].indexOf(resultIngredient.grade);
-		if (gradeIndex >= 6) {
-			return { color: '#FBBF24', particles: ['✨', '⭐', '💫'] }; // A, R - 골드
-		}
-		if (gradeIndex >= 4) {
-			return { color: '#A855F7', particles: ['✨', '💜', '🔮'] }; // C, B - 퍼플
-		}
-		return { color: '#3B82F6', particles: ['✨', '💠', '🌟'] }; // G~D - 블루
+		if (gradeIndex >= 6) return { color: '#FBBF24', particles: ['✨', '⭐', '💫'] };
+		if (gradeIndex >= 4) return { color: '#A855F7', particles: ['✨', '💜', '🔮'] };
+		return { color: '#3B82F6', particles: ['✨', '💠', '🌟'] };
 	});
 
-	// 연출 시퀀스
 	onMount(() => {
-		// 1. 두근두근 (1.2초)
 		const timer1 = setTimeout(() => {
 			stage = 'explosion';
 		}, 1200);
-
-		// 2. 빛 폭발 (0.8초)
 		const timer2 = setTimeout(() => {
 			stage = 'card';
 		}, 2000);
-
-		// 3. 카드 등장 후 뒤집기 (0.5초 후)
 		const timer3 = setTimeout(() => {
 			cardFlipped = true;
 		}, 2500);
-
-		// 4. 결과 UI 표시 (카드 뒤집힌 후 0.8초)
 		const timer4 = setTimeout(() => {
 			stage = 'result';
 		}, 3300);
@@ -78,7 +54,6 @@
 		};
 	});
 
-	// 스킵 처리
 	function handleSkip() {
 		if (stage !== 'result' && canSkip) {
 			stage = 'result';
@@ -86,24 +61,19 @@
 		}
 	}
 
-	// 바로 써보기
 	function handleUseNow() {
 		onUseNow?.(resultIngredient.id);
 	}
-
-	// 확인
 	function handleConfirm() {
 		onComplete?.();
 	}
 
-	// 빛 광선 (더 많고 다양한 두께)
 	const lightRays = Array.from({ length: 24 }, (_, i) => ({
 		angle: i * 15,
 		width: 2 + Math.random() * 6,
 		delay: Math.random() * 0.2
 	}));
 
-	// 파티클 폭발 (더 많고 다양한 크기)
 	const burstParticles = Array.from({ length: 40 }, (_, i) => ({
 		angle: i * 9 + Math.random() * 9,
 		distance: 80 + Math.random() * 200,
@@ -111,21 +81,17 @@
 		delay: Math.random() * 0.3
 	}));
 
-	// 링 이펙트
 	const rings = Array.from({ length: 3 }, (_, i) => ({
 		delay: i * 0.15,
 		scale: 1 + i * 0.5
 	}));
 
-	// recipe를 사용하지 않으면 경고가 나오므로 콘솔에서 확인용 (추후 확장 가능)
 	$effect(() => {
 		if (recipe) {
-			// 레시피 정보 활용 가능
 		}
 	});
 </script>
 
-<!-- 풀스크린 배경 -->
 <div
 	class="result-screen"
 	onclick={handleSkip}
@@ -134,7 +100,6 @@
 	tabindex="0"
 >
 	{#if stage === 'heartbeat'}
-		<!-- 1단계: 두근두근 -->
 		<div class="stage-heartbeat">
 			<div class="pot-wrapper">
 				<div class="pot-glow"></div>
@@ -148,20 +113,14 @@
 			</div>
 		</div>
 	{:else if stage === 'explosion'}
-		<!-- 2단계: 빛 폭발 -->
 		<div class="stage-explosion">
-			<!-- 중앙 플래시 -->
 			<div class="center-flash" style="--color: {explosionTheme().color}"></div>
-
-			<!-- 확산 링 -->
 			{#each rings as ring}
 				<div
 					class="explosion-ring"
 					style="--delay: {ring.delay}s; --scale: {ring.scale}; --color: {explosionTheme().color}"
 				></div>
 			{/each}
-
-			<!-- 빛 광선 -->
 			<div class="rays-container">
 				{#each lightRays as ray}
 					<div
@@ -171,8 +130,6 @@
 					></div>
 				{/each}
 			</div>
-
-			<!-- 파티클 폭발 -->
 			<div class="particles-container">
 				{#each burstParticles as particle, i}
 					<div
@@ -185,19 +142,19 @@
 			</div>
 		</div>
 	{:else}
-		<!-- 3-4단계: 카드 등장 및 결과 -->
 		<div class="stage-card">
-			<!-- 카드 + 결과 UI 컨테이너 -->
 			<div class="card-result-container">
 				<!-- 카드 -->
 				<div class="card-wrapper" class:card-entered={stage === 'card' || stage === 'result'}>
+					<!-- 후광 효과 (카드 중앙 기준) -->
+					<div class="sunburst-wrapper" class:card-entered={stage === 'card' || stage === 'result'}>
+						<img src="/imgs/bg-sunburst.png" alt="" class="sunburst-img" />
+					</div>
 					<ResultCard ingredient={resultIngredient} flipped={cardFlipped} />
 				</div>
 
-				<!-- 결과 UI (카드 아래) -->
 				{#if stage === 'result'}
 					<div class="result-ui">
-						<!-- 진행도 -->
 						<div class="progress-section">
 							<div class="progress-item">
 								<span class="progress-label" style="color: {GRADE_COLORS[resultIngredient.grade]}"
@@ -219,13 +176,11 @@
 								전체 발견: {totalProgress.discovered}/{totalProgress.total}
 							</div>
 						</div>
-
-						<!-- 버튼 -->
 						<div class="button-group">
 							{#if resultIngredient.isIngredient && onUseNow}
-								<button type="button" class="use-now-button" onclick={handleUseNow}>
-									🧪 바로 써보기
-								</button>
+								<button type="button" class="use-now-button" onclick={handleUseNow}
+									>🧪 바로 써보기</button
+								>
 							{/if}
 							<button type="button" class="confirm-button" onclick={handleConfirm}>확인</button>
 						</div>
@@ -235,7 +190,6 @@
 		</div>
 	{/if}
 
-	<!-- 스킵 힌트 -->
 	{#if stage !== 'result' && canSkip}
 		<div class="skip-hint">탭하여 스킵</div>
 	{/if}
@@ -247,15 +201,13 @@
 	.result-screen {
 		@apply fixed inset-0 z-50;
 		@apply flex items-center justify-center;
-		@apply overflow-hidden;
-		@apply cursor-pointer;
-		@apply bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-100;
+		@apply cursor-pointer overflow-hidden;
+		@apply bg-gradient-to-br from-orange-100 via-amber-100 to-orange-200;
 	}
 
-	/* ===== 1단계: 두근두근 ===== */
+	/* 1단계: 두근두근 */
 	.stage-heartbeat {
-		@apply relative z-10;
-		@apply flex flex-col items-center gap-4;
+		@apply relative z-10 flex flex-col items-center gap-4;
 	}
 
 	.pot-wrapper {
@@ -263,8 +215,7 @@
 	}
 
 	.pot-glow {
-		@apply absolute inset-0;
-		@apply rounded-full;
+		@apply absolute inset-0 rounded-full;
 		background: radial-gradient(circle, rgba(251, 191, 36, 0.4) 0%, transparent 70%);
 		animation: potGlowPulse 0.5s ease-in-out infinite;
 		transform: scale(1.5);
@@ -283,8 +234,7 @@
 	}
 
 	.pot-shaking {
-		@apply relative z-10;
-		@apply h-48 w-48 object-contain;
+		@apply relative z-10 h-48 w-48 object-contain;
 		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
 		animation: potShake 0.15s ease-in-out infinite;
 	}
@@ -349,13 +299,11 @@
 		}
 	}
 
-	/* ===== 2단계: 빛 폭발 ===== */
+	/* 2단계: 빛 폭발 */
 	.stage-explosion {
-		@apply absolute inset-0;
-		@apply flex items-center justify-center;
+		@apply absolute inset-0 flex items-center justify-center;
 	}
 
-	/* 중앙 플래시 */
 	.center-flash {
 		@apply absolute;
 		width: 100px;
@@ -380,7 +328,6 @@
 		}
 	}
 
-	/* 확산 링 */
 	.explosion-ring {
 		@apply absolute;
 		width: 100px;
@@ -402,10 +349,8 @@
 		}
 	}
 
-	/* 빛 광선 */
 	.rays-container {
-		@apply absolute inset-0;
-		@apply flex items-center justify-center;
+		@apply absolute inset-0 flex items-center justify-center;
 	}
 
 	.light-ray {
@@ -439,10 +384,8 @@
 		}
 	}
 
-	/* 파티클 폭발 */
 	.particles-container {
-		@apply absolute inset-0;
-		@apply flex items-center justify-center;
+		@apply absolute inset-0 flex items-center justify-center;
 	}
 
 	.burst-particle {
@@ -467,25 +410,50 @@
 		}
 	}
 
-	/* ===== 3-4단계: 카드 ===== */
+	/* 3-4단계: 카드 */
 	.stage-card {
-		@apply relative z-10;
-		@apply flex items-center justify-center;
-		@apply h-full w-full;
+		@apply relative z-10 flex h-full w-full items-center justify-center overflow-hidden;
 	}
 
-	/* 카드 + 결과 컨테이너 */
 	.card-result-container {
-		@apply relative z-20;
-		@apply flex flex-col items-center;
-		@apply h-full w-full;
-		@apply py-4;
-		@apply overflow-y-auto;
+		@apply relative z-20 flex h-full w-full flex-col items-center overflow-x-hidden overflow-y-auto py-4;
+	}
+
+	/* 후광 효과 (카드 중앙 기준) */
+	.sunburst-wrapper {
+		@apply pointer-events-none absolute;
+		width: 150vw;
+		height: 150vw;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		opacity: 0;
+		z-index: -1;
+		transition: opacity 0.6s ease-out;
+	}
+
+	.sunburst-wrapper.card-entered {
+		opacity: 0.6;
+	}
+
+	.sunburst-img {
+		@apply h-full w-full object-contain;
+		animation: sunburstRotate 20s linear infinite;
+	}
+
+	@keyframes sunburstRotate {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	/* 카드 래퍼 */
 	.card-wrapper {
-		@apply flex-shrink-0;
+		@apply relative flex-shrink-0;
+		z-index: 10;
 		transform: scale(0) translateY(50px);
 		opacity: 0;
 		transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -498,9 +466,7 @@
 
 	/* 결과 UI */
 	.result-ui {
-		@apply flex flex-col items-center;
-		@apply mt-3 w-full px-4;
-		@apply flex-shrink-0;
+		@apply mt-3 flex w-full flex-shrink-0 flex-col items-center px-4;
 		max-width: min(55vh * 0.68, 280px);
 		gap: 2vh;
 		animation: resultFadeIn 0.5s ease-out;
@@ -517,11 +483,8 @@
 		}
 	}
 
-	/* 진행도 */
 	.progress-section {
-		@apply flex w-full flex-col items-center;
-		@apply rounded-xl bg-white/70;
-		@apply shadow-sm;
+		@apply flex w-full flex-col items-center rounded-xl bg-white/70 shadow-sm;
 		padding: 1.5vh 2vh;
 		gap: 0.8vh;
 	}
@@ -529,46 +492,34 @@
 	.progress-item {
 		@apply flex w-full justify-between;
 	}
-
 	.progress-label {
 		@apply font-bold;
 		font-size: clamp(11px, 1.6vh, 14px);
 	}
-
 	.progress-value {
 		@apply font-medium text-gray-700;
 		font-size: clamp(11px, 1.6vh, 14px);
 	}
-
 	.progress-bar {
 		@apply w-full overflow-hidden rounded-full bg-gray-200;
 		height: clamp(4px, 0.8vh, 8px);
 	}
-
 	.progress-fill {
 		@apply h-full rounded-full;
 		transition: width 0.5s ease-out;
 	}
-
 	.progress-total {
 		@apply text-gray-500;
 		font-size: clamp(10px, 1.4vh, 12px);
 	}
 
-	/* 버튼 그룹 */
 	.button-group {
-		@apply flex flex-col items-center;
-		@apply w-full;
+		@apply flex w-full flex-col items-center;
 		gap: 1vh;
 	}
 
 	.use-now-button {
-		@apply w-full;
-		@apply bg-gradient-to-r from-orange-500 to-amber-500;
-		@apply text-white;
-		@apply rounded-xl;
-		@apply font-bold;
-		@apply shadow-md;
+		@apply w-full rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 font-bold text-white shadow-md;
 		padding: 1.2vh 2vh;
 		font-size: clamp(12px, 1.8vh, 16px);
 		transition: all 0.2s;
@@ -580,26 +531,18 @@
 	}
 
 	.confirm-button {
-		@apply w-full;
-		@apply bg-white text-gray-700;
-		@apply rounded-xl;
-		@apply font-bold;
-		@apply shadow-sm;
-		@apply border border-gray-200;
+		@apply w-full rounded-xl border border-gray-200 bg-white font-bold text-gray-700 shadow-sm;
 		padding: 1.2vh 2vh;
 		font-size: clamp(12px, 1.8vh, 16px);
 		transition: all 0.2s;
 	}
 
 	.confirm-button:hover {
-		@apply scale-105;
-		@apply bg-gray-50;
+		@apply scale-105 bg-gray-50;
 	}
 
-	/* 스킵 힌트 */
 	.skip-hint {
-		@apply absolute bottom-8 left-1/2 -translate-x-1/2;
-		@apply text-orange-700/60;
+		@apply absolute bottom-8 left-1/2 -translate-x-1/2 text-orange-700/60;
 		font-size: var(--font-sm);
 		animation: hintFade 1.5s ease-in-out infinite;
 	}

@@ -164,7 +164,7 @@
 
 	.cooking-screen {
 		@apply fixed inset-0 z-50;
-		@apply bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-100;
+		@apply bg-gradient-to-br from-orange-100 via-amber-100 to-orange-200;
 		@apply flex flex-col items-center justify-center gap-8 p-6;
 		@apply overflow-hidden;
 	}
