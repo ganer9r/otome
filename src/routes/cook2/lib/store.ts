@@ -10,6 +10,7 @@ import {
 
 const FAILED_COMBINATIONS_KEY = 'cook2_failed_combinations';
 const TRIED_COMBINATIONS_KEY = 'cook2_tried_combinations';
+const SUCCESS_COMBINATIONS_KEY = 'cook2_success_combinations';
 const NEW_INGREDIENTS_KEY = 'cook2_new_ingredients';
 
 /**
@@ -239,6 +240,84 @@ function createTriedCombinationsStore() {
 }
 
 export const triedCombinationsStore = createTriedCombinationsStore();
+
+/**
+ * 성공한 조합과 결과 저장 (조합키 -> 결과 재료 ID)
+ */
+type SuccessCombinations = Record<string, number>;
+
+function getSuccessCombinations(): SuccessCombinations {
+	if (!browser) return {};
+	const stored = localStorage.getItem(SUCCESS_COMBINATIONS_KEY);
+	if (!stored) return {};
+	try {
+		return JSON.parse(stored);
+	} catch {
+		return {};
+	}
+}
+
+function saveSuccessCombinations(combinations: SuccessCombinations) {
+	if (!browser) return;
+	localStorage.setItem(SUCCESS_COMBINATIONS_KEY, JSON.stringify(combinations));
+}
+
+function createSuccessCombinationsStore() {
+	const { subscribe, set } = writable<SuccessCombinations>(getSuccessCombinations());
+
+	return {
+		subscribe,
+		/**
+		 * 성공한 조합 추가
+		 */
+		addSuccess: (ingredientIds: number[], resultId: number) => {
+			const combinations = getSuccessCombinations();
+			const key = createCombinationKey(ingredientIds);
+			combinations[key] = resultId;
+			saveSuccessCombinations(combinations);
+			set(combinations);
+		},
+		/**
+		 * 첫 번째 재료 기준으로 성공한 조합의 결과 맵 반환
+		 * { secondIngredientId: resultIngredientId }
+		 */
+		getSuccessResultsFor: (firstIngredientId: number): Record<number, number> => {
+			const combinations = getSuccessCombinations();
+			const results: Record<number, number> = {};
+			Object.entries(combinations).forEach(([key, resultId]) => {
+				const ids = key.split(',').map(Number);
+				if (ids.includes(firstIngredientId)) {
+					const otherId = ids.find((id) => id !== firstIngredientId);
+					if (otherId !== undefined) {
+						results[otherId] = resultId;
+					}
+					// 같은 재료 2개 조합인 경우
+					if (ids[0] === ids[1] && ids[0] === firstIngredientId) {
+						results[firstIngredientId] = resultId;
+					}
+				}
+			});
+			return results;
+		},
+		/**
+		 * Store 새로고침
+		 */
+		refresh: () => {
+			set(getSuccessCombinations());
+		},
+		/**
+		 * 초기화
+		 */
+		reset: () => {
+			if (browser) {
+				localStorage.removeItem(SUCCESS_COMBINATIONS_KEY);
+			}
+			set({});
+		}
+	};
+}
+
+export const successCombinationsStore = createSuccessCombinationsStore();
 
 /**
  * 새로 획득한 재료 ID 목록 (NEW 뱃지 표시용)

@@ -2,9 +2,10 @@
 	import {
 		unlockedIngredientsStore,
 		triedCombinationsStore,
+		successCombinationsStore,
 		newIngredientsStore
 	} from '../lib/store';
-	import { INGREDIENTS } from '../lib/data/ingredients';
+	import { INGREDIENTS, findIngredientById } from '../lib/data/ingredients';
 	import { GRADE_COLORS, GRADE_NAMES, GRADE_ORDER } from '../lib/types';
 	import type { IngredientGrade, Ingredient } from '../lib/types';
 
@@ -30,6 +31,11 @@
 	// 첫 번째 재료가 선택되었을 때, 이미 시도한 조합의 두 번째 재료 목록
 	let triedPairIds = $derived(
 		selectedIds.length === 1 ? triedCombinationsStore.getTriedPairsFor(selectedIds[0]) : []
+	);
+
+	// 첫 번째 재료가 선택되었을 때, 성공한 조합의 결과 맵 { secondIngredientId: resultIngredientId }
+	let successResultsMap = $derived(
+		selectedIds.length === 1 ? successCombinationsStore.getSuccessResultsFor(selectedIds[0]) : {}
 	);
 
 	// 필터링된 재료 목록 (isIngredient: true인 것만)
@@ -90,6 +96,8 @@
 		{#each filteredIngredients as ingredient (ingredient.id)}
 			{@const isTried = triedPairIds.includes(ingredient.id)}
 			{@const isNew = newIngredientIds.has(ingredient.id)}
+			{@const resultId = successResultsMap[ingredient.id]}
+			{@const resultIngredient = resultId ? findIngredientById(resultId) : null}
 			<button
 				type="button"
 				class="ingredient-card"
@@ -105,6 +113,11 @@
 				</div>
 				{#if isNew}
 					<div class="new-badge">NEW</div>
+				{/if}
+				{#if resultIngredient && selectedIds.length === 1}
+					<div class="result-badge">
+						<img src={resultIngredient.imageUrl} alt={resultIngredient.name} class="result-image" />
+					</div>
 				{/if}
 			</button>
 		{/each}
@@ -174,6 +187,7 @@
 		@apply p-2;
 		@apply shadow-sm;
 		@apply outline-none;
+		@apply relative;
 	}
 
 	.ingredient-card:active {
@@ -258,5 +272,22 @@
 		@apply flex items-center justify-center;
 		@apply text-gray-400;
 		@apply py-8;
+	}
+
+	/* 결과 요리 뱃지 (우하단) */
+	.result-badge {
+		@apply absolute -right-1 -bottom-1;
+		@apply h-7 w-7;
+		@apply rounded-full;
+		@apply bg-white;
+		@apply border-2 border-orange-400;
+		@apply shadow-md;
+		@apply flex items-center justify-center;
+		@apply overflow-hidden;
+	}
+
+	.result-image {
+		@apply h-5 w-5;
+		@apply object-contain;
 	}
 </style>

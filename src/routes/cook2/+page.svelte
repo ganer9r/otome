@@ -8,6 +8,7 @@
 		unlockedIngredientsStore,
 		failedCombinationsStore,
 		triedCombinationsStore,
+		successCombinationsStore,
 		newIngredientsStore
 	} from './lib/store';
 	import { findIngredientById } from './lib/data/ingredients';
@@ -37,6 +38,7 @@
 
 		// 2. 성공한 조합 저장
 		triedCombinationsStore.addTried(selectedIngredients);
+		successCombinationsStore.addSuccess(selectedIngredients, recipe.resultIngredientId);
 
 		// 3. 조리 시작 (cooking 화면 전환)
 		currentRecipe = recipe;
