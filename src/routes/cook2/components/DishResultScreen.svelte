@@ -98,7 +98,13 @@
 </script>
 
 <!-- 풀스크린 배경 (어두운 overlay) -->
-<div class="result-screen" onclick={handleClick} onkeydown={(e) => e.key === 'Enter' && handleClick()} role="button" tabindex="0">
+<div
+	class="result-screen"
+	onclick={handleClick}
+	onkeydown={(e) => e.key === 'Enter' && handleClick()}
+	role="button"
+	tabindex="0"
+>
 	<!-- 배경 그라데이션 (등급별) -->
 	<div class="background-overlay bg-gradient-to-br {theme().bg}"></div>
 
@@ -169,21 +175,38 @@
 			<!-- 요리 이름 -->
 			<h2 class="dish-name">{resultIngredient.name}</h2>
 
-			<!-- 새 재료 획득 -->
-			<div class="new-ingredient">
-				<p class="new-ingredient-label">🎉 새로운 재료 획득!</p>
-				<div class="ingredient-badge">
-					<img src={resultIngredient.imageUrl} alt={resultIngredient.name} class="ingredient-icon" />
-					<span class="ingredient-name">{resultIngredient.name}</span>
+			<!-- 새 재료 획득 (isIngredient가 true인 경우만) -->
+			{#if resultIngredient.isIngredient}
+				<div class="new-ingredient">
+					<div class="new-ingredient-banner">
+						<span class="banner-icon">🔓</span>
+						<span class="banner-text">새로운 재료 해금!</span>
+					</div>
+					<div class="ingredient-badge ingredient-unlocked">
+						<div class="unlock-glow"></div>
+						<img
+							src={resultIngredient.imageUrl}
+							alt={resultIngredient.name}
+							class="ingredient-icon"
+						/>
+						<span class="ingredient-name">{resultIngredient.name}</span>
+						<span class="ingredient-arrow">→</span>
+						<span class="ingredient-hint">조합에 사용 가능!</span>
+					</div>
 				</div>
-			</div>
+			{:else}
+				<div class="dish-complete">
+					<p class="dish-complete-label">🍽️ 요리 완성!</p>
+				</div>
+			{/if}
 
 			<!-- 파티클 효과 -->
 			<div class="particles">
 				{#each Array(30) as _, i}
 					<div
 						class="particle"
-						style="--delay: {i * 0.03}s; --angle: {i * 12}deg; --distance: {80 + Math.random() * 100}px"
+						style="--delay: {i * 0.03}s; --angle: {i * 12}deg; --distance: {80 +
+							Math.random() * 100}px"
 					>
 						{theme().particle}
 					</div>
@@ -238,7 +261,7 @@
 	}
 
 	.pot-shaking {
-		@apply w-48 h-48 object-contain;
+		@apply h-48 w-48 object-contain;
 		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
 		animation: potShake 0.3s ease-in-out infinite;
 	}
@@ -260,7 +283,7 @@
 	}
 
 	.heartbeat-text {
-		@apply text-white/90 font-bold;
+		@apply font-bold text-white/90;
 		font-size: var(--font-xl);
 		animation: textPulse 1s ease-in-out infinite;
 	}
@@ -300,7 +323,7 @@
 
 	/* ===== 2단계: 냄비 열림 + 빛 폭발 ===== */
 	.stage-opening {
-		@apply relative w-full h-full;
+		@apply relative h-full w-full;
 		@apply flex items-center justify-center;
 	}
 
@@ -330,7 +353,7 @@
 	}
 
 	.pot-image {
-		@apply w-48 h-48 object-contain;
+		@apply h-48 w-48 object-contain;
 		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
 	}
 
@@ -395,7 +418,7 @@
 	.stage-result {
 		@apply relative z-10;
 		@apply flex flex-col items-center justify-center;
-		@apply w-full h-full;
+		@apply h-full w-full;
 		@apply gap-4;
 		@apply px-6;
 		animation: resultFadeIn 0.5s ease-out;
@@ -482,7 +505,7 @@
 	}
 
 	.result-image {
-		@apply w-32 h-32 object-contain;
+		@apply h-32 w-32 object-contain;
 	}
 
 	@keyframes dishEnter {
@@ -498,8 +521,8 @@
 
 	/* 등급 뱃지 */
 	.grade-badge {
-		@apply px-4 py-2 rounded-full;
-		@apply text-white font-bold;
+		@apply rounded-full px-4 py-2;
+		@apply font-bold text-white;
 		@apply shadow-lg;
 		font-size: var(--font-sm);
 		animation: badgeFadeIn 0.5s ease-out 0.9s backwards;
@@ -536,17 +559,181 @@
 		}
 	}
 
-	/* 새 재료 획득 */
+	/* 새 재료 해금 (isIngredient: true) */
 	.new-ingredient {
-		@apply flex flex-col items-center gap-3;
-		@apply mt-4;
+		@apply flex flex-col items-center gap-4;
+		@apply mt-6;
 		animation: ingredientSlideUp 0.6s ease-out 1.2s backwards;
 	}
 
 	@keyframes ingredientSlideUp {
 		from {
 			opacity: 0;
-			transform: translateY(30px);
+			transform: translateY(30px) scale(0.9);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	/* 해금 배너 */
+	.new-ingredient-banner {
+		@apply flex items-center gap-2;
+		@apply px-6 py-2;
+		@apply bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-500;
+		@apply rounded-full;
+		@apply shadow-lg;
+		animation:
+			bannerPulse 1s ease-in-out 1.5s infinite,
+			bannerShine 2s linear 1.8s infinite;
+		background-size: 200% 100%;
+	}
+
+	.banner-icon {
+		font-size: clamp(24px, 6vw, 32px);
+		animation: unlockBounce 0.6s ease-out 1.4s backwards;
+	}
+
+	.banner-text {
+		@apply font-bold text-white;
+		font-size: var(--font-lg);
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+	}
+
+	@keyframes bannerPulse {
+		0%,
+		100% {
+			transform: scale(1);
+			box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+		}
+		50% {
+			transform: scale(1.05);
+			box-shadow: 0 0 40px rgba(16, 185, 129, 0.8);
+		}
+	}
+
+	@keyframes bannerShine {
+		0% {
+			background-position: 200% 0;
+		}
+		100% {
+			background-position: -200% 0;
+		}
+	}
+
+	@keyframes unlockBounce {
+		0% {
+			transform: scale(0) rotate(-180deg);
+		}
+		50% {
+			transform: scale(1.3) rotate(10deg);
+		}
+		100% {
+			transform: scale(1) rotate(0deg);
+		}
+	}
+
+	/* 재료 뱃지 (해금 버전) */
+	.ingredient-badge {
+		@apply relative flex items-center gap-2;
+		@apply px-5 py-3;
+		@apply bg-white/95 backdrop-blur-sm;
+		@apply rounded-2xl;
+		@apply border-3 border-emerald-400;
+		@apply shadow-2xl;
+		@apply overflow-hidden;
+	}
+
+	.ingredient-unlocked {
+		animation: badgeGlow 1.5s ease-in-out 1.6s infinite;
+	}
+
+	@keyframes badgeGlow {
+		0%,
+		100% {
+			box-shadow:
+				0 0 20px rgba(16, 185, 129, 0.4),
+				0 10px 30px rgba(0, 0, 0, 0.2);
+		}
+		50% {
+			box-shadow:
+				0 0 40px rgba(16, 185, 129, 0.7),
+				0 10px 30px rgba(0, 0, 0, 0.2);
+		}
+	}
+
+	.unlock-glow {
+		@apply absolute inset-0;
+		@apply bg-gradient-to-r from-transparent via-emerald-200/50 to-transparent;
+		animation: glowSweep 2s ease-in-out 1.8s infinite;
+	}
+
+	@keyframes glowSweep {
+		0% {
+			transform: translateX(-100%);
+		}
+		50%,
+		100% {
+			transform: translateX(100%);
+		}
+	}
+
+	.ingredient-icon {
+		@apply relative z-10;
+		@apply h-12 w-12 object-contain;
+		animation: iconPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) 1.5s backwards;
+	}
+
+	@keyframes iconPop {
+		0% {
+			transform: scale(0) rotate(-30deg);
+		}
+		100% {
+			transform: scale(1) rotate(0deg);
+		}
+	}
+
+	.ingredient-name {
+		@apply relative z-10;
+		@apply font-bold text-emerald-600;
+		font-size: var(--font-lg);
+	}
+
+	.ingredient-arrow {
+		@apply relative z-10;
+		@apply text-emerald-500;
+		font-size: var(--font-md);
+		animation: arrowBounce 1s ease-in-out 2s infinite;
+	}
+
+	@keyframes arrowBounce {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		50% {
+			transform: translateX(5px);
+		}
+	}
+
+	.ingredient-hint {
+		@apply relative z-10;
+		@apply font-medium text-emerald-600/80;
+		font-size: var(--font-sm);
+	}
+
+	/* 요리 완성 (isIngredient: false) */
+	.dish-complete {
+		@apply flex flex-col items-center;
+		@apply mt-4;
+		animation: dishCompleteIn 0.5s ease-out 1.2s backwards;
+	}
+
+	@keyframes dishCompleteIn {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
 		}
 		to {
 			opacity: 1;
@@ -554,27 +741,9 @@
 		}
 	}
 
-	.new-ingredient-label {
-		@apply text-white/90 font-bold;
+	.dish-complete-label {
+		@apply font-bold text-white/80;
 		font-size: var(--font-md);
-	}
-
-	.ingredient-badge {
-		@apply flex items-center gap-2;
-		@apply px-6 py-3;
-		@apply bg-white/95 backdrop-blur-sm;
-		@apply rounded-2xl;
-		@apply border-3 border-yellow-400;
-		@apply shadow-2xl;
-	}
-
-	.ingredient-icon {
-		@apply w-10 h-10 object-contain;
-	}
-
-	.ingredient-name {
-		@apply font-bold text-orange-600;
-		font-size: var(--font-lg);
 	}
 
 	/* 파티클 */
@@ -617,7 +786,9 @@
 		@apply shadow-2xl;
 		@apply border-4 border-gray-900;
 		font-size: var(--font-lg);
-		animation: buttonSlideUp 0.6s ease-out 1.4s backwards, buttonPulse 2s ease-in-out 2s infinite;
+		animation:
+			buttonSlideUp 0.6s ease-out 1.4s backwards,
+			buttonPulse 2s ease-in-out 2s infinite;
 		transition: all 0.2s;
 	}
 
