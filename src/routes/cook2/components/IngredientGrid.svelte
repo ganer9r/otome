@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {
 		unlockedIngredientsStore,
-		failedCombinationsStore,
+		triedCombinationsStore,
 		newIngredientsStore
 	} from '../lib/store';
 	import { INGREDIENTS } from '../lib/data/ingredients';
@@ -27,9 +27,9 @@
 	// 새로 획득한 재료 (NEW 뱃지)
 	let newIngredientIds = $derived($newIngredientsStore);
 
-	// 첫 번째 재료가 선택되었을 때, 실패한 조합의 두 번째 재료 목록
-	let failedPairIds = $derived(
-		selectedIds.length === 1 ? failedCombinationsStore.getFailedPairsFor(selectedIds[0]) : []
+	// 첫 번째 재료가 선택되었을 때, 이미 시도한 조합의 두 번째 재료 목록
+	let triedPairIds = $derived(
+		selectedIds.length === 1 ? triedCombinationsStore.getTriedPairsFor(selectedIds[0]) : []
 	);
 
 	// 필터링된 재료 목록 (isIngredient: true인 것만)
@@ -88,12 +88,12 @@
 	<!-- 재료 그리드 -->
 	<div class="ingredient-grid">
 		{#each filteredIngredients as ingredient (ingredient.id)}
-			{@const isFailed = failedPairIds.includes(ingredient.id)}
+			{@const isTried = triedPairIds.includes(ingredient.id)}
 			{@const isNew = newIngredientIds.has(ingredient.id)}
 			<button
 				type="button"
 				class="ingredient-card"
-				class:failed={isFailed}
+				class:tried={isTried && selectedIds.length === 1}
 				class:is-new={isNew}
 				onclick={(e) => addIngredient(ingredient, e)}
 				style="--grade-color: {GRADE_COLORS[ingredient.grade]}"
@@ -103,9 +103,6 @@
 				<div class="ingredient-grade" style="color: {GRADE_COLORS[ingredient.grade]}">
 					{ingredient.grade}
 				</div>
-				{#if isFailed}
-					<div class="failed-badge">✗</div>
-				{/if}
 				{#if isNew}
 					<div class="new-badge">NEW</div>
 				{/if}
@@ -195,27 +192,11 @@
 		}
 	}
 
-	.ingredient-card.failed {
+	/* 이미 시도한 조합 (딤 처리) */
+	.ingredient-card.tried {
 		@apply opacity-40;
-		@apply border-gray-300;
 		@apply bg-gray-100;
-		filter: grayscale(70%);
-		@apply relative;
-	}
-
-	.ingredient-card.failed:hover {
-		@apply opacity-50;
-		@apply scale-100;
-	}
-
-	.failed-badge {
-		@apply absolute top-1 right-1;
-		@apply h-5 w-5;
-		@apply bg-red-500 text-white;
-		@apply rounded-full;
-		@apply flex items-center justify-center;
-		@apply text-xs font-bold;
-		@apply shadow-sm;
+		filter: grayscale(50%);
 	}
 
 	/* NEW 뱃지 */

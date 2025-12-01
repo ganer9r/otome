@@ -7,6 +7,7 @@
 	import {
 		unlockedIngredientsStore,
 		failedCombinationsStore,
+		triedCombinationsStore,
 		newIngredientsStore
 	} from './lib/store';
 	import { findIngredientById } from './lib/data/ingredients';
@@ -29,11 +30,15 @@
 		if (!recipe) {
 			// 실패한 조합 저장
 			failedCombinationsStore.addFailed(selectedIngredients);
+			triedCombinationsStore.addTried(selectedIngredients);
 			alert('해당 조합으로 만들 수 있는 요리가 없습니다!');
 			return;
 		}
 
-		// 2. 조리 시작 (cooking 화면 전환)
+		// 2. 성공한 조합 저장
+		triedCombinationsStore.addTried(selectedIngredients);
+
+		// 3. 조리 시작 (cooking 화면 전환)
 		currentRecipe = recipe;
 		step = 'cooking';
 	}

@@ -9,6 +9,7 @@ import {
 } from './usecase/unlockIngredient';
 
 const FAILED_COMBINATIONS_KEY = 'cook2_failed_combinations';
+const TRIED_COMBINATIONS_KEY = 'cook2_tried_combinations';
 const NEW_INGREDIENTS_KEY = 'cook2_new_ingredients';
 
 /**
@@ -149,6 +150,95 @@ function createFailedCombinationsStore() {
 }
 
 export const failedCombinationsStore = createFailedCombinationsStore();
+
+/**
+ * 시도한 조합 목록 가져오기 (성공 포함)
+ */
+function getTriedCombinations(): Set<string> {
+	if (!browser) return new Set();
+	const stored = localStorage.getItem(TRIED_COMBINATIONS_KEY);
+	if (!stored) return new Set();
+	try {
+		return new Set(JSON.parse(stored));
+	} catch {
+		return new Set();
+	}
+}
+
+/**
+ * 시도한 조합 목록 저장
+ */
+function saveTriedCombinations(combinations: Set<string>) {
+	if (!browser) return;
+	localStorage.setItem(TRIED_COMBINATIONS_KEY, JSON.stringify([...combinations]));
+}
+
+/**
+ * 시도한 조합 관리 Store (성공/실패 모두 포함)
+ */
+function createTriedCombinationsStore() {
+	const { subscribe, set } = writable<Set<string>>(getTriedCombinations());
+
+	return {
+		subscribe,
+		/**
+		 * 시도한 조합 추가
+		 */
+		addTried: (ingredientIds: number[]) => {
+			const combinations = getTriedCombinations();
+			const key = createCombinationKey(ingredientIds);
+			combinations.add(key);
+			saveTriedCombinations(combinations);
+			set(combinations);
+		},
+		/**
+		 * 조합을 시도했는지 확인
+		 */
+		hasTried: (ingredientIds: number[]): boolean => {
+			const combinations = getTriedCombinations();
+			const key = createCombinationKey(ingredientIds);
+			return combinations.has(key);
+		},
+		/**
+		 * 첫 번째 재료 기준으로 시도한 두 번째 재료 ID 목록 반환
+		 */
+		getTriedPairsFor: (firstIngredientId: number): number[] => {
+			const combinations = getTriedCombinations();
+			const triedPairs: number[] = [];
+			combinations.forEach((key) => {
+				const ids = key.split(',').map(Number);
+				if (ids.includes(firstIngredientId)) {
+					const otherId = ids.find((id) => id !== firstIngredientId);
+					if (otherId !== undefined) {
+						triedPairs.push(otherId);
+					}
+					// 같은 재료 2개 조합인 경우
+					if (ids[0] === ids[1] && ids[0] === firstIngredientId) {
+						triedPairs.push(firstIngredientId);
+					}
+				}
+			});
+			return triedPairs;
+		},
+		/**
+		 * Store 새로고침
+		 */
+		refresh: () => {
+			set(getTriedCombinations());
+		},
+		/**
+		 * 초기화
+		 */
+		reset: () => {
+			if (browser) {
+				localStorage.removeItem(TRIED_COMBINATIONS_KEY);
+			}
+			set(new Set());
+		}
+	};
+}
+
+export const triedCombinationsStore = createTriedCombinationsStore();
 
 /**
  * 새로 획득한 재료 ID 목록 (NEW 뱃지 표시용)
