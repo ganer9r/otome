@@ -36,66 +36,69 @@
 </script>
 
 <div class="ingredient-select-screen">
-	<!-- 상단: 타이틀 -->
-	<div class="title-section">
-		<h1 class="title">재료를 선택하세요</h1>
-		<p class="subtitle">맛있는 요리를 위해 1-2가지 재료를 골라주세요</p>
+	<!-- 주방 영역 (100vw height) -->
+	<div class="kitchen-section">
+		<!-- 타이틀 -->
+		<div class="title-section">
+			<h1 class="title">재료를 선택하세요</h1>
+			<p class="subtitle">맛있는 요리를 위해 1-2가지 재료를 골라주세요</p>
+		</div>
+
+		<!-- 재료 슬롯 2개 -->
+		<div class="slots-section">
+			<button
+				type="button"
+				class="slot"
+				class:filled={ingredients[0]}
+				onclick={() => removeIngredient(0)}
+				disabled={!ingredients[0]}
+			>
+				{#if ingredients[0]}
+					<div class="slot-filled">
+						<img src={ingredients[0].imageUrl} alt={ingredients[0].name} class="slot-image" />
+						<span class="ingredient-text">{ingredients[0].name}</span>
+						<span class="remove-hint">탭하여 제거</span>
+					</div>
+				{:else}
+					<div class="slot-empty">
+						<span class="plus-icon">+</span>
+						<span class="slot-label">재료 1</span>
+					</div>
+				{/if}
+			</button>
+
+			<button
+				type="button"
+				class="slot"
+				class:filled={ingredients[1]}
+				onclick={() => removeIngredient(1)}
+				disabled={!ingredients[1]}
+			>
+				{#if ingredients[1]}
+					<div class="slot-filled">
+						<img src={ingredients[1].imageUrl} alt={ingredients[1].name} class="slot-image" />
+						<span class="ingredient-text">{ingredients[1].name}</span>
+						<span class="remove-hint">탭하여 제거</span>
+					</div>
+				{:else}
+					<div class="slot-empty">
+						<span class="plus-icon">+</span>
+						<span class="slot-label">재료 2</span>
+					</div>
+				{/if}
+			</button>
+		</div>
+
+		<!-- 요리하기 버튼 -->
+		<div class="button-section">
+			<button type="button" class="cook-button" disabled={!canCook} onclick={handleCook}>
+				<Flame size={20} class="flame-icon" />
+				<span class="button-text">요리하기</span>
+			</button>
+		</div>
 	</div>
 
-	<!-- 중앙: 재료 슬롯 2개 -->
-	<div class="slots-section">
-		<button
-			type="button"
-			class="slot"
-			class:filled={ingredients[0]}
-			onclick={() => removeIngredient(0)}
-			disabled={!ingredients[0]}
-		>
-			{#if ingredients[0]}
-				<div class="slot-filled">
-					<img src={ingredients[0].imageUrl} alt={ingredients[0].name} class="slot-image" />
-					<span class="ingredient-text">{ingredients[0].name}</span>
-					<span class="remove-hint">탭하여 제거</span>
-				</div>
-			{:else}
-				<div class="slot-empty">
-					<span class="plus-icon">+</span>
-					<span class="slot-label">재료 1</span>
-				</div>
-			{/if}
-		</button>
-
-		<button
-			type="button"
-			class="slot"
-			class:filled={ingredients[1]}
-			onclick={() => removeIngredient(1)}
-			disabled={!ingredients[1]}
-		>
-			{#if ingredients[1]}
-				<div class="slot-filled">
-					<img src={ingredients[1].imageUrl} alt={ingredients[1].name} class="slot-image" />
-					<span class="ingredient-text">{ingredients[1].name}</span>
-					<span class="remove-hint">탭하여 제거</span>
-				</div>
-			{:else}
-				<div class="slot-empty">
-					<span class="plus-icon">+</span>
-					<span class="slot-label">재료 2</span>
-				</div>
-			{/if}
-		</button>
-	</div>
-
-	<!-- 요리하기 버튼 -->
-	<div class="button-section">
-		<button type="button" class="cook-button" disabled={!canCook} onclick={handleCook}>
-			<Flame size={20} class="flame-icon" />
-			<span class="button-text">요리하기</span>
-		</button>
-	</div>
-
-	<!-- 하단: 재료 그리드 -->
+	<!-- 재료 그리드 (width 100%) -->
 	<div class="grid-section">
 		<IngredientGrid bind:selectedIds />
 	</div>
@@ -108,6 +111,14 @@
 		@apply flex flex-col;
 		@apply h-screen;
 		@apply overflow-hidden;
+	}
+
+	/* 주방 영역 (100vw height) */
+	.kitchen-section {
+		@apply flex flex-col;
+		@apply w-full;
+		height: 100vw;
+		flex-shrink: 0;
 		background-image: url('/imgs/cook_bg.webp');
 		background-size: cover;
 		background-position: center;
@@ -119,11 +130,10 @@
 		@apply flex flex-col items-center gap-2;
 		@apply pt-6 pb-4;
 		@apply px-4;
-		flex-shrink: 0;
 	}
 
 	.title {
-		@apply text-white font-bold;
+		@apply font-bold text-white;
 		@apply drop-shadow-lg;
 		font-size: var(--font-xl);
 		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
@@ -138,9 +148,10 @@
 
 	/* 슬롯 섹션 */
 	.slots-section {
-		@apply flex gap-3 justify-center;
-		@apply px-4 pb-4;
-		flex-shrink: 0;
+		@apply flex justify-center gap-3;
+		@apply flex-1;
+		@apply px-4;
+		@apply items-center;
 	}
 
 	.slot {
@@ -196,7 +207,7 @@
 	}
 
 	.slot-image {
-		@apply w-10 h-10;
+		@apply h-10 w-10;
 		@apply object-contain;
 		@apply rounded-lg;
 	}
@@ -215,8 +226,7 @@
 	/* 버튼 섹션 */
 	.button-section {
 		@apply flex justify-center;
-		@apply px-4 pb-4;
-		flex-shrink: 0;
+		@apply px-4 pb-6;
 	}
 
 	.cook-button {
@@ -257,10 +267,14 @@
 	@keyframes cookPulse {
 		0%,
 		100% {
-			box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+			box-shadow:
+				0 20px 25px -5px rgb(0 0 0 / 0.1),
+				0 8px 10px -6px rgb(0 0 0 / 0.1);
 		}
 		50% {
-			box-shadow: 0 20px 25px -5px rgb(249 115 22 / 0.5), 0 8px 10px -6px rgb(249 115 22 / 0.5);
+			box-shadow:
+				0 20px 25px -5px rgb(249 115 22 / 0.5),
+				0 8px 10px -6px rgb(249 115 22 / 0.5);
 			transform: translateY(-2px);
 		}
 	}
@@ -282,10 +296,11 @@
 		}
 	}
 
-	/* 그리드 섹션 */
+	/* 그리드 섹션 (width 100%, 나머지 높이) */
 	.grid-section {
 		@apply flex-1;
+		@apply w-full;
 		@apply overflow-hidden;
-		@apply px-4 pb-4;
+		@apply bg-amber-50;
 	}
 </style>

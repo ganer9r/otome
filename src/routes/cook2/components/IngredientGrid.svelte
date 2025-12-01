@@ -122,15 +122,12 @@
 		@apply flex flex-col;
 		@apply h-full;
 		@apply bg-base-100;
-		@apply rounded-2xl;
-		@apply border-base-300 border;
-		@apply shadow-lg;
 		overflow: hidden;
 	}
 
 	.grade-tabs {
-		@apply flex gap-2;
-		@apply p-3;
+		@apply flex gap-1;
+		@apply px-2 py-1.5;
 		@apply bg-base-200;
 		@apply border-base-300 border-b;
 		@apply overflow-x-auto;
@@ -138,8 +135,8 @@
 	}
 
 	.tab {
-		@apply px-4 py-2;
-		@apply rounded-lg;
+		@apply px-3 py-1;
+		@apply rounded-md;
 		@apply font-medium;
 		@apply transition-all;
 		@apply whitespace-nowrap;

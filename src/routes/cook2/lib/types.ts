@@ -61,12 +61,12 @@ export const GRADE_COLORS: Record<IngredientGrade, string> = {
  * 등급별 한글 이름
  */
 export const GRADE_NAMES: Record<IngredientGrade, string> = {
-	G: '기본',
-	F: '일반',
-	E: '고급',
-	D: '희귀',
-	C: '영웅',
-	B: '전설',
-	A: '신화',
-	R: '레어'
+	G: 'G급',
+	F: 'F급',
+	E: 'E급',
+	D: 'D급',
+	C: 'C급',
+	B: 'B급',
+	A: 'A급',
+	R: 'R급'
 };
