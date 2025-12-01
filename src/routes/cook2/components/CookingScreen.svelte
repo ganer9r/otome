@@ -253,16 +253,16 @@
 		@apply text-4xl;
 		animation: steamRise var(--duration) ease-out infinite;
 		animation-delay: var(--delay);
-		transform: translateX(var(--x));
+		transform: translateX(var(--x)) rotate(-90deg);
 	}
 
 	@keyframes steamRise {
 		0% {
-			transform: translateX(var(--x)) translateY(0) scale(0.5);
+			transform: translateX(var(--x)) translateY(0) scale(0.5) rotate(-90deg);
 			opacity: 1;
 		}
 		100% {
-			transform: translateX(var(--x)) translateY(-150px) scale(1.5);
+			transform: translateX(var(--x)) translateY(-150px) scale(1.5) rotate(-90deg);
 			opacity: 0;
 		}
 	}
