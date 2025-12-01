@@ -85,11 +85,6 @@
 		delay: i * 0.15,
 		scale: 1 + i * 0.5
 	}));
-
-	$effect(() => {
-		if (recipe) {
-		}
-	});
 </script>
 
 <div

@@ -11,7 +11,7 @@
 		selectedIngredients?: number[];
 	}
 
-	let { onComplete, cookingTime = 5, selectedIngredients = [] }: Props = $props();
+	let { onComplete, cookingTime = 8, selectedIngredients = [] }: Props = $props();
 
 	let remainingTime = $state(cookingTime);
 	let progress = $state(0);
@@ -74,13 +74,11 @@
 			{#if ingredient1}
 				<div class="ingredient-drop" style="--delay: 0s">
 					<img src={ingredient1.imageUrl} alt={ingredient1.name} class="ingredient-image" />
-					<div class="ingredient-name">{ingredient1.name}</div>
 				</div>
 			{/if}
 			{#if ingredient2}
 				<div class="ingredient-drop" style="--delay: 1s">
 					<img src={ingredient2.imageUrl} alt={ingredient2.name} class="ingredient-image" />
-					<div class="ingredient-name">{ingredient2.name}</div>
 				</div>
 			{/if}
 		</div>
@@ -140,9 +138,6 @@
 			<!-- 조리 중 텍스트 -->
 			<h1 class="cooking-text">조리 중...</h1>
 
-			<!-- 타이머 -->
-			<div class="timer-display">{remainingTime}초</div>
-
 			<!-- 프로그레스 바 -->
 			<div class="progress-container">
 				<div class="progress-bar" style="width: {progress}%"></div>
@@ -187,14 +182,6 @@
 	.ingredient-image {
 		@apply h-20 w-20 object-contain;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
-	}
-
-	.ingredient-name {
-		@apply font-bold text-gray-800;
-		@apply rounded-full px-3 py-1;
-		@apply bg-white/80 backdrop-blur-sm;
-		@apply border-2 border-orange-300;
-		font-size: var(--font-md);
 	}
 
 	@keyframes ingredientDrop {
@@ -347,14 +334,6 @@
 		50% {
 			opacity: 0.6;
 		}
-	}
-
-	/* 타이머 */
-	.timer-display {
-		@apply font-bold text-orange-600;
-		@apply tabular-nums;
-		@apply relative z-10;
-		font-size: clamp(48px, 12vw, 80px);
 	}
 
 	/* 프로그레스 바 */

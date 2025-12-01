@@ -2,6 +2,7 @@
 	import { Flame } from 'lucide-svelte';
 	import IngredientGrid from './IngredientGrid.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
+	import type { Ingredient } from '../lib/types';
 
 	interface Props {
 		/** 선택된 재료 ID 배열 (양방향 바인딩) */
@@ -11,6 +12,19 @@
 	}
 
 	let { selectedIds = $bindable(), onCook }: Props = $props();
+
+	// 슬롯 DOM 참조
+	let slot1: HTMLButtonElement | undefined = $state();
+	let slot2: HTMLButtonElement | undefined = $state();
+
+	// 날아가는 재료 상태
+	let flyingIngredient = $state<{
+		imageUrl: string;
+		startX: number;
+		startY: number;
+		endX: number;
+		endY: number;
+	} | null>(null);
 
 	// 재료 정보
 	let ingredients = $derived(
@@ -33,9 +47,46 @@
 			selectedIds = selectedIds.filter((_, i) => i !== slotIndex);
 		}
 	}
+
+	// 재료 선택 시 애니메이션
+	function handleIngredientSelect(ingredient: Ingredient, fromRect: DOMRect) {
+		// 목표 슬롯 결정 (현재 선택된 개수에 따라)
+		const targetSlot = selectedIds.length === 0 ? slot1 : slot2;
+		if (!targetSlot) return;
+
+		const toRect = targetSlot.getBoundingClientRect();
+
+		// 날아가는 요소 생성
+		flyingIngredient = {
+			imageUrl: ingredient.imageUrl || '',
+			startX: fromRect.left + fromRect.width / 2,
+			startY: fromRect.top + fromRect.height / 2,
+			endX: toRect.left + toRect.width / 2,
+			endY: toRect.top + toRect.height / 2
+		};
+
+		// 애니메이션 종료 후 제거
+		setTimeout(() => {
+			flyingIngredient = null;
+		}, 300);
+	}
 </script>
 
 <div class="ingredient-select-screen">
+	<!-- 날아가는 재료 애니메이션 -->
+	{#if flyingIngredient}
+		<div
+			class="flying-ingredient"
+			style="
+				--start-x: {flyingIngredient.startX}px;
+				--start-y: {flyingIngredient.startY}px;
+				--end-x: {flyingIngredient.endX}px;
+				--end-y: {flyingIngredient.endY}px;
+			"
+		>
+			<img src={flyingIngredient.imageUrl} alt="flying" class="flying-image" />
+		</div>
+	{/if}
 	<!-- 주방 영역 (100vw height) -->
 	<div class="kitchen-section">
 		<!-- 타이틀 -->
@@ -47,6 +98,7 @@
 		<!-- 재료 슬롯 2개 -->
 		<div class="slots-section">
 			<button
+				bind:this={slot1}
 				type="button"
 				class="slot"
 				class:filled={ingredients[0]}
@@ -68,6 +120,7 @@
 			</button>
 
 			<button
+				bind:this={slot2}
 				type="button"
 				class="slot"
 				class:filled={ingredients[1]}
@@ -100,7 +153,7 @@
 
 	<!-- 재료 그리드 (width 100%) -->
 	<div class="grid-section">
-		<IngredientGrid bind:selectedIds />
+		<IngredientGrid bind:selectedIds onSelect={handleIngredientSelect} />
 	</div>
 </div>
 
@@ -302,5 +355,37 @@
 		@apply w-full;
 		@apply overflow-hidden;
 		@apply bg-amber-50;
+	}
+
+	/* 날아가는 재료 애니메이션 */
+	.flying-ingredient {
+		@apply fixed z-50;
+		@apply pointer-events-none;
+		animation: flyToSlot 0.3s ease-out forwards;
+	}
+
+	.flying-image {
+		@apply h-12 w-12;
+		@apply object-contain;
+		@apply rounded-lg;
+		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+	}
+
+	@keyframes flyToSlot {
+		0% {
+			left: var(--start-x);
+			top: var(--start-y);
+			transform: translate(-50%, -50%) scale(1);
+			opacity: 1;
+		}
+		50% {
+			transform: translate(-50%, -50%) scale(1.3);
+		}
+		100% {
+			left: var(--end-x);
+			top: var(--end-y);
+			transform: translate(-50%, -50%) scale(0.8);
+			opacity: 0.8;
+		}
 	}
 </style>

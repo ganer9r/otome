@@ -6,14 +6,16 @@
 	} from '../lib/store';
 	import { INGREDIENTS } from '../lib/data/ingredients';
 	import { GRADE_COLORS, GRADE_NAMES, GRADE_ORDER } from '../lib/types';
-	import type { IngredientGrade } from '../lib/types';
+	import type { IngredientGrade, Ingredient } from '../lib/types';
 
 	interface Props {
 		/** 선택된 재료 ID 배열 (양방향 바인딩) */
 		selectedIds: number[];
+		/** 재료 선택 시 콜백 (좌표 정보 포함) */
+		onSelect?: (ingredient: Ingredient, rect: DOMRect) => void;
 	}
 
-	let { selectedIds = $bindable() }: Props = $props();
+	let { selectedIds = $bindable(), onSelect }: Props = $props();
 
 	// 등급 필터 탭 (G, F, E, D, C, B, A, R)
 	const grades: IngredientGrade[] = GRADE_ORDER;
@@ -44,11 +46,17 @@
 	);
 
 	// 재료 추가 (같은 재료도 추가 가능, 최대 2개)
-	function addIngredient(id: number) {
+	function addIngredient(ingredient: Ingredient, event: MouseEvent) {
 		if (selectedIds.length < 2) {
-			selectedIds = [...selectedIds, id];
+			const target = event.currentTarget as HTMLElement;
+			const rect = target.getBoundingClientRect();
+
+			// 콜백으로 좌표 전달 (애니메이션용)
+			onSelect?.(ingredient, rect);
+
+			selectedIds = [...selectedIds, ingredient.id];
 			// NEW 뱃지 제거
-			newIngredientsStore.markSeen(id);
+			newIngredientsStore.markSeen(ingredient.id);
 		}
 	}
 </script>
@@ -80,17 +88,14 @@
 	<!-- 재료 그리드 -->
 	<div class="ingredient-grid">
 		{#each filteredIngredients as ingredient (ingredient.id)}
-			{@const selectionCount = selectedIds.filter((id) => id === ingredient.id).length}
 			{@const isFailed = failedPairIds.includes(ingredient.id)}
 			{@const isNew = newIngredientIds.has(ingredient.id)}
 			<button
 				type="button"
 				class="ingredient-card"
-				class:selected={selectionCount > 0}
-				class:selected-twice={selectionCount >= 2}
 				class:failed={isFailed}
 				class:is-new={isNew}
-				onclick={() => addIngredient(ingredient.id)}
+				onclick={(e) => addIngredient(ingredient, e)}
 				style="--grade-color: {GRADE_COLORS[ingredient.grade]}"
 			>
 				<img src={ingredient.imageUrl} alt={ingredient.name} class="ingredient-image" />
@@ -170,27 +175,24 @@
 		@apply border-3 border-gray-200;
 		@apply flex flex-col items-center justify-center gap-1;
 		@apply p-2;
-		@apply transition-all;
 		@apply shadow-sm;
+		@apply outline-none;
 	}
 
-	.ingredient-card:hover {
-		@apply border-primary/50;
-		@apply shadow-md;
-		@apply scale-105;
+	.ingredient-card:active {
+		animation: cardPop 0.2s ease-out;
 	}
 
-	.ingredient-card.selected {
-		@apply bg-primary text-primary-content;
-		@apply border-primary;
-		@apply shadow-lg;
-		@apply scale-95;
-	}
-
-	.ingredient-card.selected-twice {
-		@apply bg-orange-500 text-white;
-		@apply border-orange-600;
-		box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
+	@keyframes cardPop {
+		0% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(0.9);
+		}
+		100% {
+			transform: scale(1);
+		}
 	}
 
 	.ingredient-card.failed {
@@ -268,10 +270,6 @@
 	.ingredient-grade {
 		@apply font-bold;
 		font-size: clamp(8px, 2vw, 10px);
-	}
-
-	.ingredient-card.selected .ingredient-grade {
-		@apply text-primary-content/70;
 	}
 
 	.empty-message {
