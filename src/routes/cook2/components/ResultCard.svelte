@@ -18,41 +18,11 @@
 		if (gradeIndex >= 4) return 2; // C, B
 		return 1; // G, F, E, D
 	});
-
-	// 등급별 카드 테마
-	const cardTheme = $derived(() => {
-		const gradeIndex = ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'R'].indexOf(ingredient.grade);
-		if (gradeIndex >= 6) {
-			// A, R 등급 - 골드/레전더리
-			return {
-				border: 'border-yellow-400',
-				bg: 'bg-gradient-to-br from-yellow-900/90 via-amber-800/90 to-yellow-900/90',
-				glow: 'shadow-[0_0_40px_rgba(251,191,36,0.6)]',
-				shimmer: 'from-yellow-200/30 via-white/50 to-yellow-200/30'
-			};
-		}
-		if (gradeIndex >= 4) {
-			// C, B 등급 - 퍼플/에픽
-			return {
-				border: 'border-purple-400',
-				bg: 'bg-gradient-to-br from-purple-900/90 via-violet-800/90 to-purple-900/90',
-				glow: 'shadow-[0_0_30px_rgba(168,85,247,0.5)]',
-				shimmer: 'from-purple-200/30 via-white/40 to-purple-200/30'
-			};
-		}
-		// G, F, E, D 등급 - 블루/레어
-		return {
-			border: 'border-blue-400',
-			bg: 'bg-gradient-to-br from-slate-800/90 via-gray-700/90 to-slate-800/90',
-			glow: 'shadow-[0_0_20px_rgba(59,130,246,0.4)]',
-			shimmer: 'from-blue-200/20 via-white/30 to-blue-200/20'
-		};
-	});
 </script>
 
 <div class="card-container" class:flipped>
 	<div class="card-inner">
-		<!-- 카드 뒷면 -->
+		<!-- 카드 뒷면 (남색) -->
 		<div class="card-back">
 			<div class="card-back-pattern">
 				<div class="pattern-circle"></div>
@@ -62,21 +32,17 @@
 			</div>
 		</div>
 
-		<!-- 카드 앞면 -->
-		<div class="card-front {cardTheme().bg} {cardTheme().border} {cardTheme().glow}">
-			<!-- 홀로그램 효과 -->
-			<div class="hologram-effect bg-gradient-to-br {cardTheme().shimmer}"></div>
-
+		<!-- 카드 앞면 (흰색) -->
+		<div class="card-front">
 			<!-- 별 등급 -->
 			<div class="stars-row">
-				{#each Array(starsCount()) as _, i}
-					<span class="star" style="animation-delay: {i * 0.1}s">⭐</span>
+				{#each Array(starsCount()) as _}
+					<span class="star">⭐</span>
 				{/each}
 			</div>
 
 			<!-- 메인 이미지 -->
 			<div class="image-container">
-				<div class="image-glow"></div>
 				<img src={ingredient.imageUrl} alt={ingredient.name} class="ingredient-image" />
 			</div>
 
@@ -149,12 +115,12 @@
 		overflow: hidden;
 	}
 
-	/* 카드 뒷면 */
+	/* 카드 뒷면 (오렌지/앰버) */
 	.card-back {
-		@apply bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-900;
 		@apply flex items-center justify-center;
-		border: var(--card-border) solid rgb(129 140 248);
-		box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+		background: linear-gradient(135deg, #c2410c 0%, #9a3412 50%, #c2410c 100%);
+		border: var(--card-border) solid #ea580c;
+		box-shadow: 0 8px 24px rgba(194, 65, 12, 0.3);
 	}
 
 	.card-back-pattern {
@@ -164,67 +130,36 @@
 
 	.pattern-circle {
 		@apply absolute rounded-full;
-		border: 2px solid rgba(129, 140, 248, 0.3);
+		border: 2px solid rgba(251, 191, 36, 0.4);
 		width: 80%;
 		height: 80%;
-		animation: patternRotate 10s linear infinite;
 	}
 
 	.pattern-circle-2 {
 		width: 60%;
 		height: 60%;
-		animation-direction: reverse;
-		animation-duration: 8s;
 	}
 
 	.pattern-circle-3 {
 		width: 40%;
 		height: 40%;
-		animation-duration: 6s;
-	}
-
-	@keyframes patternRotate {
-		from {
-			transform: rotate(0deg);
-		}
-		to {
-			transform: rotate(360deg);
-		}
 	}
 
 	.card-back-text {
 		@apply absolute;
-		@apply text-indigo-300/50;
+		color: rgba(251, 191, 36, 0.5);
 		font-size: calc(var(--card-height) * 0.25);
 		font-weight: bold;
 	}
 
-	/* 카드 앞면 */
+	/* 카드 앞면 (흰색) */
 	.card-front {
 		transform: rotateY(180deg);
 		@apply flex flex-col items-center justify-between;
-		border-width: var(--card-border);
+		@apply bg-white;
+		border: var(--card-border) solid #e5e7eb;
 		padding: var(--card-padding);
-	}
-
-	/* 홀로그램 효과 */
-	.hologram-effect {
-		@apply absolute inset-0;
-		@apply pointer-events-none;
-		animation: hologramShift 3s ease-in-out infinite;
-		mix-blend-mode: overlay;
-	}
-
-	@keyframes hologramShift {
-		0%,
-		100% {
-			opacity: 0.3;
-			transform: translateX(-100%) rotate(25deg);
-		}
-		50% {
-			opacity: 0.6;
-			transform: translateX(100%) rotate(25deg);
-		}
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 	}
 
 	/* 별 */
@@ -235,20 +170,7 @@
 
 	.star {
 		font-size: calc(var(--card-height) * 0.065);
-		animation: starShine 1.5s ease-in-out infinite;
-		filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8));
-	}
-
-	@keyframes starShine {
-		0%,
-		100% {
-			transform: scale(1);
-			filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8));
-		}
-		50% {
-			transform: scale(1.15);
-			filter: drop-shadow(0 0 16px rgba(251, 191, 36, 1));
-		}
+		filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.5));
 	}
 
 	/* 이미지 컨테이너 */
@@ -257,33 +179,11 @@
 		@apply flex items-center justify-center;
 	}
 
-	.image-glow {
-		@apply absolute;
-		@apply rounded-full;
-		width: 140%;
-		height: 140%;
-		background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
-		animation: imageGlow 2s ease-in-out infinite;
-	}
-
-	@keyframes imageGlow {
-		0%,
-		100% {
-			opacity: 0.5;
-			transform: scale(1);
-		}
-		50% {
-			opacity: 0.8;
-			transform: scale(1.1);
-		}
-	}
-
 	.ingredient-image {
-		@apply relative z-10;
 		width: calc(var(--card-height) * 0.32);
 		height: calc(var(--card-height) * 0.32);
 		@apply object-contain;
-		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
 	}
 
 	/* 구분선 */
@@ -296,21 +196,20 @@
 
 	.divider-line {
 		@apply flex-1;
-		height: 2px;
-		@apply bg-gradient-to-r from-transparent via-white/40 to-transparent;
+		height: 1px;
+		@apply bg-gradient-to-r from-transparent via-gray-300 to-transparent;
 	}
 
 	.divider-diamond {
-		@apply text-white/60;
+		@apply text-gray-400;
 		font-size: calc(var(--card-height) * 0.025);
 	}
 
 	/* 이름 */
 	.ingredient-name {
-		@apply font-bold text-white;
+		@apply font-bold text-gray-800;
 		@apply text-center;
 		font-size: calc(var(--card-height) * 0.055);
-		text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 	}
 
 	/* 등급 뱃지 */
@@ -319,7 +218,7 @@
 		@apply font-bold text-white;
 		padding: calc(var(--card-height) * 0.015) calc(var(--card-height) * 0.04);
 		font-size: calc(var(--card-height) * 0.035);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 	}
 
 	/* 해금 뱃지 */
@@ -327,20 +226,9 @@
 		@apply flex items-center;
 		@apply bg-gradient-to-r from-emerald-500 to-green-400;
 		@apply rounded-xl;
-		@apply shadow-lg;
 		gap: calc(var(--card-height) * 0.015);
 		padding: calc(var(--card-height) * 0.02) calc(var(--card-height) * 0.04);
-		animation: unlockPulse 1.5s ease-in-out infinite;
-	}
-
-	@keyframes unlockPulse {
-		0%,
-		100% {
-			box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-		}
-		50% {
-			box-shadow: 0 0 25px rgba(16, 185, 129, 0.8);
-		}
+		box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 	}
 
 	.unlock-icon {
@@ -357,9 +245,9 @@
 		@apply flex items-center;
 		@apply bg-gradient-to-r from-orange-500 to-amber-400;
 		@apply rounded-xl;
-		@apply shadow-lg;
 		gap: calc(var(--card-height) * 0.015);
 		padding: calc(var(--card-height) * 0.02) calc(var(--card-height) * 0.04);
+		box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
 	}
 
 	.dish-icon {

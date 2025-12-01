@@ -133,9 +133,6 @@
 	role="button"
 	tabindex="0"
 >
-	<!-- 배경 -->
-	<div class="background-base"></div>
-
 	{#if stage === 'heartbeat'}
 		<!-- 1단계: 두근두근 -->
 		<div class="stage-heartbeat">
@@ -190,22 +187,6 @@
 	{:else}
 		<!-- 3-4단계: 카드 등장 및 결과 -->
 		<div class="stage-card">
-			<!-- 배경 글로우 -->
-			<div class="card-background-glow" style="--color: {explosionTheme().color}"></div>
-
-			<!-- 떠다니는 파티클 -->
-			<div class="floating-particles">
-				{#each Array(20) as _, i}
-					<div
-						class="floating-particle"
-						style="--x: {Math.random() * 100}%; --y: {Math.random() *
-							100}%; --delay: {Math.random() * 3}s; --duration: {2 + Math.random() * 2}s"
-					>
-						{explosionTheme().particles[i % 3]}
-					</div>
-				{/each}
-			</div>
-
 			<!-- 카드 + 결과 UI 컨테이너 -->
 			<div class="card-result-container">
 				<!-- 카드 -->
@@ -268,11 +249,7 @@
 		@apply flex items-center justify-center;
 		@apply overflow-hidden;
 		@apply cursor-pointer;
-	}
-
-	.background-base {
-		@apply absolute inset-0;
-		@apply bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900;
+		@apply bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-100;
 	}
 
 	/* ===== 1단계: 두근두근 ===== */
@@ -326,7 +303,7 @@
 	}
 
 	.heartbeat-text {
-		@apply font-bold text-white/90;
+		@apply font-bold text-orange-800;
 		font-size: var(--font-xl);
 		animation: textPulse 0.5s ease-in-out infinite;
 	}
@@ -497,59 +474,6 @@
 		@apply h-full w-full;
 	}
 
-	.card-background-glow {
-		@apply absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 50vh;
-		height: 50vh;
-		background: radial-gradient(circle, var(--color) 0%, transparent 70%);
-		opacity: 0.3;
-		filter: blur(60px);
-		animation: bgGlowPulse 2s ease-in-out infinite;
-	}
-
-	@keyframes bgGlowPulse {
-		0%,
-		100% {
-			opacity: 0.2;
-			transform: translate(-50%, -50%) scale(1);
-		}
-		50% {
-			opacity: 0.4;
-			transform: translate(-50%, -50%) scale(1.2);
-		}
-	}
-
-	/* 떠다니는 파티클 */
-	.floating-particles {
-		@apply absolute inset-0;
-		@apply pointer-events-none;
-		@apply overflow-hidden;
-	}
-
-	.floating-particle {
-		@apply absolute;
-		left: var(--x);
-		top: var(--y);
-		font-size: clamp(16px, 4vw, 24px);
-		animation: particleFloat var(--duration) ease-in-out var(--delay) infinite;
-		opacity: 0.6;
-	}
-
-	@keyframes particleFloat {
-		0%,
-		100% {
-			transform: translateY(0) rotate(0deg);
-			opacity: 0.4;
-		}
-		50% {
-			transform: translateY(-30px) rotate(180deg);
-			opacity: 0.8;
-		}
-	}
-
 	/* 카드 + 결과 컨테이너 */
 	.card-result-container {
 		@apply relative z-20;
@@ -596,8 +520,8 @@
 	/* 진행도 */
 	.progress-section {
 		@apply flex w-full flex-col items-center;
-		@apply rounded-xl bg-white/10;
-		@apply backdrop-blur-sm;
+		@apply rounded-xl bg-white/70;
+		@apply shadow-sm;
 		padding: 1.5vh 2vh;
 		gap: 0.8vh;
 	}
@@ -612,12 +536,12 @@
 	}
 
 	.progress-value {
-		@apply font-medium text-white/90;
+		@apply font-medium text-gray-700;
 		font-size: clamp(11px, 1.6vh, 14px);
 	}
 
 	.progress-bar {
-		@apply w-full overflow-hidden rounded-full bg-white/20;
+		@apply w-full overflow-hidden rounded-full bg-gray-200;
 		height: clamp(4px, 0.8vh, 8px);
 	}
 
@@ -627,7 +551,7 @@
 	}
 
 	.progress-total {
-		@apply text-white/60;
+		@apply text-gray-500;
 		font-size: clamp(10px, 1.4vh, 12px);
 	}
 
@@ -640,39 +564,28 @@
 
 	.use-now-button {
 		@apply w-full;
-		@apply bg-gradient-to-r from-emerald-500 to-green-500;
+		@apply bg-gradient-to-r from-orange-500 to-amber-500;
 		@apply text-white;
 		@apply rounded-xl;
 		@apply font-bold;
-		@apply shadow-lg;
+		@apply shadow-md;
 		padding: 1.2vh 2vh;
 		font-size: clamp(12px, 1.8vh, 16px);
 		transition: all 0.2s;
-		animation: buttonPulse 1.5s ease-in-out infinite;
 	}
 
 	.use-now-button:hover {
 		@apply scale-105;
-		box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
-	}
-
-	@keyframes buttonPulse {
-		0%,
-		100% {
-			box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-		}
-		50% {
-			box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
-		}
+		box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
 	}
 
 	.confirm-button {
 		@apply w-full;
-		@apply bg-white/20 text-white;
+		@apply bg-white text-gray-700;
 		@apply rounded-xl;
 		@apply font-bold;
-		@apply backdrop-blur-sm;
-		@apply border border-white/30;
+		@apply shadow-sm;
+		@apply border border-gray-200;
 		padding: 1.2vh 2vh;
 		font-size: clamp(12px, 1.8vh, 16px);
 		transition: all 0.2s;
@@ -680,13 +593,13 @@
 
 	.confirm-button:hover {
 		@apply scale-105;
-		@apply bg-white/30;
+		@apply bg-gray-50;
 	}
 
 	/* 스킵 힌트 */
 	.skip-hint {
 		@apply absolute bottom-8 left-1/2 -translate-x-1/2;
-		@apply text-white/50;
+		@apply text-orange-700/60;
 		font-size: var(--font-sm);
 		animation: hintFade 1.5s ease-in-out infinite;
 	}
@@ -694,10 +607,10 @@
 	@keyframes hintFade {
 		0%,
 		100% {
-			opacity: 0.3;
+			opacity: 0.4;
 		}
 		50% {
-			opacity: 0.7;
+			opacity: 0.8;
 		}
 	}
 </style>
