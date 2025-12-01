@@ -19,6 +19,7 @@
 
 	let { selectedIds = $bindable(), onSelect }: Props = $props();
 
+	// 재료/요리 탭
 	// 등급 필터 탭 (G, F, E, D, C, B, A, R)
 	const grades: IngredientGrade[] = GRADE_ORDER;
 	let selectedGrade = $state<IngredientGrade | 'all'>('all');
@@ -52,18 +53,31 @@
 		selectedIds.length === 1 ? getPossiblePairsFor(selectedIds[0]) : []
 	);
 
-	// 필터링된 재료 목록 (isIngredient: true인 것만)
+	// 필터링된 재료 목록
 	let filteredIngredients = $derived(
 		INGREDIENTS.filter((ing) => {
-			// 재료만 표시 (요리는 제외)
 			if (!ing.isIngredient) return false;
-			// 언락 여부 체크
-			if (!unlockedIngredients.includes(ing.id)) return false;
-			// 등급 필터
 			if (selectedGrade !== 'all' && ing.grade !== selectedGrade) return false;
 			return true;
 		})
 	);
+
+	// 필터링된 요리 목록
+	let filteredDishes = $derived(
+		INGREDIENTS.filter((ing) => {
+			if (ing.isIngredient) return false;
+			if (selectedGrade !== 'all' && ing.grade !== selectedGrade) return false;
+			return true;
+		})
+	);
+
+	// 해당 등급에 하나라도 해금된 재료가 있는지
+	let hasUnlockedIngredient = $derived(
+		filteredIngredients.some((i) => unlockedIngredients.includes(i.id))
+	);
+
+	// 해당 등급에 하나라도 해금된 요리가 있는지
+	let hasUnlockedDish = $derived(filteredDishes.some((i) => unlockedIngredients.includes(i.id)));
 
 	// 재료 추가 (같은 재료도 추가 가능, 최대 2개)
 	function addIngredient(ingredient: Ingredient, event: MouseEvent) {
@@ -105,45 +119,160 @@
 		{/each}
 	</div>
 
-	<!-- 재료 그리드 -->
-	<div class="ingredient-grid">
-		{#each filteredIngredients as ingredient (ingredient.id)}
-			{@const isTried = triedPairIds.includes(ingredient.id)}
-			{@const isNew = newIngredientIds.has(ingredient.id)}
-			{@const resultId = successResultsMap[ingredient.id]}
-			{@const resultIngredient = resultId ? findIngredientById(resultId) : null}
-			{@const isPossible = possiblePairIds.includes(ingredient.id)}
-			{@const isImpossible = isHintEnabled && selectedIds.length === 1 && !isPossible && !isTried}
-			<button
-				type="button"
-				class="ingredient-card"
-				class:tried={isTried && selectedIds.length === 1}
-				class:possible={isHintEnabled && isPossible && !isTried && selectedIds.length === 1}
-				class:impossible={isImpossible}
-				class:is-new={isNew}
-				onclick={(e) => addIngredient(ingredient, e)}
-				style="--grade-color: {GRADE_COLORS[ingredient.grade]}"
-			>
-				<img src={ingredient.imageUrl} alt={ingredient.name} class="ingredient-image" />
-				<div class="ingredient-name">{ingredient.name}</div>
-				<div class="ingredient-grade" style="color: {GRADE_COLORS[ingredient.grade]}">
-					{ingredient.grade}
-				</div>
-				{#if isNew}
-					<div class="new-badge">NEW</div>
-				{/if}
-				{#if resultIngredient && selectedIds.length === 1}
-					<div class="result-badge">
-						<img src={resultIngredient.imageUrl} alt={resultIngredient.name} class="result-image" />
-					</div>
-				{/if}
-			</button>
-		{/each}
+	<div class="scroll-container">
+		{#if selectedGrade === 'all'}
+			<!-- 전체: 해금된 재료만 -->
+			<div class="ingredient-grid" style="padding: 12px;">
+				{#each filteredIngredients.filter( (i) => unlockedIngredients.includes(i.id) ) as ingredient (ingredient.id)}
+					{@const isTried = triedPairIds.includes(ingredient.id)}
+					{@const isNew = newIngredientIds.has(ingredient.id)}
+					{@const resultId = successResultsMap[ingredient.id]}
+					{@const resultIngredient = resultId ? findIngredientById(resultId) : null}
+					{@const isPossible = possiblePairIds.includes(ingredient.id)}
+					{@const isImpossible =
+						isHintEnabled && selectedIds.length === 1 && !isPossible && !isTried}
 
-		{#if filteredIngredients.length === 0}
-			<div class="empty-message">
-				<p>해당 등급의 재료가 없습니다</p>
+					<button
+						type="button"
+						class="ingredient-card"
+						class:tried={isTried && selectedIds.length === 1}
+						class:possible={isHintEnabled && isPossible && !isTried && selectedIds.length === 1}
+						class:impossible={isImpossible}
+						class:is-new={isNew}
+						onclick={(e) => addIngredient(ingredient, e)}
+						style="--grade-color: {GRADE_COLORS[ingredient.grade]}"
+					>
+						<img src={ingredient.imageUrl} alt={ingredient.name} class="ingredient-image" />
+						<div class="ingredient-name">{ingredient.name}</div>
+						<div class="ingredient-grade" style="color: {GRADE_COLORS[ingredient.grade]}">
+							{ingredient.grade}
+						</div>
+						{#if isNew}
+							<div class="new-badge">NEW</div>
+						{/if}
+						{#if resultIngredient && selectedIds.length === 1}
+							<div class="result-badge">
+								<img
+									src={resultIngredient.imageUrl}
+									alt={resultIngredient.name}
+									class="result-image"
+								/>
+							</div>
+						{/if}
+					</button>
+				{/each}
 			</div>
+		{:else}
+			<!-- 등급별: 재료 섹션 + 요리 섹션 -->
+			<!-- 재료 섹션 (재료가 있고, 하나라도 해금되었을 때만) -->
+			{#if filteredIngredients.length > 0 && hasUnlockedIngredient}
+				<div class="section">
+					<div class="section-header">
+						<span class="section-title">🥬 재료</span>
+						<span class="section-count"
+							>{filteredIngredients.filter((i) => unlockedIngredients.includes(i.id))
+								.length}/{filteredIngredients.length}</span
+						>
+					</div>
+					<div class="ingredient-grid">
+						{#each filteredIngredients as ingredient (ingredient.id)}
+							{@const isUnlocked = unlockedIngredients.includes(ingredient.id)}
+							{@const isTried = triedPairIds.includes(ingredient.id)}
+							{@const isNew = newIngredientIds.has(ingredient.id)}
+							{@const resultId = successResultsMap[ingredient.id]}
+							{@const resultIngredient = resultId ? findIngredientById(resultId) : null}
+							{@const isPossible = possiblePairIds.includes(ingredient.id)}
+							{@const isImpossible =
+								isHintEnabled && selectedIds.length === 1 && !isPossible && !isTried}
+
+							{#if isUnlocked}
+								<button
+									type="button"
+									class="ingredient-card"
+									class:tried={isTried && selectedIds.length === 1}
+									class:possible={isHintEnabled &&
+										isPossible &&
+										!isTried &&
+										selectedIds.length === 1}
+									class:impossible={isImpossible}
+									class:is-new={isNew}
+									onclick={(e) => addIngredient(ingredient, e)}
+									style="--grade-color: {GRADE_COLORS[ingredient.grade]}"
+								>
+									<img src={ingredient.imageUrl} alt={ingredient.name} class="ingredient-image" />
+									<div class="ingredient-name">{ingredient.name}</div>
+									<div class="ingredient-grade" style="color: {GRADE_COLORS[ingredient.grade]}">
+										{ingredient.grade}
+									</div>
+									{#if isNew}
+										<div class="new-badge">NEW</div>
+									{/if}
+									{#if resultIngredient && selectedIds.length === 1}
+										<div class="result-badge">
+											<img
+												src={resultIngredient.imageUrl}
+												alt={resultIngredient.name}
+												class="result-image"
+											/>
+										</div>
+									{/if}
+								</button>
+							{:else}
+								<div class="ingredient-card locked">
+									<div class="locked-image">
+										<img src={ingredient.imageUrl} alt="?" class="silhouette-image" />
+									</div>
+									<div class="locked-text">?</div>
+									<div class="ingredient-grade" style="color: {GRADE_COLORS[ingredient.grade]}">
+										{ingredient.grade}
+									</div>
+								</div>
+							{/if}
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			<!-- 요리 섹션 (하나라도 해금되었을 때만) -->
+			{#if hasUnlockedDish}
+				<div class="section">
+					<div class="section-header">
+						<span class="section-title">🍳 요리</span>
+						<span class="section-count"
+							>{filteredDishes.filter((i) => unlockedIngredients.includes(i.id))
+								.length}/{filteredDishes.length}</span
+						>
+					</div>
+					<div class="ingredient-grid">
+						{#each filteredDishes as dish (dish.id)}
+							{@const isUnlocked = unlockedIngredients.includes(dish.id)}
+
+							{#if isUnlocked}
+								<div
+									class="ingredient-card dish-card"
+									style="--grade-color: {GRADE_COLORS[dish.grade]}"
+								>
+									<img src={dish.imageUrl} alt={dish.name} class="ingredient-image" />
+									<div class="ingredient-name">{dish.name}</div>
+									<div class="ingredient-grade" style="color: {GRADE_COLORS[dish.grade]}">
+										{dish.grade}
+									</div>
+								</div>
+							{:else}
+								<div class="ingredient-card locked">
+									<div class="locked-image">
+										<img src={dish.imageUrl} alt="?" class="silhouette-image" />
+									</div>
+									<div class="locked-text">?</div>
+									<div class="ingredient-grade" style="color: {GRADE_COLORS[dish.grade]}">
+										{dish.grade}
+									</div>
+								</div>
+							{/if}
+						{/each}
+					</div>
+				</div>
+			{/if}
 		{/if}
 	</div>
 </div>
@@ -188,10 +317,34 @@
 		@apply shadow-md;
 	}
 
-	.ingredient-grid {
+	/* 스크롤 컨테이너 */
+	.scroll-container {
 		@apply flex-1;
-		@apply p-3;
 		@apply overflow-y-auto;
+	}
+
+	/* 섹션 */
+	.section {
+		@apply p-3;
+		@apply pb-2;
+	}
+
+	.section-header {
+		@apply flex items-center justify-between;
+		@apply mb-2 px-1;
+	}
+
+	.section-title {
+		@apply font-bold text-gray-700;
+		font-size: var(--font-sm);
+	}
+
+	.section-count {
+		@apply font-medium text-gray-400;
+		font-size: var(--font-xs);
+	}
+
+	.ingredient-grid {
 		@apply grid grid-cols-3 gap-2;
 		@apply content-start;
 	}
@@ -236,6 +389,37 @@
 		@apply border-emerald-500;
 		@apply bg-emerald-50;
 		box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+	}
+
+	/* 요리 카드 (선택 불가, 보기만) */
+	.ingredient-card.dish-card {
+		@apply cursor-default;
+		@apply bg-amber-50;
+		@apply border-amber-300;
+	}
+
+	/* 미해금 (실루엣) */
+	.ingredient-card.locked {
+		@apply bg-gray-200;
+		@apply border-gray-300;
+		@apply cursor-default;
+	}
+
+	.locked-image {
+		@apply h-12 w-12;
+		@apply flex items-center justify-center;
+		@apply overflow-hidden;
+	}
+
+	.silhouette-image {
+		@apply h-full w-full;
+		@apply object-contain;
+		filter: brightness(0) opacity(0.3);
+	}
+
+	.locked-text {
+		@apply font-bold text-gray-400;
+		font-size: var(--font-md);
 	}
 
 	/* 조합 불가능 (더 흐리게) */
