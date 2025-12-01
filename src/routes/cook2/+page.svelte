@@ -4,7 +4,11 @@
 	import DishResultScreen from './components/DishResultScreen.svelte';
 	import RestartModal from './components/RestartModal.svelte';
 	import { findRecipe } from './lib/usecase/findRecipe';
-	import { unlockedIngredientsStore } from './lib/store';
+	import {
+		unlockedIngredientsStore,
+		failedCombinationsStore,
+		newIngredientsStore
+	} from './lib/store';
 	import { findIngredientById } from './lib/data/ingredients';
 	import { modalStore } from '$lib/stores/modal';
 	import type { Recipe, Ingredient } from './lib/types';
@@ -23,6 +27,8 @@
 		const recipe = findRecipe(selectedIngredients);
 
 		if (!recipe) {
+			// 실패한 조합 저장
+			failedCombinationsStore.addFailed(selectedIngredients);
 			alert('해당 조합으로 만들 수 있는 요리가 없습니다!');
 			return;
 		}
@@ -42,9 +48,13 @@
 			resultIngredient = result;
 			// 2. 재료 오픈
 			unlockedIngredientsStore.unlock(currentRecipe.resultIngredientId);
+			// 3. 재료인 경우 NEW 뱃지 추가
+			if (result.isIngredient) {
+				newIngredientsStore.add(currentRecipe.resultIngredientId);
+			}
 		}
 
-		// 3. 결과 화면 표시
+		// 4. 결과 화면 표시
 		step = 'result';
 	}
 
@@ -60,6 +70,14 @@
 		// 초기화
 		step = 'ingredient';
 		selectedIngredients = [];
+		currentRecipe = null;
+		resultIngredient = null;
+	}
+
+	// 바로 써보기 (새 재료를 첫 번째 슬롯에 넣고 시작)
+	function handleUseNow(ingredientId: number) {
+		step = 'ingredient';
+		selectedIngredients = [ingredientId];
 		currentRecipe = null;
 		resultIngredient = null;
 	}
@@ -80,7 +98,12 @@
 	<CookingScreen onComplete={handleCookingComplete} {selectedIngredients} />
 {:else if step === 'result' && resultIngredient && currentRecipe}
 	<!-- 결과 화면 -->
-	<DishResultScreen {resultIngredient} recipe={currentRecipe} onComplete={handleResultComplete} />
+	<DishResultScreen
+		{resultIngredient}
+		recipe={currentRecipe}
+		onComplete={handleResultComplete}
+		onUseNow={resultIngredient.isIngredient ? handleUseNow : undefined}
+	/>
 {/if}
 
 <style lang="postcss">

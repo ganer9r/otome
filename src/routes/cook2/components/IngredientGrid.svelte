@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { unlockedIngredientsStore } from '../lib/store';
+	import {
+		unlockedIngredientsStore,
+		failedCombinationsStore,
+		newIngredientsStore
+	} from '../lib/store';
 	import { INGREDIENTS } from '../lib/data/ingredients';
 	import { GRADE_COLORS, GRADE_NAMES, GRADE_ORDER } from '../lib/types';
 	import type { IngredientGrade } from '../lib/types';
@@ -18,6 +22,14 @@
 	// 언락된 재료
 	let unlockedIngredients = $derived($unlockedIngredientsStore);
 
+	// 새로 획득한 재료 (NEW 뱃지)
+	let newIngredientIds = $derived($newIngredientsStore);
+
+	// 첫 번째 재료가 선택되었을 때, 실패한 조합의 두 번째 재료 목록
+	let failedPairIds = $derived(
+		selectedIds.length === 1 ? failedCombinationsStore.getFailedPairsFor(selectedIds[0]) : []
+	);
+
 	// 필터링된 재료 목록 (isIngredient: true인 것만)
 	let filteredIngredients = $derived(
 		INGREDIENTS.filter((ing) => {
@@ -35,6 +47,8 @@
 	function addIngredient(id: number) {
 		if (selectedIds.length < 2) {
 			selectedIds = [...selectedIds, id];
+			// NEW 뱃지 제거
+			newIngredientsStore.markSeen(id);
 		}
 	}
 </script>
@@ -67,11 +81,15 @@
 	<div class="ingredient-grid">
 		{#each filteredIngredients as ingredient (ingredient.id)}
 			{@const selectionCount = selectedIds.filter((id) => id === ingredient.id).length}
+			{@const isFailed = failedPairIds.includes(ingredient.id)}
+			{@const isNew = newIngredientIds.has(ingredient.id)}
 			<button
 				type="button"
 				class="ingredient-card"
 				class:selected={selectionCount > 0}
 				class:selected-twice={selectionCount >= 2}
+				class:failed={isFailed}
+				class:is-new={isNew}
 				onclick={() => addIngredient(ingredient.id)}
 				style="--grade-color: {GRADE_COLORS[ingredient.grade]}"
 			>
@@ -80,6 +98,12 @@
 				<div class="ingredient-grade" style="color: {GRADE_COLORS[ingredient.grade]}">
 					{ingredient.grade}
 				</div>
+				{#if isFailed}
+					<div class="failed-badge">✗</div>
+				{/if}
+				{#if isNew}
+					<div class="new-badge">NEW</div>
+				{/if}
 			</button>
 		{/each}
 
@@ -170,6 +194,65 @@
 		@apply bg-orange-500 text-white;
 		@apply border-orange-600;
 		box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
+	}
+
+	.ingredient-card.failed {
+		@apply opacity-40;
+		@apply border-gray-300;
+		@apply bg-gray-100;
+		filter: grayscale(70%);
+		@apply relative;
+	}
+
+	.ingredient-card.failed:hover {
+		@apply opacity-50;
+		@apply scale-100;
+	}
+
+	.failed-badge {
+		@apply absolute top-1 right-1;
+		@apply h-5 w-5;
+		@apply bg-red-500 text-white;
+		@apply rounded-full;
+		@apply flex items-center justify-center;
+		@apply text-xs font-bold;
+		@apply shadow-sm;
+	}
+
+	/* NEW 뱃지 */
+	.ingredient-card.is-new {
+		@apply border-emerald-400;
+		animation: newGlow 1.5s ease-in-out infinite;
+	}
+
+	@keyframes newGlow {
+		0%,
+		100% {
+			box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+		}
+		50% {
+			box-shadow: 0 0 16px rgba(16, 185, 129, 0.7);
+		}
+	}
+
+	.new-badge {
+		@apply absolute -top-1 -left-1;
+		@apply px-1.5 py-0.5;
+		@apply bg-emerald-500 text-white;
+		@apply rounded-md;
+		@apply text-xs font-bold;
+		@apply shadow-md;
+		animation: newBadgePulse 1s ease-in-out infinite;
+	}
+
+	@keyframes newBadgePulse {
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.1);
+		}
 	}
 
 	.ingredient-image {

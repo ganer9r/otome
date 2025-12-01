@@ -21,3 +21,27 @@ export function getIngredientsByGrade(grade: IngredientGrade): Ingredient[] {
 export function findIngredientByName(name: string): Ingredient | undefined {
 	return INGREDIENTS.find((i) => i.name === name);
 }
+
+/** 등급별 발견 현황 */
+export function getProgressByGrade(
+	unlockedIds: number[],
+	grade: IngredientGrade
+): { discovered: number; total: number; percent: number } {
+	const gradeIngredients = INGREDIENTS.filter((i) => i.grade === grade);
+	const discovered = gradeIngredients.filter((i) => unlockedIds.includes(i.id)).length;
+	const total = gradeIngredients.length;
+	const percent = total > 0 ? Math.round((discovered / total) * 100) : 0;
+	return { discovered, total, percent };
+}
+
+/** 전체 발견 현황 */
+export function getTotalProgress(unlockedIds: number[]): {
+	discovered: number;
+	total: number;
+	percent: number;
+} {
+	const discovered = unlockedIds.length;
+	const total = INGREDIENTS.length;
+	const percent = total > 0 ? Math.round((discovered / total) * 100) : 0;
+	return { discovered, total, percent };
+}
