@@ -38,16 +38,20 @@
 	.tax-modal {
 		@apply fixed inset-0 z-50;
 		@apply flex items-center justify-center;
-		@apply bg-black/60;
+		background: rgba(0, 0, 0, 0.6);
 	}
 
 	.modal-content {
 		@apply flex flex-col items-center;
-		@apply rounded-2xl bg-white;
+		@apply rounded-3xl;
 		@apply p-6;
 		@apply mx-4;
-		@apply shadow-2xl;
 		@apply w-full max-w-sm;
+		background: linear-gradient(to bottom, #fffde7, #fff8e1);
+		border: 4px solid #e8d4a8;
+		box-shadow:
+			0 8px 32px rgba(0, 0, 0, 0.25),
+			inset 0 2px 0 rgba(255, 255, 255, 0.8);
 		animation: modalPop 0.3s ease-out;
 	}
 
@@ -68,20 +72,24 @@
 	}
 
 	.title {
-		@apply text-xl font-bold text-gray-800;
+		@apply text-xl font-bold;
+		color: #5d4037;
 		@apply mb-1;
 	}
 
 	.description {
-		@apply text-sm text-gray-500;
+		@apply text-sm font-medium;
+		color: #8d6e63;
 		@apply mb-4;
 	}
 
 	.tax-info {
 		@apply w-full;
-		@apply rounded-xl bg-gray-100;
+		@apply rounded-2xl;
 		@apply p-4;
 		@apply mb-4;
+		background: rgba(255, 255, 255, 0.8);
+		border: 3px solid #e8d4a8;
 	}
 
 	.tax-row {
@@ -90,40 +98,46 @@
 	}
 
 	.label {
-		@apply font-medium text-gray-600;
+		@apply font-bold;
+		color: #8d6e63;
 	}
 
 	.value {
-		@apply font-bold text-gray-800;
+		@apply font-bold;
+		color: #5d4037;
 	}
 
 	.value.tax {
-		@apply text-red-500;
+		color: #d32f2f;
 	}
 
 	.value.negative {
-		@apply text-red-500;
+		color: #d32f2f;
 	}
 
 	.divider {
-		@apply border-t border-gray-300;
+		border-top: 2px solid #e8d4a8;
 		@apply my-2;
 	}
 
 	.confirm-btn {
 		@apply w-full;
 		@apply px-6 py-3;
-		@apply bg-blue-500 text-white;
 		@apply rounded-xl;
 		@apply font-bold;
 		@apply transition-all;
+		background: linear-gradient(to bottom, #64b5f6, #2196f3);
+		color: white;
+		border: 3px solid #1976d2;
+		box-shadow: 0 4px 0 #1565c0;
 	}
 
 	.confirm-btn:hover {
-		@apply bg-blue-600;
+		filter: brightness(1.05);
 	}
 
 	.confirm-btn:active {
-		@apply scale-95;
+		box-shadow: 0 2px 0 #1565c0;
+		transform: translateY(2px) scale(0.95);
 	}
 </style>

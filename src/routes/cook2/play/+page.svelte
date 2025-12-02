@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { Coins, Star } from 'lucide-svelte';
 	import IngredientSelectScreen from '../components/IngredientSelectScreen.svelte';
 	import CookingScreen from '../components/CookingScreen.svelte';
 	import DishResultScreen from '../components/DishResultScreen.svelte';
@@ -206,30 +205,6 @@
 </svelte:head>
 
 <div class="play-container">
-	<!-- 상단 자본 표시 (조리 중에는 숨김) -->
-	{#if step !== 'cooking'}
-		<div class="capital-bar">
-			<div class="left-section">
-				<div class="capital-display">
-					<Coins size={20} class="text-yellow-500" />
-					<span class="capital-amount" class:negative={runState.capital < 0}>
-						{runState.capital.toLocaleString()}원
-					</span>
-				</div>
-				{#if runState.earnedStars > 0}
-					<div class="star-display">
-						<Star size={16} class="star-icon" />
-						<span class="star-count">{runState.earnedStars}</span>
-					</div>
-				{/if}
-			</div>
-			<div class="turn-display">
-				<span class="turn-label">세금까지</span>
-				<span class="turn-count">{turnsUntilTax}턴</span>
-			</div>
-		</div>
-	{/if}
-
 	<!-- 세금 모달 -->
 	{#if showTaxModal && lastTaxResult}
 		<TaxModal
@@ -254,7 +229,13 @@
 	<div class="game-area">
 		{#if step === 'ingredient'}
 			<!-- 재료 선택 화면 -->
-			<IngredientSelectScreen bind:selectedIds={selectedIngredients} onCook={handleCookRequest} />
+			<IngredientSelectScreen
+				bind:selectedIds={selectedIngredients}
+				onCook={handleCookRequest}
+				capital={runState.capital}
+				earnedStars={runState.earnedStars}
+				{turnsUntilTax}
+			/>
 		{:else if step === 'cooking'}
 			<!-- 조리 화면 -->
 			<CookingScreen onComplete={handleCookingComplete} {selectedIngredients} />
@@ -294,61 +275,7 @@
 	.play-container {
 		@apply flex flex-col;
 		@apply h-screen;
-		@apply bg-base-100;
-	}
-
-	.capital-bar {
-		@apply flex items-center justify-between;
-		@apply px-4 py-2;
-		@apply bg-base-200;
-		@apply border-base-300 border-b;
-		flex-shrink: 0;
-	}
-
-	.left-section {
-		@apply flex items-center gap-4;
-	}
-
-	.capital-display {
-		@apply flex items-center gap-2;
-	}
-
-	.capital-amount {
-		@apply text-lg font-bold;
-		@apply text-yellow-600;
-	}
-
-	.capital-amount.negative {
-		@apply text-red-500;
-	}
-
-	.star-display {
-		@apply flex items-center gap-1;
-		@apply px-2 py-0.5;
-		@apply rounded-full bg-yellow-100;
-	}
-
-	.star-display :global(.star-icon) {
-		@apply text-yellow-500;
-		fill: currentColor;
-	}
-
-	.star-count {
-		@apply text-sm font-bold text-yellow-600;
-	}
-
-	.turn-display {
-		@apply flex items-center gap-1.5;
-		@apply px-2 py-1;
-		@apply rounded-full bg-orange-100;
-	}
-
-	.turn-label {
-		@apply text-xs text-orange-600;
-	}
-
-	.turn-count {
-		@apply text-sm font-bold text-orange-700;
+		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
 	}
 
 	.game-area {

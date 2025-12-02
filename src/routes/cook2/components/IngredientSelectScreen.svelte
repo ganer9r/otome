@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Flame } from 'lucide-svelte';
+	import { Flame, Coins } from 'lucide-svelte';
 	import IngredientGrid from './IngredientGrid.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { runStore, upgradeStore } from '../lib/store';
@@ -10,9 +10,21 @@
 		selectedIds: number[];
 		/** 요리하기 버튼 클릭 콜백 */
 		onCook: () => void;
+		/** 현재 자본 */
+		capital?: number;
+		/** 획득한 스타 */
+		earnedStars?: number;
+		/** 세금까지 남은 턴 */
+		turnsUntilTax?: number;
 	}
 
-	let { selectedIds = $bindable(), onCook }: Props = $props();
+	let {
+		selectedIds = $bindable(),
+		onCook,
+		capital = 0,
+		earnedStars = 0,
+		turnsUntilTax = 0
+	}: Props = $props();
 
 	// 런 상태
 	let runState = $derived($runStore);
@@ -112,10 +124,29 @@
 	{/if}
 	<!-- 주방 영역 (100vw height) -->
 	<div class="kitchen-section">
+		<!-- 상단 정보 바 -->
+		<div class="info-bar">
+			<div class="left-info">
+				<div class="capital-badge">
+					<Coins size={18} />
+					<span class:negative={capital < 0}>{capital.toLocaleString()}원</span>
+				</div>
+				{#if earnedStars > 0}
+					<div class="star-badge">
+						<img src="/imgs/ui/star.png" alt="star" class="star-icon" />
+						<span>{earnedStars}</span>
+					</div>
+				{/if}
+			</div>
+			<div class="tax-badge">
+				<span class="tax-label">세금</span>
+				<span class="tax-count">{turnsUntilTax}턴</span>
+			</div>
+		</div>
+
 		<!-- 타이틀 -->
 		<div class="title-section">
 			<h1 class="title">재료를 선택하세요</h1>
-			<p class="subtitle">맛있는 요리를 위해 1-2가지 재료를 골라주세요</p>
 		</div>
 
 		<!-- 재료 슬롯 2개 -->
@@ -202,25 +233,82 @@
 		background-repeat: no-repeat;
 	}
 
+	/* 상단 정보 바 */
+	.info-bar {
+		@apply flex items-center justify-between;
+		@apply px-3 py-2;
+	}
+
+	.left-info {
+		@apply flex items-center gap-2;
+	}
+
+	.capital-badge {
+		@apply flex items-center gap-1.5;
+		@apply px-3 py-1.5;
+		@apply rounded-xl;
+		@apply font-bold;
+		background: rgba(255, 255, 255, 0.9);
+		border: 2px solid #e8d4a8;
+		color: #e65100;
+		font-size: var(--font-sm);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+	}
+
+	.capital-badge span.negative {
+		color: #d32f2f;
+	}
+
+	.star-badge {
+		@apply flex items-center gap-1;
+		@apply px-2.5 py-1.5;
+		@apply rounded-xl;
+		@apply font-bold;
+		background: rgba(255, 255, 255, 0.9);
+		border: 2px solid #ffc107;
+		color: #e65100;
+		font-size: var(--font-sm);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+	}
+
+	.star-icon {
+		width: 16px;
+		height: 16px;
+	}
+
+	.tax-badge {
+		@apply flex items-center gap-1.5;
+		@apply px-3 py-1.5;
+		@apply rounded-xl;
+		@apply font-bold;
+		background: linear-gradient(to bottom, rgba(255, 204, 128, 0.95), rgba(255, 183, 77, 0.95));
+		border: 2px solid #f57c00;
+		color: #5d4037;
+		font-size: var(--font-sm);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+	}
+
+	.tax-label {
+		color: #795548;
+		font-size: var(--font-xs);
+	}
+
+	.tax-count {
+		color: #e65100;
+	}
+
 	/* 타이틀 섹션 */
 	.title-section {
-		@apply flex flex-col items-center gap-2;
-		@apply pt-6 pb-4;
+		@apply flex flex-col items-center;
+		@apply pb-2;
 		@apply px-4;
 	}
 
 	.title {
 		@apply font-bold text-white;
 		@apply drop-shadow-lg;
-		font-size: var(--font-xl);
+		font-size: var(--font-lg);
 		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-	}
-
-	.subtitle {
-		@apply text-white/90;
-		@apply drop-shadow-md;
-		font-size: var(--font-sm);
-		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 	}
 
 	/* 슬롯 섹션 */
@@ -233,20 +321,22 @@
 
 	.slot {
 		@apply flex items-center justify-center;
-		@apply rounded-xl;
-		@apply border-3 border-dashed border-white/50;
-		@apply bg-white/70;
+		@apply rounded-2xl;
 		@apply transition-all duration-300;
-		@apply shadow-md;
 		backdrop-filter: blur(4px);
 		width: clamp(120px, 40vw, 160px);
 		height: clamp(80px, 20vw, 100px);
+		background: rgba(255, 255, 255, 0.75);
+		border: 3px dashed rgba(139, 119, 101, 0.5);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 	}
 
 	.slot.filled {
-		@apply border-solid border-orange-400;
-		@apply bg-orange-100/80;
-		@apply shadow-lg shadow-orange-300;
+		border: 3px solid #ffb74d;
+		background: linear-gradient(to bottom, rgba(255, 248, 225, 0.9), rgba(255, 236, 179, 0.9));
+		box-shadow:
+			0 4px 8px rgba(255, 152, 0, 0.3),
+			inset 0 1px 0 rgba(255, 255, 255, 0.8);
 		animation: slotPop 0.3s ease-out;
 		backdrop-filter: blur(4px);
 	}
@@ -265,17 +355,17 @@
 
 	.slot-empty {
 		@apply flex flex-col items-center gap-1;
-		@apply text-white/70;
+		color: #8d6e63;
 	}
 
 	.plus-icon {
 		@apply text-4xl font-light;
-		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+		color: #a1887f;
 	}
 
 	.slot-label {
-		@apply text-sm font-medium;
-		@apply drop-shadow-md;
+		@apply text-sm font-bold;
+		color: #8d6e63;
 		font-size: var(--font-xs);
 	}
 
@@ -287,10 +377,12 @@
 		@apply h-10 w-10;
 		@apply object-contain;
 		@apply rounded-lg;
+		filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.15));
 	}
 
 	.ingredient-text {
-		@apply text-sm font-bold text-orange-700;
+		@apply text-sm font-bold;
+		color: #5d4037;
 		font-size: var(--font-sm);
 	}
 
@@ -301,26 +393,27 @@
 	}
 
 	.cost-display {
-		@apply font-bold text-white;
-		@apply px-3 py-1;
-		@apply rounded-full;
-		@apply bg-black/40;
+		@apply font-bold;
+		@apply px-4 py-1.5;
+		@apply rounded-xl;
+		background: rgba(255, 255, 255, 0.85);
+		color: #5d4037;
+		border: 2px solid #e8d4a8;
 		font-size: var(--font-sm);
-		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 	}
 
 	.cook-button {
 		@apply w-full max-w-xs;
 		@apply px-6 py-3;
 		@apply rounded-xl;
-		@apply bg-gradient-to-r from-orange-500 to-red-500;
-		@apply text-white;
 		@apply flex items-center justify-center gap-2;
-		@apply shadow-lg;
 		@apply transition-all duration-300;
 		@apply font-bold;
-		@apply border-3 border-orange-600;
 		font-size: var(--font-md);
+		background: linear-gradient(to bottom, #ff7043, #f4511e);
+		color: white;
+		border: 3px solid #e64a19;
+		box-shadow: 0 4px 0 #bf360c;
 	}
 
 	.cook-button:not(:disabled) {
@@ -328,39 +421,37 @@
 	}
 
 	.cook-button:not(:disabled):hover {
-		@apply scale-110;
-		@apply shadow-orange-500/50;
+		filter: brightness(1.1);
 	}
 
 	.cook-button:not(:disabled):active {
-		@apply scale-95;
+		box-shadow: 0 2px 0 #bf360c;
+		transform: translateY(2px) scale(0.95);
 	}
 
 	.cook-button:disabled {
-		@apply opacity-40;
 		@apply cursor-not-allowed;
-		@apply from-gray-400 to-gray-500;
-		@apply border-gray-500;
+		background: #bcaaa4;
+		border-color: #a1887f;
+		box-shadow: 0 3px 0 #8d6e63;
 		animation: none;
 	}
 
 	@keyframes cookPulse {
 		0%,
 		100% {
-			box-shadow:
-				0 20px 25px -5px rgb(0 0 0 / 0.1),
-				0 8px 10px -6px rgb(0 0 0 / 0.1);
+			box-shadow: 0 4px 0 #bf360c;
 		}
 		50% {
 			box-shadow:
-				0 20px 25px -5px rgb(249 115 22 / 0.5),
-				0 8px 10px -6px rgb(249 115 22 / 0.5);
+				0 4px 0 #bf360c,
+				0 0 20px rgba(255, 112, 67, 0.6);
 			transform: translateY(-2px);
 		}
 	}
 
 	.button-text {
-		@apply drop-shadow-lg;
+		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 	}
 
 	.cook-button :global(.flame-icon) {
@@ -381,7 +472,6 @@
 		@apply flex-1;
 		@apply w-full;
 		@apply overflow-hidden;
-		@apply bg-amber-50;
 	}
 
 	/* 날아가는 재료 애니메이션 */

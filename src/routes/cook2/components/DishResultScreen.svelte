@@ -541,9 +541,12 @@
 
 	/* 수익 섹션 */
 	.profit-section {
-		@apply flex w-full flex-col rounded-xl bg-white/80 shadow-md;
+		@apply flex w-full flex-col rounded-2xl;
 		padding: 1.5vh 2vh;
 		gap: 0.6vh;
+		background: rgba(255, 255, 255, 0.85);
+		border: 3px solid #e8d4a8;
+		box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 	}
 
 	.profit-row {
@@ -555,47 +558,53 @@
 	}
 
 	.profit-label {
-		@apply font-medium text-gray-600;
+		@apply font-bold;
+		color: #8d6e63;
 		font-size: clamp(11px, 1.5vh, 13px);
 	}
 
 	.profit-row.total .profit-label {
-		@apply font-bold text-gray-800;
+		@apply font-bold;
+		color: #5d4037;
 		font-size: clamp(12px, 1.7vh, 14px);
 	}
 
 	.profit-value {
 		@apply font-bold;
+		color: #5d4037;
 		font-size: clamp(12px, 1.6vh, 14px);
 	}
 
 	.profit-value.sell {
-		@apply text-green-600;
+		color: #4caf50;
 	}
 
 	.profit-value.cost {
-		@apply text-red-500;
+		color: #d32f2f;
 	}
 
 	.profit-value.positive {
-		@apply text-green-600;
+		color: #4caf50;
 		font-size: clamp(14px, 2vh, 18px);
 	}
 
 	.profit-value.negative {
-		@apply text-red-500;
+		color: #d32f2f;
 		font-size: clamp(14px, 2vh, 18px);
 	}
 
 	.profit-divider {
-		@apply w-full border-t border-gray-300;
+		@apply w-full;
+		border-top: 2px solid #e8d4a8;
 		margin: 0.3vh 0;
 	}
 
 	.progress-section {
-		@apply flex w-full flex-col items-center rounded-xl bg-white/70 shadow-sm;
+		@apply flex w-full flex-col items-center rounded-2xl;
 		padding: 1.5vh 2vh;
 		gap: 0.8vh;
+		background: rgba(255, 255, 255, 0.75);
+		border: 3px solid #e8d4a8;
 	}
 
 	.progress-item {
@@ -606,19 +615,22 @@
 		font-size: clamp(11px, 1.6vh, 14px);
 	}
 	.progress-value {
-		@apply font-medium text-gray-700;
+		@apply font-bold;
+		color: #5d4037;
 		font-size: clamp(11px, 1.6vh, 14px);
 	}
 	.progress-bar {
-		@apply w-full overflow-hidden rounded-full bg-gray-200;
-		height: clamp(4px, 0.8vh, 8px);
+		@apply w-full overflow-hidden rounded-full;
+		background: #e0d4c0;
+		border: 2px solid #c9b896;
+		height: clamp(6px, 1vh, 10px);
 	}
 	.progress-fill {
 		@apply h-full rounded-full;
 		transition: width 0.5s ease-out;
 	}
 	.progress-total {
-		@apply text-gray-500;
+		color: #8d6e63;
 		font-size: clamp(10px, 1.4vh, 12px);
 	}
 
@@ -628,26 +640,41 @@
 	}
 
 	.use-now-button {
-		@apply w-full rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 font-bold text-white shadow-md;
+		@apply w-full rounded-xl font-bold;
 		padding: 1.2vh 2vh;
 		font-size: clamp(12px, 1.8vh, 16px);
 		transition: all 0.2s;
+		background: linear-gradient(to bottom, #ffb74d, #ff9800);
+		color: #5d4037;
+		border: 3px solid #f57c00;
+		box-shadow: 0 3px 0 #e65100;
 	}
 
 	.use-now-button:hover {
-		@apply scale-105;
-		box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+		filter: brightness(1.05);
+	}
+
+	.use-now-button:active {
+		box-shadow: 0 1px 0 #e65100;
+		transform: translateY(2px);
 	}
 
 	.confirm-button {
-		@apply w-full rounded-xl border border-gray-200 bg-white font-bold text-gray-700 shadow-sm;
+		@apply w-full rounded-xl font-bold;
 		padding: 1.2vh 2vh;
 		font-size: clamp(12px, 1.8vh, 16px);
 		transition: all 0.2s;
+		background: rgba(255, 255, 255, 0.9);
+		color: #5d4037;
+		border: 3px solid #e8d4a8;
 	}
 
 	.confirm-button:hover {
-		@apply scale-105 bg-gray-50;
+		background: rgba(255, 255, 255, 1);
+	}
+
+	.confirm-button:active {
+		transform: translateY(1px);
 	}
 
 	.skip-hint {

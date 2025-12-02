@@ -315,38 +315,41 @@
 	.ingredient-grid-container {
 		@apply flex flex-col;
 		@apply h-full;
-		@apply bg-base-100;
+		background: linear-gradient(to bottom, #fffde7, #fff8e1);
 		overflow: hidden;
 	}
 
 	.grade-tabs {
-		@apply flex gap-1;
-		@apply px-2 py-1.5;
-		@apply bg-base-200;
-		@apply border-base-300 border-b;
+		@apply flex gap-1.5;
+		@apply px-2 py-2;
+		background: rgba(255, 255, 255, 0.7);
+		border-bottom: 3px solid #e8d4a8;
 		@apply overflow-x-auto;
 		flex-shrink: 0;
 	}
 
 	.tab {
-		@apply px-3 py-1;
-		@apply rounded-md;
-		@apply font-medium;
+		@apply px-3 py-1.5;
+		@apply rounded-xl;
+		@apply font-bold;
 		@apply transition-all;
 		@apply whitespace-nowrap;
-		@apply border-2 border-transparent;
 		font-size: var(--font-xs);
 		flex-shrink: 0;
+		background: rgba(255, 255, 255, 0.6);
+		color: #8d6e63;
+		border: 2px solid #d7ccc8;
 	}
 
 	.tab:hover {
-		@apply bg-base-300;
+		background: rgba(255, 255, 255, 0.9);
 	}
 
 	.tab.active {
-		@apply bg-primary text-primary-content;
-		@apply border-primary;
-		@apply shadow-md;
+		background: linear-gradient(to bottom, #ffb74d, #ff9800);
+		color: #5d4037;
+		border-color: #f57c00;
+		box-shadow: 0 2px 0 #e65100;
 	}
 
 	/* 스크롤 컨테이너 */
@@ -367,12 +370,14 @@
 	}
 
 	.section-title {
-		@apply font-bold text-gray-700;
+		@apply font-bold;
+		color: #5d4037;
 		font-size: var(--font-sm);
 	}
 
 	.section-count {
-		@apply font-medium text-gray-400;
+		@apply font-medium;
+		color: #a1887f;
 		font-size: var(--font-xs);
 	}
 
@@ -383,14 +388,16 @@
 
 	.ingredient-card {
 		@apply aspect-square;
-		@apply rounded-xl;
-		@apply bg-white;
-		@apply border-3 border-gray-200;
+		@apply rounded-2xl;
 		@apply flex flex-col items-center justify-center gap-1;
 		@apply p-2;
-		@apply shadow-sm;
 		@apply outline-none;
 		@apply relative;
+		background: rgba(255, 255, 255, 0.9);
+		border: 3px solid #e8d4a8;
+		box-shadow:
+			0 3px 6px rgba(0, 0, 0, 0.1),
+			inset 0 1px 0 rgba(255, 255, 255, 0.8);
 	}
 
 	.ingredient-card:active {
@@ -412,28 +419,30 @@
 	/* 이미 시도한 조합 (딤 처리) */
 	.ingredient-card.tried {
 		@apply opacity-40;
-		@apply bg-gray-100;
+		background: #e0d4c0;
 		filter: grayscale(50%);
 	}
 
 	/* 조합 가능 (강조) */
 	.ingredient-card.possible {
-		@apply border-emerald-500;
-		@apply bg-emerald-50;
-		box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+		border-color: #81c784;
+		background: linear-gradient(to bottom, #e8f5e9, #c8e6c9);
+		box-shadow:
+			0 0 8px rgba(76, 175, 80, 0.4),
+			0 3px 6px rgba(0, 0, 0, 0.1);
 	}
 
 	/* 요리 카드 (선택 불가, 보기만) */
 	.ingredient-card.dish-card {
 		@apply cursor-default;
-		@apply bg-amber-50;
-		@apply border-amber-300;
+		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
+		border-color: #ffb74d;
 	}
 
 	/* 미해금 (실루엣) */
 	.ingredient-card.locked {
-		@apply bg-gray-200;
-		@apply border-gray-300;
+		background: rgba(200, 190, 170, 0.5);
+		border-color: #c9b896;
 		@apply cursor-default;
 	}
 
@@ -446,11 +455,12 @@
 	.silhouette-image {
 		@apply h-full w-full;
 		@apply object-contain;
-		filter: brightness(0) opacity(0.3);
+		filter: brightness(0) opacity(0.15);
 	}
 
 	.locked-text {
-		@apply font-bold text-gray-400;
+		@apply font-bold;
+		color: #a1887f;
 		font-size: var(--font-md);
 	}
 
@@ -462,27 +472,32 @@
 
 	/* NEW 뱃지 */
 	.ingredient-card.is-new {
-		@apply border-emerald-400;
+		border-color: #81c784;
 		animation: newGlow 1.5s ease-in-out infinite;
 	}
 
 	@keyframes newGlow {
 		0%,
 		100% {
-			box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+			box-shadow:
+				0 0 8px rgba(76, 175, 80, 0.4),
+				0 3px 6px rgba(0, 0, 0, 0.1);
 		}
 		50% {
-			box-shadow: 0 0 16px rgba(16, 185, 129, 0.7);
+			box-shadow:
+				0 0 16px rgba(76, 175, 80, 0.7),
+				0 3px 6px rgba(0, 0, 0, 0.1);
 		}
 	}
 
 	.new-badge {
 		@apply absolute -top-1 -left-1;
 		@apply px-1.5 py-0.5;
-		@apply bg-emerald-500 text-white;
-		@apply rounded-md;
-		@apply text-xs font-bold;
-		@apply shadow-md;
+		@apply text-xs font-bold text-white;
+		background: linear-gradient(to bottom, #81c784, #4caf50);
+		border: 2px solid #388e3c;
+		@apply rounded-lg;
+		box-shadow: 0 2px 0 #2e7d32;
 		animation: newBadgePulse 1s ease-in-out infinite;
 	}
 
@@ -500,11 +515,13 @@
 		@apply h-12 w-12;
 		@apply object-contain;
 		@apply rounded-lg;
+		filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.1));
 	}
 
 	.ingredient-name {
 		@apply text-center font-bold;
 		font-size: var(--font-xs);
+		color: #5d4037;
 		@apply break-keep;
 		@apply leading-tight;
 	}
@@ -517,7 +534,7 @@
 	.empty-message {
 		@apply col-span-3;
 		@apply flex items-center justify-center;
-		@apply text-gray-400;
+		color: #a1887f;
 		@apply py-8;
 	}
 
@@ -526,9 +543,9 @@
 		@apply absolute -right-1 -bottom-1;
 		@apply h-7 w-7;
 		@apply rounded-full;
-		@apply bg-white;
-		@apply border-2 border-orange-400;
-		@apply shadow-md;
+		background: rgba(255, 255, 255, 0.9);
+		border: 2px solid #ffb74d;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 		@apply flex items-center justify-center;
 		@apply overflow-hidden;
 	}
