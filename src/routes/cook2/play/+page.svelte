@@ -6,6 +6,8 @@
 	import CookingScreen from '../components/CookingScreen.svelte';
 	import DishResultScreen from '../components/DishResultScreen.svelte';
 	import RestartModal from '../components/RestartModal.svelte';
+	import TaxModal from '../components/TaxModal.svelte';
+	import BankruptModal from '../components/BankruptModal.svelte';
 	import { findRecipe } from '../lib/usecase/findRecipe';
 	import {
 		unlockedIngredientsStore,
@@ -13,14 +15,19 @@
 		triedCombinationsStore,
 		successCombinationsStore,
 		newIngredientsStore,
-		runStore
+		runStore,
+		RUN_CONFIG
 	} from '../lib/store';
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { modalStore } from '$lib/stores/modal';
 	import type { Recipe, Ingredient } from '../lib/types';
+	import type { TaxResult } from '../lib/store';
 
 	// 런 상태
 	let runState = $derived($runStore);
+
+	// 다음 세금까지 남은 턴
+	let turnsUntilTax = $derived(runStore.getTurnsUntilTax(runState.turn));
 
 	// 선택 상태
 	let selectedIngredients = $state<number[]>([]);
@@ -31,6 +38,11 @@
 	let resultIngredient = $state<Ingredient | null>(null);
 	let currentIngredientCost = $state(0);
 
+	// 세금/파산 모달 상태
+	let showTaxModal = $state(false);
+	let showBankruptModal = $state(false);
+	let lastTaxResult = $state<TaxResult | null>(null);
+
 	// 조리 시작 (조리기구 선택 없이 바로)
 	function handleCookRequest() {
 		// 1. 레시피 찾기
@@ -40,7 +52,23 @@
 			// 실패한 조합 저장
 			failedCombinationsStore.addFailed(selectedIngredients);
 			triedCombinationsStore.addTried(selectedIngredients);
+
+			// 턴 증가 + 세금 체크
+			const taxResult = runStore.nextTurn();
+
+			if (taxResult.collected) {
+				lastTaxResult = taxResult;
+				if (taxResult.isBankrupt) {
+					showBankruptModal = true;
+				} else {
+					showTaxModal = true;
+				}
+				selectedIngredients = [];
+				return;
+			}
+
 			alert('해당 조합으로 만들 수 있는 요리가 없습니다!');
+			selectedIngredients = [];
 			return;
 		}
 
@@ -81,6 +109,22 @@
 
 	// 결과 확인 완료
 	async function handleResultComplete() {
+		// 턴 증가 + 세금 체크
+		const taxResult = runStore.nextTurn();
+
+		if (taxResult.collected) {
+			lastTaxResult = taxResult;
+
+			if (taxResult.isBankrupt) {
+				// 파산 모달 표시
+				showBankruptModal = true;
+			} else {
+				// 세금 모달 표시
+				showTaxModal = true;
+			}
+			return; // 모달 닫힌 후 계속 진행
+		}
+
 		// 다시하기 모달 표시
 		await modalStore.open({
 			component: RestartModal,
@@ -89,6 +133,34 @@
 		});
 
 		// 초기화
+		resetRound();
+	}
+
+	// 세금 모달 확인
+	function handleTaxConfirm() {
+		showTaxModal = false;
+		continueAfterTax();
+	}
+
+	// 파산 모달 확인
+	function handleBankruptConfirm() {
+		showBankruptModal = false;
+		runStore.endRun();
+		goto('/cook2');
+	}
+
+	// 세금 납부 후 계속
+	async function continueAfterTax() {
+		await modalStore.open({
+			component: RestartModal,
+			props: {},
+			hideClose: true
+		});
+		resetRound();
+	}
+
+	// 라운드 초기화
+	function resetRound() {
 		step = 'ingredient';
 		selectedIngredients = [];
 		currentRecipe = null;
@@ -110,12 +182,6 @@
 			runStore.startRun();
 		}
 	});
-
-	// 홈으로 돌아가기 (런 포기)
-	function handleGoHome() {
-		runStore.endRun();
-		goto('/cook2');
-	}
 </script>
 
 <svelte:head>
@@ -131,9 +197,29 @@
 		<div class="capital-bar">
 			<div class="capital-display">
 				<Coins size={20} class="text-yellow-500" />
-				<span class="capital-amount">{runState.capital.toLocaleString()}원</span>
+				<span class="capital-amount" class:negative={runState.capital < 0}>
+					{runState.capital.toLocaleString()}원
+				</span>
+			</div>
+			<div class="turn-display">
+				<span class="turn-label">세금까지</span>
+				<span class="turn-count">{turnsUntilTax}턴</span>
 			</div>
 		</div>
+	{/if}
+
+	<!-- 세금 모달 -->
+	{#if showTaxModal && lastTaxResult}
+		<TaxModal
+			taxAmount={lastTaxResult.taxAmount}
+			capitalAfterTax={runState.capital}
+			onConfirm={handleTaxConfirm}
+		/>
+	{/if}
+
+	<!-- 파산 모달 -->
+	{#if showBankruptModal}
+		<BankruptModal finalCapital={runState.capital} onConfirm={handleBankruptConfirm} />
 	{/if}
 
 	<!-- 게임 화면 -->
@@ -198,6 +284,24 @@
 	.capital-amount {
 		@apply text-lg font-bold;
 		@apply text-yellow-600;
+	}
+
+	.capital-amount.negative {
+		@apply text-red-500;
+	}
+
+	.turn-display {
+		@apply flex items-center gap-1.5;
+		@apply px-2 py-1;
+		@apply rounded-full bg-orange-100;
+	}
+
+	.turn-label {
+		@apply text-xs text-orange-600;
+	}
+
+	.turn-count {
+		@apply text-sm font-bold text-orange-700;
 	}
 
 	.game-area {

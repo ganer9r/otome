@@ -425,7 +425,15 @@ export const unlockedDishesStore = createUnlockedDishesStore();
 // 런 상태 관리 (로그라이트)
 // ============================================
 
-const INITIAL_CAPITAL = 2000; // 초기 자본
+/** 게임 밸런스 상수 (테스트용 조절 가능) */
+export const RUN_CONFIG = {
+	/** 초기 자본 */
+	INITIAL_CAPITAL: 500,
+	/** 세금 징수 주기 (턴) */
+	TAX_INTERVAL: 3,
+	/** 세금률 (0.2 = 20%) */
+	TAX_RATE: 0.2
+} as const;
 
 export interface RunState {
 	/** 현재 자본 */
@@ -434,13 +442,28 @@ export interface RunState {
 	turn: number;
 	/** 런 진행 중 여부 */
 	isRunning: boolean;
+	/** 누적 수익 (세금 계산용) */
+	totalEarned: number;
+	/** 파산 여부 */
+	isBankrupt: boolean;
+}
+
+export interface TaxResult {
+	/** 세금 징수 여부 */
+	collected: boolean;
+	/** 징수된 세금액 */
+	taxAmount: number;
+	/** 파산 여부 */
+	isBankrupt: boolean;
 }
 
 function createRunStore() {
 	const initialState: RunState = {
-		capital: INITIAL_CAPITAL,
+		capital: RUN_CONFIG.INITIAL_CAPITAL,
 		turn: 0,
-		isRunning: false
+		isRunning: false,
+		totalEarned: 0,
+		isBankrupt: false
 	};
 
 	const { subscribe, set, update } = writable<RunState>(initialState);
@@ -452,9 +475,11 @@ function createRunStore() {
 		 */
 		startRun: () => {
 			set({
-				capital: INITIAL_CAPITAL,
+				capital: RUN_CONFIG.INITIAL_CAPITAL,
 				turn: 0,
-				isRunning: true
+				isRunning: true,
+				totalEarned: 0,
+				isBankrupt: false
 			});
 		},
 		/**
@@ -467,7 +492,7 @@ function createRunStore() {
 			}));
 		},
 		/**
-		 * 자본 차감 (재료 구매)
+		 * 자본 차감 (재료 구매) - 마이너스 허용
 		 */
 		spend: (amount: number) => {
 			update((state) => ({
@@ -481,17 +506,47 @@ function createRunStore() {
 		earn: (amount: number) => {
 			update((state) => ({
 				...state,
-				capital: state.capital + amount
+				capital: state.capital + amount,
+				totalEarned: state.totalEarned + amount
 			}));
 		},
 		/**
-		 * 턴 증가
+		 * 턴 증가 + 세금 징수 체크
+		 * @returns 세금 징수 결과
 		 */
-		nextTurn: () => {
-			update((state) => ({
-				...state,
-				turn: state.turn + 1
-			}));
+		nextTurn: (): TaxResult => {
+			let result: TaxResult = { collected: false, taxAmount: 0, isBankrupt: false };
+
+			update((state) => {
+				const newTurn = state.turn + 1;
+
+				// 세금 징수 턴인지 확인
+				if (newTurn > 0 && newTurn % RUN_CONFIG.TAX_INTERVAL === 0) {
+					const taxAmount = Math.floor(state.totalEarned * RUN_CONFIG.TAX_RATE);
+					const newCapital = state.capital - taxAmount;
+					const isBankrupt = newCapital < 0;
+
+					result = { collected: true, taxAmount, isBankrupt };
+
+					return {
+						...state,
+						turn: newTurn,
+						capital: newCapital,
+						totalEarned: 0, // 세금 징수 후 리셋
+						isBankrupt
+					};
+				}
+
+				return { ...state, turn: newTurn };
+			});
+
+			return result;
+		},
+		/**
+		 * 다음 세금까지 남은 턴
+		 */
+		getTurnsUntilTax: (currentTurn: number): number => {
+			return RUN_CONFIG.TAX_INTERVAL - (currentTurn % RUN_CONFIG.TAX_INTERVAL);
 		},
 		/**
 		 * 초기화

@@ -83,10 +83,9 @@
 	// 해당 등급에 하나라도 해금된 요리가 있는지
 	let hasUnlockedDish = $derived(filteredDishes.some((i) => unlockedIngredients.includes(i.id)));
 
-	// 재료 가격 확인
-	function canAfford(ingredient: Ingredient): boolean {
-		const price = ingredient.buyPrice ?? 0;
-		return runState.capital >= price;
+	// 재료 가격 확인 (마이너스도 허용 - 세금 때 파산 판정)
+	function canAfford(_ingredient: Ingredient): boolean {
+		return true; // 항상 구매 가능
 	}
 
 	// 재료 추가 (같은 재료도 추가 가능, 최대 2개)
