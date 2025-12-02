@@ -1,6 +1,15 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { ChefHat, Play, Trophy, Utensils, Coins, Star, ArrowUpCircle } from 'lucide-svelte';
+	import {
+		ChefHat,
+		Play,
+		Trophy,
+		Utensils,
+		Coins,
+		Star,
+		ArrowUpCircle,
+		Sparkles
+	} from 'lucide-svelte';
 	import { unlockedIngredientsStore, unlockedDishesStore, runStore, starStore } from './lib/store';
 	import { INGREDIENTS } from './lib/data/ingredients';
 	import { RECIPES } from './lib/data/recipes';
@@ -30,6 +39,10 @@
 
 	function goUpgrade() {
 		goto('/cook2/upgrade');
+	}
+
+	function goUnlock() {
+		goto('/cook2/unlock');
 	}
 </script>
 
@@ -109,10 +122,16 @@
 				</button>
 			{/if}
 
-			<button class="upgrade-button" onclick={goUpgrade}>
-				<ArrowUpCircle size={24} />
-				<span>업그레이드</span>
-			</button>
+			<div class="sub-buttons">
+				<button class="sub-button" onclick={goUpgrade}>
+					<ArrowUpCircle size={22} />
+					<span>업그레이드</span>
+				</button>
+				<button class="sub-button unlock" onclick={goUnlock}>
+					<Sparkles size={22} />
+					<span>재료 해금</span>
+				</button>
+			</div>
 		</div>
 	</section>
 </div>
@@ -266,20 +285,47 @@
 		@apply from-yellow-600 to-amber-600;
 	}
 
-	/* 업그레이드 버튼 */
-	.upgrade-button {
-		@apply flex items-center justify-center gap-2;
+	/* 서브 버튼 그룹 */
+	.sub-buttons {
+		@apply flex gap-3;
 		@apply w-full;
+	}
+
+	.sub-button {
+		@apply flex-1;
+		@apply flex items-center justify-center gap-2;
 		@apply py-3;
 		@apply bg-base-200;
 		@apply text-base-content;
-		@apply text-lg font-medium;
+		@apply text-sm font-medium;
 		@apply rounded-xl;
 		@apply border-base-300 border;
 		@apply transition-all active:scale-95;
 	}
 
-	.upgrade-button:hover {
+	.sub-button:hover {
 		@apply bg-base-300;
+	}
+
+	/* 스타 뱃지 */
+	.star-badge {
+		@apply flex items-center gap-1;
+		@apply px-3 py-1.5;
+		@apply rounded-full;
+		@apply bg-yellow-100;
+		@apply absolute top-6 right-6;
+	}
+
+	.star-badge :global(.star-icon) {
+		@apply text-yellow-500;
+		fill: currentColor;
+	}
+
+	.star-count {
+		@apply text-sm font-bold text-yellow-600;
+	}
+
+	.home-container {
+		@apply relative;
 	}
 </style>

@@ -777,3 +777,86 @@ function createRunStore() {
 }
 
 export const runStore = createRunStore();
+
+// ============================================
+// 영구 재료 해금 시스템
+// ============================================
+
+const PERMANENT_UNLOCK_KEY = 'cook2_permanent_unlocks';
+
+/** 등급별 해금 비용 (스타) */
+export const UNLOCK_COSTS: Record<string, number> = {
+	G: 0, // 기본 해금
+	F: 3,
+	E: 5,
+	D: 8,
+	C: 12,
+	B: 18,
+	A: 25,
+	R: 35
+};
+
+function getStoredPermanentUnlocks(): Set<number> {
+	if (!browser) return new Set();
+	const stored = localStorage.getItem(PERMANENT_UNLOCK_KEY);
+	if (!stored) return new Set();
+	try {
+		return new Set(JSON.parse(stored));
+	} catch {
+		return new Set();
+	}
+}
+
+function savePermanentUnlocks(unlocks: Set<number>) {
+	if (!browser) return;
+	localStorage.setItem(PERMANENT_UNLOCK_KEY, JSON.stringify([...unlocks]));
+}
+
+function createPermanentUnlockStore() {
+	const { subscribe, set } = writable<Set<number>>(getStoredPermanentUnlocks());
+
+	return {
+		subscribe,
+		/**
+		 * 재료가 영구 해금되었는지 확인
+		 */
+		isUnlocked: (ingredientId: number): boolean => {
+			return getStoredPermanentUnlocks().has(ingredientId);
+		},
+		/**
+		 * 단일 재료 해금
+		 */
+		unlock: (ingredientId: number) => {
+			const unlocks = getStoredPermanentUnlocks();
+			unlocks.add(ingredientId);
+			savePermanentUnlocks(unlocks);
+			set(unlocks);
+		},
+		/**
+		 * 여러 재료 해금 (연관 재료 포함)
+		 */
+		unlockMultiple: (ingredientIds: number[]) => {
+			const unlocks = getStoredPermanentUnlocks();
+			ingredientIds.forEach((id) => unlocks.add(id));
+			savePermanentUnlocks(unlocks);
+			set(unlocks);
+		},
+		/**
+		 * Store 새로고침
+		 */
+		refresh: () => {
+			set(getStoredPermanentUnlocks());
+		},
+		/**
+		 * 초기화 (테스트용)
+		 */
+		reset: () => {
+			if (browser) {
+				localStorage.removeItem(PERMANENT_UNLOCK_KEY);
+			}
+			set(new Set());
+		}
+	};
+}
+
+export const permanentUnlockStore = createPermanentUnlockStore();

@@ -1,9 +1,35 @@
+import { browser } from '$app/environment';
 import { INITIAL_INGREDIENTS } from '../data/ingredients';
+
+const PERMANENT_UNLOCK_KEY = 'cook2_permanent_unlocks';
+
+/**
+ * 영구 해금된 재료 가져오기
+ */
+function getPermanentUnlocks(): number[] {
+	if (!browser) return [];
+	const stored = localStorage.getItem(PERMANENT_UNLOCK_KEY);
+	if (!stored) return [];
+	try {
+		return JSON.parse(stored);
+	} catch {
+		return [];
+	}
+}
+
+/**
+ * 초기 해금 재료 (G등급 + 영구 해금)
+ */
+function getInitialUnlocks(): number[] {
+	const gGrade = INITIAL_INGREDIENTS.map((i) => i.id);
+	const permanent = getPermanentUnlocks();
+	return [...new Set([...gGrade, ...permanent])];
+}
 
 /**
  * 메모리에 저장된 오픈 재료 목록 (새로고침 시 초기화)
  */
-let unlockedIngredients: number[] = INITIAL_INGREDIENTS.map((i) => i.id);
+let unlockedIngredients: number[] = getInitialUnlocks();
 
 /**
  * 재료를 오픈하여 메모리에 저장
@@ -42,8 +68,18 @@ export function isIngredientUnlocked(ingredientId: number): boolean {
 }
 
 /**
- * 오픈 재료 초기화
+ * 오픈 재료 초기화 (G등급 + 영구 해금으로 리셋)
  */
 export function resetUnlockedIngredients(): void {
-	unlockedIngredients = INITIAL_INGREDIENTS.map((i) => i.id);
+	unlockedIngredients = getInitialUnlocks();
+}
+
+/**
+ * 영구 해금 반영하여 새로고침
+ */
+export function refreshUnlockedIngredients(): void {
+	const currentUnlocks = [...unlockedIngredients];
+	const initialUnlocks = getInitialUnlocks();
+	// 기존 해금 + 새로 영구해금된 것 합치기
+	unlockedIngredients = [...new Set([...currentUnlocks, ...initialUnlocks])];
 }

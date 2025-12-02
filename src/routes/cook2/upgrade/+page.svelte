@@ -48,7 +48,7 @@
 		}
 	];
 
-	function handlePurchase(type: UpgradeType) {
+	function handleUpgradePurchase(type: UpgradeType) {
 		upgradeStore.purchase(type);
 	}
 
@@ -63,64 +63,64 @@
 		<button class="back-button" onclick={goBack}>
 			<ArrowLeft size={24} />
 		</button>
-		<h1 class="title">업그레이드</h1>
+		<h1 class="title">강화</h1>
 		<div class="star-badge">
 			<Star size={18} class="star-icon" />
 			<span class="star-count">{totalStars}</span>
 		</div>
 	</header>
 
-	<!-- 업그레이드 목록 -->
-	<section class="upgrade-list">
-		{#each upgradeInfo as info}
-			{@const level = upgrades[info.type]}
-			{@const isMaxLevel = level >= UPGRADE_CONFIG.MAX_LEVEL}
-			{@const cost = getUpgradeCost(level)}
-			{@const canAfford = totalStars >= cost}
+	<div class="content-area">
+		<section class="upgrade-list">
+			{#each upgradeInfo as info}
+				{@const level = upgrades[info.type]}
+				{@const isMaxLevel = level >= UPGRADE_CONFIG.MAX_LEVEL}
+				{@const cost = getUpgradeCost(level)}
+				{@const canAfford = totalStars >= cost}
 
-			<div class="upgrade-card">
-				<div class="upgrade-header">
-					<div class="upgrade-icon">
-						<info.icon size={24} />
+				<div class="upgrade-card">
+					<div class="upgrade-header">
+						<div class="upgrade-icon">
+							<info.icon size={24} />
+						</div>
+						<div class="upgrade-info">
+							<h2 class="upgrade-name">{info.name}</h2>
+							<p class="upgrade-desc">{info.description}</p>
+						</div>
+						{#if isMaxLevel}
+							<button class="purchase-button max" disabled> MAX </button>
+						{:else}
+							<button
+								class="purchase-button"
+								class:disabled={!canAfford}
+								disabled={!canAfford}
+								onclick={() => handleUpgradePurchase(info.type)}
+							>
+								<Star size={14} class="button-star" />
+								<span>{cost}</span>
+							</button>
+						{/if}
 					</div>
-					<div class="upgrade-info">
-						<h2 class="upgrade-name">{info.name}</h2>
-						<p class="upgrade-desc">{info.description}</p>
+
+					<div class="upgrade-details">
+						<div class="level-bar">
+							{#each Array(UPGRADE_CONFIG.MAX_LEVEL) as _, i}
+								<div class="level-pip" class:filled={i < level}></div>
+							{/each}
+						</div>
+						<div class="level-text">
+							Lv.{level} / {UPGRADE_CONFIG.MAX_LEVEL}
+						</div>
+					</div>
+
+					<div class="upgrade-effect">
+						<span class="effect-label">현재 효과:</span>
+						<span class="effect-value">{info.effectText(level)}</span>
 					</div>
 				</div>
-
-				<div class="upgrade-details">
-					<div class="level-bar">
-						{#each Array(UPGRADE_CONFIG.MAX_LEVEL) as _, i}
-							<div class="level-pip" class:filled={i < level}></div>
-						{/each}
-					</div>
-					<div class="level-text">
-						Lv.{level} / {UPGRADE_CONFIG.MAX_LEVEL}
-					</div>
-				</div>
-
-				<div class="upgrade-effect">
-					<span class="effect-label">현재 효과:</span>
-					<span class="effect-value">{info.effectText(level)}</span>
-				</div>
-
-				{#if isMaxLevel}
-					<button class="purchase-button max" disabled> MAX </button>
-				{:else}
-					<button
-						class="purchase-button"
-						class:disabled={!canAfford}
-						disabled={!canAfford}
-						onclick={() => handlePurchase(info.type)}
-					>
-						<Star size={16} class="button-star" />
-						<span>{cost}</span>
-					</button>
-				{/if}
-			</div>
-		{/each}
-	</section>
+			{/each}
+		</section>
+	</div>
 </div>
 
 <style lang="postcss">
@@ -167,9 +167,17 @@
 		@apply text-sm font-bold text-yellow-600;
 	}
 
-	.upgrade-list {
-		@apply flex flex-col gap-4;
+	/* 콘텐츠 영역 */
+	.content-area {
+		@apply flex-1;
+		@apply overflow-y-auto;
 		@apply p-4;
+		@apply flex flex-col gap-4;
+	}
+
+	/* 업그레이드 목록 */
+	.upgrade-list {
+		@apply flex flex-col gap-3;
 	}
 
 	.upgrade-card {
@@ -251,14 +259,14 @@
 	}
 
 	.purchase-button {
-		@apply w-full;
-		@apply flex items-center justify-center gap-2;
-		@apply py-3;
-		@apply rounded-xl;
+		@apply flex items-center justify-center gap-1;
+		@apply px-3 py-2;
+		@apply rounded-lg;
 		@apply bg-yellow-500;
-		@apply font-bold text-white;
+		@apply text-sm font-bold text-white;
 		@apply transition-all;
 		@apply active:scale-95;
+		@apply flex-shrink-0;
 	}
 
 	.purchase-button:hover:not(:disabled) {
@@ -274,6 +282,7 @@
 	.purchase-button.max {
 		@apply bg-base-300;
 		@apply text-base-content/50;
+		@apply px-4;
 	}
 
 	.purchase-button :global(.button-star) {

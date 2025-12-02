@@ -60,3 +60,45 @@ export function getPossiblePairsFor(firstIngredientId: number): number[] {
 export function getRecipeSellPrice(recipe: Recipe): number | undefined {
 	return recipe.sellPrice;
 }
+
+/**
+ * 재료를 만드는 데 필요한 모든 연관 재료 ID를 재귀적으로 찾기
+ * (중복 제거, G등급 기본 재료 제외)
+ */
+export function getRequiredIngredients(
+	ingredientId: number,
+	visited: Set<number> = new Set()
+): number[] {
+	// 순환 참조 방지
+	if (visited.has(ingredientId)) return [];
+	visited.add(ingredientId);
+
+	// 이 재료를 만드는 레시피 찾기
+	const recipe = findRecipeByResult(ingredientId);
+	if (!recipe) {
+		// 레시피 없음 = 기본 재료 (G등급)
+		return [];
+	}
+
+	const result: number[] = [];
+
+	// 레시피의 재료들
+	for (const inputId of recipe.ingredientIds) {
+		result.push(inputId);
+		// 재귀적으로 하위 재료도 찾기
+		const subIngredients = getRequiredIngredients(inputId, visited);
+		result.push(...subIngredients);
+	}
+
+	return result;
+}
+
+/**
+ * 재료 + 연관 재료 전체 ID 목록 (중복 제거, G등급 제외)
+ */
+export function getAllRelatedIngredients(ingredientId: number): number[] {
+	const required = getRequiredIngredients(ingredientId);
+	const allIds = [ingredientId, ...required];
+	// 중복 제거
+	return [...new Set(allIds)];
+}
