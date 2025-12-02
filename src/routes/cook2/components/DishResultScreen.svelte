@@ -11,18 +11,25 @@
 		recipe: Recipe;
 		onComplete?: () => void;
 		onUseNow?: (ingredientId: number) => void;
-		onSell?: (ingredientId: number, sellPrice: number) => void;
 	}
 
-	let { resultIngredient, recipe, onComplete, onUseNow, onSell }: Props = $props();
+	let { resultIngredient, recipe, onComplete, onUseNow }: Props = $props();
 
 	// 런 상태
 	let runState = $derived($runStore);
 
-	// 요리인지 & 판매가가 있는지
-	let canSell = $derived(
-		!resultIngredient.isIngredient && resultIngredient.sellPrice && runState.isRunning
-	);
+	// 자동 판매 금액
+	let earnedAmount = $state(0);
+	let sold = $state(false);
+
+	// 런 진행 중이면 자동 판매 (1회만)
+	$effect(() => {
+		if (!sold && runState.isRunning && resultIngredient.sellPrice) {
+			earnedAmount = resultIngredient.sellPrice;
+			runStore.earn(resultIngredient.sellPrice);
+			sold = true;
+		}
+	});
 
 	let unlockedIds = $derived($unlockedIngredientsStore);
 	let gradeProgress = $derived(getProgressByGrade(unlockedIds, resultIngredient.grade));
@@ -81,7 +88,6 @@
 	function handleSell() {
 		if (resultIngredient.sellPrice) {
 			runStore.earn(resultIngredient.sellPrice);
-			onSell?.(resultIngredient.id, resultIngredient.sellPrice);
 			onComplete?.();
 		}
 	}
@@ -171,6 +177,13 @@
 
 				{#if stage === 'result'}
 					<div class="result-ui">
+						{#if earnedAmount > 0}
+							<div class="earned-amount">+{earnedAmount.toLocaleString()}원</div>
+						{/if}
+
+						{#if earnedAmount > 0}
+							<div class="earned-amount">+{earnedAmount.toLocaleString()}원</div>
+						{/if}
 						<div class="progress-section">
 							<div class="progress-item">
 								<span class="progress-label" style="color: {GRADE_COLORS[resultIngredient.grade]}"
@@ -198,11 +211,7 @@
 									>🧪 바로 써보기</button
 								>
 							{/if}
-							{#if canSell}
-								<button type="button" class="sell-button" onclick={handleSell}
-									>💰 판매하기 ({resultIngredient.sellPrice?.toLocaleString()}원)</button
-								>
-							{/if}
+
 							<button type="button" class="confirm-button" onclick={handleConfirm}>확인</button>
 						</div>
 					</div>
