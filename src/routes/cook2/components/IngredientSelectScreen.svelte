@@ -162,7 +162,7 @@
 
 	.ingredient-select-screen {
 		@apply flex flex-col;
-		@apply h-screen;
+		@apply h-full;
 		@apply overflow-hidden;
 	}
 

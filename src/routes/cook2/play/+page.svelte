@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { Coins } from 'lucide-svelte';
 	import IngredientSelectScreen from '../components/IngredientSelectScreen.svelte';
 	import CookingScreen from '../components/CookingScreen.svelte';
 	import DishResultScreen from '../components/DishResultScreen.svelte';
@@ -9,11 +12,15 @@
 		failedCombinationsStore,
 		triedCombinationsStore,
 		successCombinationsStore,
-		newIngredientsStore
+		newIngredientsStore,
+		runStore
 	} from '../lib/store';
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { modalStore } from '$lib/stores/modal';
 	import type { Recipe, Ingredient } from '../lib/types';
+
+	// 런 상태
+	let runState = $derived($runStore);
 
 	// 선택 상태
 	let selectedIngredients = $state<number[]>([]);
@@ -88,6 +95,19 @@
 		currentRecipe = null;
 		resultIngredient = null;
 	}
+
+	// 런 시작 (페이지 진입 시)
+	onMount(() => {
+		if (!runState.isRunning) {
+			runStore.startRun();
+		}
+	});
+
+	// 홈으로 돌아가기 (런 포기)
+	function handleGoHome() {
+		runStore.endRun();
+		goto('/cook2');
+	}
 </script>
 
 <svelte:head>
@@ -97,21 +117,36 @@
 	/>
 </svelte:head>
 
-{#if step === 'ingredient'}
-	<!-- 재료 선택 화면 -->
-	<IngredientSelectScreen bind:selectedIds={selectedIngredients} onCook={handleCookRequest} />
-{:else if step === 'cooking'}
-	<!-- 조리 화면 -->
-	<CookingScreen onComplete={handleCookingComplete} {selectedIngredients} />
-{:else if step === 'result' && resultIngredient && currentRecipe}
-	<!-- 결과 화면 -->
-	<DishResultScreen
-		{resultIngredient}
-		recipe={currentRecipe}
-		onComplete={handleResultComplete}
-		onUseNow={resultIngredient.isIngredient ? handleUseNow : undefined}
-	/>
-{/if}
+<div class="play-container">
+	<!-- 상단 자본 표시 (조리 중에는 숨김) -->
+	{#if step !== 'cooking'}
+		<div class="capital-bar">
+			<div class="capital-display">
+				<Coins size={20} class="text-yellow-500" />
+				<span class="capital-amount">{runState.capital.toLocaleString()}원</span>
+			</div>
+		</div>
+	{/if}
+
+	<!-- 게임 화면 -->
+	<div class="game-area">
+		{#if step === 'ingredient'}
+			<!-- 재료 선택 화면 -->
+			<IngredientSelectScreen bind:selectedIds={selectedIngredients} onCook={handleCookRequest} />
+		{:else if step === 'cooking'}
+			<!-- 조리 화면 -->
+			<CookingScreen onComplete={handleCookingComplete} {selectedIngredients} />
+		{:else if step === 'result' && resultIngredient && currentRecipe}
+			<!-- 결과 화면 -->
+			<DishResultScreen
+				{resultIngredient}
+				recipe={currentRecipe}
+				onComplete={handleResultComplete}
+				onUseNow={resultIngredient.isIngredient ? handleUseNow : undefined}
+			/>
+		{/if}
+	</div>
+</div>
 
 <style lang="postcss">
 	@reference '$styles/app.css';
@@ -131,5 +166,33 @@
 		--spacing-md: clamp(12px, 3vw, 24px);
 		--spacing-sm: clamp(8px, 2vw, 16px);
 		--spacing-xs: clamp(4px, 1vw, 8px);
+	}
+
+	.play-container {
+		@apply flex flex-col;
+		@apply h-screen;
+		@apply bg-base-100;
+	}
+
+	.capital-bar {
+		@apply flex items-center justify-between;
+		@apply px-4 py-2;
+		@apply bg-base-200;
+		@apply border-base-300 border-b;
+		flex-shrink: 0;
+	}
+
+	.capital-display {
+		@apply flex items-center gap-2;
+	}
+
+	.capital-amount {
+		@apply text-lg font-bold;
+		@apply text-yellow-600;
+	}
+
+	.game-area {
+		@apply flex-1;
+		@apply overflow-hidden;
 	}
 </style>

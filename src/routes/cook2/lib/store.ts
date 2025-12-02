@@ -420,3 +420,86 @@ function createUnlockedDishesStore() {
 }
 
 export const unlockedDishesStore = createUnlockedDishesStore();
+
+// ============================================
+// 런 상태 관리 (로그라이트)
+// ============================================
+
+const INITIAL_CAPITAL = 2000; // 초기 자본
+
+export interface RunState {
+	/** 현재 자본 */
+	capital: number;
+	/** 현재 턴 */
+	turn: number;
+	/** 런 진행 중 여부 */
+	isRunning: boolean;
+}
+
+function createRunStore() {
+	const initialState: RunState = {
+		capital: INITIAL_CAPITAL,
+		turn: 0,
+		isRunning: false
+	};
+
+	const { subscribe, set, update } = writable<RunState>(initialState);
+
+	return {
+		subscribe,
+		/**
+		 * 새 런 시작
+		 */
+		startRun: () => {
+			set({
+				capital: INITIAL_CAPITAL,
+				turn: 0,
+				isRunning: true
+			});
+		},
+		/**
+		 * 런 종료
+		 */
+		endRun: () => {
+			update((state) => ({
+				...state,
+				isRunning: false
+			}));
+		},
+		/**
+		 * 자본 차감 (재료 구매)
+		 */
+		spend: (amount: number) => {
+			update((state) => ({
+				...state,
+				capital: state.capital - amount
+			}));
+		},
+		/**
+		 * 자본 추가 (요리 판매)
+		 */
+		earn: (amount: number) => {
+			update((state) => ({
+				...state,
+				capital: state.capital + amount
+			}));
+		},
+		/**
+		 * 턴 증가
+		 */
+		nextTurn: () => {
+			update((state) => ({
+				...state,
+				turn: state.turn + 1
+			}));
+		},
+		/**
+		 * 초기화
+		 */
+		reset: () => {
+			set(initialState);
+		}
+	};
+}
+
+export const runStore = createRunStore();

@@ -55,3 +55,8 @@ export function getPossiblePairsFor(firstIngredientId: number): number[] {
 
 	return [...new Set(pairs)];
 }
+
+/** 레시피의 판매가 가져오기 (요리만 판매가 있음) */
+export function getRecipeSellPrice(recipe: Recipe): number | undefined {
+	return recipe.sellPrice;
+}

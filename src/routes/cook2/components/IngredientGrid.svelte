@@ -3,7 +3,8 @@
 		unlockedIngredientsStore,
 		triedCombinationsStore,
 		successCombinationsStore,
-		newIngredientsStore
+		newIngredientsStore,
+		runStore
 	} from '../lib/store';
 	import { INGREDIENTS, findIngredientById } from '../lib/data/ingredients';
 	import { getPossiblePairsFor } from '../lib/data/recipes';
@@ -18,6 +19,9 @@
 	}
 
 	let { selectedIds = $bindable(), onSelect }: Props = $props();
+
+	// 현재 자본
+	let runState = $derived($runStore);
 
 	// 재료/요리 탭
 	// 등급 필터 탭 (G, F, E, D, C, B, A, R)
@@ -79,9 +83,25 @@
 	// 해당 등급에 하나라도 해금된 요리가 있는지
 	let hasUnlockedDish = $derived(filteredDishes.some((i) => unlockedIngredients.includes(i.id)));
 
+	// 재료 가격 확인
+	function canAfford(ingredient: Ingredient): boolean {
+		const price = ingredient.buyPrice ?? 0;
+		return runState.capital >= price;
+	}
+
 	// 재료 추가 (같은 재료도 추가 가능, 최대 2개)
 	function addIngredient(ingredient: Ingredient, event: MouseEvent) {
 		if (selectedIds.length < 2) {
+			const price = ingredient.buyPrice ?? 0;
+
+			// 돈 부족하면 선택 불가
+			if (!canAfford(ingredient)) {
+				return;
+			}
+
+			// 돈 차감
+			runStore.spend(price);
+
 			const target = event.currentTarget as HTMLElement;
 			const rect = target.getBoundingClientRect();
 
@@ -131,6 +151,8 @@
 					{@const isPossible = possiblePairIds.includes(ingredient.id)}
 					{@const isImpossible =
 						isHintEnabled && selectedIds.length === 1 && !isPossible && !isTried}
+					{@const price = ingredient.buyPrice ?? 0}
+					{@const affordable = canAfford(ingredient)}
 
 					<button
 						type="button"
@@ -139,13 +161,15 @@
 						class:possible={isHintEnabled && isPossible && !isTried && selectedIds.length === 1}
 						class:impossible={isImpossible}
 						class:is-new={isNew}
+						class:unaffordable={!affordable}
 						onclick={(e) => addIngredient(ingredient, e)}
+						disabled={!affordable}
 						style="--grade-color: {GRADE_COLORS[ingredient.grade]}"
 					>
 						<img src={ingredient.imageUrl} alt={ingredient.name} class="ingredient-image" />
 						<div class="ingredient-name">{ingredient.name}</div>
-						<div class="ingredient-grade" style="color: {GRADE_COLORS[ingredient.grade]}">
-							{ingredient.grade}
+						<div class="price-tag" class:unaffordable={!affordable}>
+							{price}원
 						</div>
 						{#if isNew}
 							<div class="new-badge">NEW</div>
@@ -184,6 +208,8 @@
 							{@const isPossible = possiblePairIds.includes(ingredient.id)}
 							{@const isImpossible =
 								isHintEnabled && selectedIds.length === 1 && !isPossible && !isTried}
+							{@const price = ingredient.buyPrice ?? 0}
+							{@const affordable = canAfford(ingredient)}
 
 							{#if isUnlocked}
 								<button
@@ -196,13 +222,15 @@
 										selectedIds.length === 1}
 									class:impossible={isImpossible}
 									class:is-new={isNew}
+									class:unaffordable={!affordable}
 									onclick={(e) => addIngredient(ingredient, e)}
+									disabled={!affordable}
 									style="--grade-color: {GRADE_COLORS[ingredient.grade]}"
 								>
 									<img src={ingredient.imageUrl} alt={ingredient.name} class="ingredient-image" />
 									<div class="ingredient-name">{ingredient.name}</div>
-									<div class="ingredient-grade" style="color: {GRADE_COLORS[ingredient.grade]}">
-										{ingredient.grade}
+									<div class="price-tag" class:unaffordable={!affordable}>
+										{price}원
 									</div>
 									{#if isNew}
 										<div class="new-badge">NEW</div>
@@ -504,5 +532,30 @@
 	.result-image {
 		@apply h-5 w-5;
 		@apply object-contain;
+	}
+
+	/* 가격 표시 */
+	.price-tag {
+		@apply text-xs font-bold;
+		@apply text-yellow-600;
+		@apply bg-yellow-100;
+		@apply px-1.5 py-0.5;
+		@apply rounded-md;
+	}
+
+	.price-tag.unaffordable {
+		@apply text-red-500;
+		@apply bg-red-100;
+	}
+
+	/* 구매 불가 */
+	.ingredient-card.unaffordable {
+		@apply opacity-50;
+		@apply cursor-not-allowed;
+		filter: grayscale(50%);
+	}
+
+	.ingredient-card.unaffordable:active {
+		animation: none;
 	}
 </style>

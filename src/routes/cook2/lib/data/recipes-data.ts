@@ -1,12 +1,46 @@
 import type { Recipe } from '../types';
+import { GRADE_PRICES, type IngredientGrade } from '../types';
+
+/**
+ * 재료 ID → 등급 매핑 (간단한 방식)
+ * 1~8: G, 101~127: F, 201~262: E, 301~346: D, 401~431: C, 501~523: B, 601~614: A, 701~730: R
+ */
+function getGradeById(id: number): IngredientGrade {
+	if (id <= 8) return 'G';
+	if (id <= 127) return 'F';
+	if (id <= 262) return 'E';
+	if (id <= 346) return 'D';
+	if (id <= 431) return 'C';
+	if (id <= 523) return 'B';
+	if (id <= 614) return 'A';
+	return 'R';
+}
+
+/**
+ * 판매가 계산 (재료비 × 2~3배, 10원 단위)
+ * 시드 기반으로 일관된 값 생성
+ */
+function calculateSellPrice(id: number, ingredientIds: number[]): number {
+	const cost = ingredientIds.reduce((sum, ingId) => {
+		const grade = getGradeById(ingId);
+		return sum + GRADE_PRICES[grade];
+	}, 0);
+
+	// id 기반 시드로 2.0~3.0 배수 결정
+	const seed = ((id * 7 + 13) % 11) / 10; // 0.0 ~ 1.0
+	const multiplier = 2.0 + seed; // 2.0 ~ 3.0
+
+	// 10원 단위로 반올림
+	return Math.round((cost * multiplier) / 10) * 10;
+}
 
 /**
  * 레시피 데이터
  * 총: 238개 (G→F: 27, F→E: 55, E→D: 47, D→C: 39, C→B: 31, B→A: 20, A→R: 16)
  */
-export const RECIPES_DATA: Recipe[] = [
+const RECIPES_RAW: Omit<Recipe, 'sellPrice'>[] = [
 	// ========== G → F등급 (27개) ==========
-	// F등급 재료 (12개)
+	// F등급 재료 (12개) - 판매 불가
 	{ id: 1, name: '밥', resultIngredientId: 101, ingredientIds: [1, 7] }, // 쌀 + 물
 	{ id: 2, name: '반죽', resultIngredientId: 102, ingredientIds: [2, 7] }, // 밀 + 물
 	{ id: 3, name: '빵', resultIngredientId: 103, ingredientIds: [2, 8] }, // 밀 + 불
@@ -239,3 +273,33 @@ export const RECIPES_DATA: Recipe[] = [
 	{ id: 626, name: '오페라케이크', resultIngredientId: 726, ingredientIds: [610, 611] }, // 피에스몽테 + 황실디저트
 	{ id: 630, name: '초콜릿퐁듀', resultIngredientId: 730, ingredientIds: [614, 610] } // 그랑크뤼 + 피에스몽테
 ];
+
+/**
+ * 결과물이 요리인지 판별 (isIngredient = false)
+ * 요리 ID 범위: 113~127 (F), 215~262 (E), 314~346 (D), 413~431 (C), 512~523 (B), R등급 전체
+ */
+function isDishResult(resultId: number): boolean {
+	// F등급 요리: 113~127
+	if (resultId >= 113 && resultId <= 127) return true;
+	// E등급 요리: 215~262
+	if (resultId >= 215 && resultId <= 262) return true;
+	// D등급 요리: 314~346
+	if (resultId >= 314 && resultId <= 346) return true;
+	// C등급 요리: 413~431
+	if (resultId >= 413 && resultId <= 431) return true;
+	// B등급 요리: 512~523
+	if (resultId >= 512 && resultId <= 523) return true;
+	// R등급은 전부 요리
+	if (resultId >= 701) return true;
+	return false;
+}
+
+/**
+ * 판매가가 포함된 레시피 데이터
+ */
+export const RECIPES_DATA: Recipe[] = RECIPES_RAW.map((recipe) => ({
+	...recipe,
+	sellPrice: isDishResult(recipe.resultIngredientId)
+		? calculateSellPrice(recipe.id, recipe.ingredientIds)
+		: undefined
+}));

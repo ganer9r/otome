@@ -1,8 +1,13 @@
 import type { Ingredient, IngredientGrade } from '../types';
 import { INGREDIENTS_DATA } from './ingredients-data';
+import { calculateBuyPrice, calculateSellPrice } from './price-calculator';
 
-/** 모든 재료 (272개) */
-export const INGREDIENTS: Ingredient[] = INGREDIENTS_DATA;
+/** 모든 재료 (272개) - 가격 계산 적용 */
+export const INGREDIENTS: Ingredient[] = INGREDIENTS_DATA.map((ing) => ({
+	...ing,
+	buyPrice: ing.isIngredient ? calculateBuyPrice(ing.id) : 0,
+	sellPrice: calculateSellPrice(ing.id)
+}));
 
 /** 초기 해금 재료 (G등급) */
 export const INITIAL_INGREDIENTS = INGREDIENTS.filter((i) => i.grade === 'G');

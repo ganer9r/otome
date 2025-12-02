@@ -22,6 +22,10 @@ export interface Ingredient {
 	imageUrl?: string;
 	/** 재료 여부 (true: 다음 조합에 사용 가능, false: 요리만) */
 	isIngredient: boolean;
+	/** 구매가 (재료인 경우) */
+	buyPrice?: number;
+	/** 판매가 (요리인 경우) */
+	sellPrice?: number;
 }
 
 /**
@@ -36,6 +40,8 @@ export interface Recipe {
 	resultIngredientId: number;
 	/** 필요 재료 ID 목록 (2개) */
 	ingredientIds: number[];
+	/** 판매가 (요리인 경우) */
+	sellPrice?: number;
 }
 
 /**
@@ -70,3 +76,24 @@ export const GRADE_NAMES: Record<IngredientGrade, string> = {
 	A: 'A급',
 	R: 'R급'
 };
+
+/**
+ * 등급별 재료 구매 가격
+ */
+export const GRADE_PRICES: Record<IngredientGrade, number> = {
+	G: 50,
+	F: 80,
+	E: 120,
+	D: 180,
+	C: 250,
+	B: 350,
+	A: 500,
+	R: 800
+};
+
+/**
+ * 재료 가격 가져오기
+ */
+export function getIngredientPrice(grade: IngredientGrade): number {
+	return GRADE_PRICES[grade];
+}

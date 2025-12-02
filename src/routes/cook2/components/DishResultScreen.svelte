@@ -3,7 +3,7 @@
 	import type { Ingredient, Recipe } from '../lib/types';
 	import { GRADE_COLORS } from '../lib/types';
 	import { getProgressByGrade, getTotalProgress } from '../lib/data/ingredients';
-	import { unlockedIngredientsStore } from '../lib/store';
+	import { unlockedIngredientsStore, runStore } from '../lib/store';
 	import ResultCard from './ResultCard.svelte';
 
 	interface Props {
@@ -11,9 +11,18 @@
 		recipe: Recipe;
 		onComplete?: () => void;
 		onUseNow?: (ingredientId: number) => void;
+		onSell?: (ingredientId: number, sellPrice: number) => void;
 	}
 
-	let { resultIngredient, recipe, onComplete, onUseNow }: Props = $props();
+	let { resultIngredient, recipe, onComplete, onUseNow, onSell }: Props = $props();
+
+	// 런 상태
+	let runState = $derived($runStore);
+
+	// 요리인지 & 판매가가 있는지
+	let canSell = $derived(
+		!resultIngredient.isIngredient && resultIngredient.sellPrice && runState.isRunning
+	);
 
 	let unlockedIds = $derived($unlockedIngredientsStore);
 	let gradeProgress = $derived(getProgressByGrade(unlockedIds, resultIngredient.grade));
@@ -68,6 +77,13 @@
 
 	function handleUseNow() {
 		onUseNow?.(resultIngredient.id);
+	}
+	function handleSell() {
+		if (resultIngredient.sellPrice) {
+			runStore.earn(resultIngredient.sellPrice);
+			onSell?.(resultIngredient.id, resultIngredient.sellPrice);
+			onComplete?.();
+		}
 	}
 	function handleConfirm() {
 		onComplete?.();
@@ -180,6 +196,11 @@
 							{#if resultIngredient.isIngredient && onUseNow}
 								<button type="button" class="use-now-button" onclick={handleUseNow}
 									>🧪 바로 써보기</button
+								>
+							{/if}
+							{#if canSell}
+								<button type="button" class="sell-button" onclick={handleSell}
+									>💰 판매하기 ({resultIngredient.sellPrice?.toLocaleString()}원)</button
 								>
 							{/if}
 							<button type="button" class="confirm-button" onclick={handleConfirm}>확인</button>
