@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { ArrowLeft, Star, Coins, Percent, TrendingUp } from 'lucide-svelte';
+	import { ArrowLeft, Coins, Percent, TrendingUp } from 'lucide-svelte';
 	import {
 		starStore,
 		upgradeStore,
@@ -65,7 +64,7 @@
 		</button>
 		<h1 class="title">강화</h1>
 		<div class="star-badge">
-			<Star size={18} class="star-icon" />
+			<img src="/imgs/ui/star.png" alt="star" class="star-icon" />
 			<span class="star-count">{totalStars}</span>
 		</div>
 	</header>
@@ -96,7 +95,7 @@
 								disabled={!canAfford}
 								onclick={() => handleUpgradePurchase(info.type)}
 							>
-								<Star size={14} class="button-star" />
+								<img src="/imgs/ui/star.png" alt="star" class="button-star" />
 								<span>{cost}</span>
 							</button>
 						{/if}
@@ -129,42 +128,52 @@
 	.upgrade-container {
 		@apply flex flex-col;
 		@apply min-h-screen;
-		@apply bg-base-100;
+		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
 	}
 
 	.header {
 		@apply flex items-center justify-between;
 		@apply px-4 py-3;
-		@apply bg-base-200;
-		@apply border-base-300 border-b;
+		background: rgba(255, 255, 255, 0.7);
+		border-bottom: 3px solid #e8d4a8;
 	}
 
 	.back-button {
 		@apply p-2;
-		@apply rounded-lg;
-		@apply hover:bg-base-300;
-		@apply transition-colors;
+		@apply rounded-xl;
+		color: #5d4037;
+		background: rgba(255, 255, 255, 0.6);
+		border: 2px solid #d7ccc8;
+		@apply transition-all;
+	}
+
+	.back-button:hover {
+		background: rgba(255, 255, 255, 0.9);
 	}
 
 	.title {
 		@apply text-xl font-bold;
-		@apply text-base-content;
+		color: #5d4037;
+		text-shadow: 1px 1px 0 #fff;
 	}
 
 	.star-badge {
 		@apply flex items-center gap-1;
 		@apply px-3 py-1.5;
 		@apply rounded-full;
-		@apply bg-yellow-100;
+		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
+		border: 2px solid #ffc107;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
-	.star-badge :global(.star-icon) {
-		@apply text-yellow-500;
-		fill: currentColor;
+	.star-icon {
+		width: 20px;
+		height: 20px;
 	}
 
 	.star-count {
-		@apply text-sm font-bold text-yellow-600;
+		@apply text-sm font-bold;
+		color: #e65100;
 	}
 
 	/* 콘텐츠 영역 */
@@ -181,10 +190,13 @@
 	}
 
 	.upgrade-card {
-		@apply bg-base-200;
-		@apply rounded-xl;
+		@apply rounded-2xl;
 		@apply p-4;
-		@apply shadow-md;
+		background: rgba(255, 255, 255, 0.85);
+		border: 3px solid #e8d4a8;
+		box-shadow:
+			0 4px 8px rgba(0, 0, 0, 0.1),
+			inset 0 1px 0 rgba(255, 255, 255, 0.8);
 	}
 
 	.upgrade-header {
@@ -195,9 +207,11 @@
 	.upgrade-icon {
 		@apply flex items-center justify-center;
 		@apply h-12 w-12;
-		@apply rounded-full;
-		@apply bg-primary/20;
-		@apply text-primary;
+		@apply rounded-xl;
+		background: linear-gradient(to bottom, #ffcc80, #ffb74d);
+		color: #5d4037;
+		border: 2px solid #f9a825;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 	}
 
 	.upgrade-info {
@@ -206,12 +220,12 @@
 
 	.upgrade-name {
 		@apply text-lg font-bold;
-		@apply text-base-content;
+		color: #5d4037;
 	}
 
 	.upgrade-desc {
 		@apply text-sm;
-		@apply text-base-content/60;
+		color: #8d6e63;
 	}
 
 	.upgrade-details {
@@ -225,18 +239,20 @@
 
 	.level-pip {
 		@apply flex-1;
-		@apply h-2;
+		@apply h-3;
 		@apply rounded-full;
-		@apply bg-base-300;
+		background: #e0d4c0;
+		border: 1px solid #c9b896;
 	}
 
 	.level-pip.filled {
-		@apply bg-primary;
+		background: linear-gradient(to bottom, #ffb74d, #ff9800);
+		border-color: #f57c00;
 	}
 
 	.level-text {
-		@apply text-xs;
-		@apply text-base-content/50;
+		@apply text-xs font-medium;
+		color: #8d6e63;
 		@apply text-right;
 	}
 
@@ -244,48 +260,62 @@
 		@apply flex items-center justify-between;
 		@apply mb-3;
 		@apply px-3 py-2;
-		@apply rounded-lg;
-		@apply bg-base-100;
+		@apply rounded-xl;
+		background: rgba(255, 248, 225, 0.8);
+		border: 2px solid #e8d4a8;
 	}
 
 	.effect-label {
 		@apply text-sm;
-		@apply text-base-content/60;
+		color: #8d6e63;
 	}
 
 	.effect-value {
 		@apply text-lg font-bold;
-		@apply text-primary;
+		color: #e65100;
 	}
 
 	.purchase-button {
 		@apply flex items-center justify-center gap-1;
-		@apply px-3 py-2;
-		@apply rounded-lg;
-		@apply bg-yellow-500;
-		@apply text-sm font-bold text-white;
+		@apply px-4 py-2;
+		@apply rounded-xl;
+		@apply text-sm font-bold;
 		@apply transition-all;
 		@apply active:scale-95;
 		@apply flex-shrink-0;
+		background: linear-gradient(to bottom, #ffd54f, #ffb300);
+		color: #5d4037;
+		border: 2px solid #ff8f00;
+		box-shadow: 0 3px 0 #e65100;
 	}
 
 	.purchase-button:hover:not(:disabled) {
-		@apply bg-yellow-600;
+		filter: brightness(1.05);
+	}
+
+	.purchase-button:active:not(:disabled) {
+		box-shadow: 0 1px 0 #e65100;
+		transform: translateY(2px) scale(0.95);
 	}
 
 	.purchase-button.disabled {
-		@apply bg-base-300;
-		@apply text-base-content/30;
+		background: #e0d4c0;
+		color: #a1887f;
+		border-color: #bcaaa4;
+		box-shadow: 0 2px 0 #a1887f;
 		@apply cursor-not-allowed;
 	}
 
 	.purchase-button.max {
-		@apply bg-base-300;
-		@apply text-base-content/50;
+		background: linear-gradient(to bottom, #81c784, #4caf50);
+		color: white;
+		border-color: #388e3c;
+		box-shadow: 0 3px 0 #2e7d32;
 		@apply px-4;
 	}
 
-	.purchase-button :global(.button-star) {
-		fill: currentColor;
+	.button-star {
+		width: 16px;
+		height: 16px;
 	}
 </style>

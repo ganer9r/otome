@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X, Star, TriangleAlert } from 'lucide-svelte';
+	import { X, TriangleAlert } from 'lucide-svelte';
 	import type { Ingredient } from '../lib/types';
 	import { GRADE_COLORS } from '../lib/types';
 	import { findIngredientById } from '../lib/data/ingredients';
@@ -161,7 +161,7 @@
 				<!-- 비용 및 해금 버튼 -->
 				<div class="unlock-section">
 					<div class="cost-display">
-						<Star size={20} class="star-icon" />
+						<img src="/imgs/ui/star.png" alt="star" class="star-icon" />
 						<span class="cost-amount">{totalCost}</span>
 					</div>
 
@@ -194,27 +194,35 @@
 		@apply fixed inset-0;
 		@apply z-50;
 		@apply flex items-center justify-center;
-		@apply bg-black/50;
+		background: rgba(0, 0, 0, 0.6);
 		@apply p-4;
 	}
 
 	.dialog-content {
 		@apply relative;
 		@apply w-full max-w-sm;
-		@apply bg-base-100;
-		@apply rounded-2xl;
+		@apply rounded-3xl;
 		@apply p-6;
-		@apply shadow-xl;
 		@apply flex flex-col items-center;
+		background: linear-gradient(to bottom, #fffde7, #fff8e1);
+		border: 4px solid #e8d4a8;
+		box-shadow:
+			0 8px 32px rgba(0, 0, 0, 0.25),
+			inset 0 2px 0 rgba(255, 255, 255, 0.8);
 	}
 
 	.close-btn {
 		@apply absolute top-3 right-3;
 		@apply p-2;
-		@apply rounded-full;
-		@apply text-base-content/50;
-		@apply hover:bg-base-200;
-		@apply transition-colors;
+		@apply rounded-xl;
+		color: #8d6e63;
+		background: rgba(255, 255, 255, 0.6);
+		border: 2px solid #d7ccc8;
+		@apply transition-all;
+	}
+
+	.close-btn:hover {
+		background: rgba(255, 255, 255, 0.9);
 	}
 
 	/* 재료 미리보기 */
@@ -227,46 +235,52 @@
 		@apply h-24 w-24;
 		@apply rounded-2xl;
 		@apply object-contain;
-		@apply bg-base-200;
-		@apply p-2;
+		@apply p-3;
+		background: rgba(255, 255, 255, 0.8);
+		border: 3px solid #e8d4a8;
+		box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 	}
 
 	.grade-badge {
 		@apply absolute -right-1 -bottom-1;
-		@apply px-2 py-0.5;
-		@apply rounded-full;
+		@apply px-2.5 py-1;
+		@apply rounded-xl;
 		@apply text-sm font-bold text-white;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 	}
 
 	.ingredient-name {
 		@apply text-xl font-bold;
-		@apply text-base-content;
+		color: #5d4037;
 		@apply mb-4;
 	}
 
 	/* 이미 해금됨 */
 	.already-unlocked {
 		@apply flex items-center gap-2;
-		@apply text-green-600;
-		@apply font-medium;
+		@apply font-bold;
+		color: #4caf50;
 	}
 
 	.check-icon {
 		@apply flex items-center justify-center;
-		@apply h-6 w-6;
+		@apply h-7 w-7;
 		@apply rounded-full;
-		@apply bg-green-500;
+		background: linear-gradient(to bottom, #81c784, #4caf50);
+		border: 2px solid #388e3c;
 		@apply text-sm font-bold text-white;
+		box-shadow: 0 2px 0 #2e7d32;
 	}
 
 	/* 경고 박스 */
 	.warning-box {
 		@apply flex items-center gap-2;
 		@apply px-4 py-2;
-		@apply rounded-lg;
-		@apply bg-amber-100;
-		@apply text-amber-700;
-		@apply text-sm font-medium;
+		@apply rounded-xl;
+		background: linear-gradient(to bottom, #fff3e0, #ffe0b2);
+		border: 2px solid #ffb74d;
+		color: #e65100;
+		@apply text-sm font-bold;
 		@apply mb-4;
 	}
 
@@ -283,12 +297,13 @@
 
 	.stack-item {
 		@apply relative;
-		@apply h-10 w-10;
+		@apply h-11 w-11;
 		@apply rounded-full;
-		@apply bg-base-200;
-		@apply border-base-100 border-2;
+		background: rgba(255, 255, 255, 0.9);
+		border: 3px solid #e8d4a8;
 		@apply overflow-hidden;
 		@apply flex-shrink-0;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
 	.stack-item:first-child {
@@ -303,19 +318,19 @@
 
 	.stack-more {
 		@apply relative;
-		@apply h-10 w-10;
+		@apply h-11 w-11;
 		@apply rounded-full;
-		@apply bg-base-300;
-		@apply border-base-100 border-2;
+		background: #e0d4c0;
+		border: 3px solid #c9b896;
 		@apply flex items-center justify-center;
 		@apply text-xs font-bold;
-		@apply text-base-content/70;
+		color: #8d6e63;
 		@apply flex-shrink-0;
 	}
 
 	.required-text {
-		@apply text-sm;
-		@apply text-base-content/60;
+		@apply text-sm font-medium;
+		color: #8d6e63;
 	}
 
 	/* 해금 섹션 */
@@ -325,43 +340,57 @@
 	}
 
 	.cost-display {
-		@apply flex items-center gap-1;
+		@apply flex items-center gap-2;
 		@apply mb-3;
+		@apply px-4 py-2;
+		@apply rounded-xl;
+		background: rgba(255, 248, 225, 0.8);
+		border: 2px solid #ffc107;
 	}
 
-	.cost-display :global(.star-icon) {
-		@apply text-yellow-500;
-		fill: currentColor;
+	.star-icon {
+		width: 24px;
+		height: 24px;
 	}
 
 	.cost-amount {
 		@apply text-2xl font-bold;
-		@apply text-yellow-600;
+		color: #e65100;
 	}
 
 	.unlock-btn {
 		@apply w-full;
 		@apply py-3;
 		@apply rounded-xl;
-		@apply bg-gradient-to-r from-purple-500 to-indigo-500;
-		@apply font-bold text-white;
+		@apply font-bold;
 		@apply transition-all;
 		@apply active:scale-95;
+		background: linear-gradient(to bottom, #ab47bc, #7b1fa2);
+		color: white;
+		border: 3px solid #6a1b9a;
+		box-shadow: 0 4px 0 #4a148c;
 	}
 
 	.unlock-btn:hover:not(:disabled) {
-		@apply from-purple-600 to-indigo-600;
+		filter: brightness(1.1);
+	}
+
+	.unlock-btn:active:not(:disabled) {
+		box-shadow: 0 2px 0 #4a148c;
+		transform: translateY(2px) scale(0.95);
 	}
 
 	.unlock-btn.disabled {
-		@apply bg-base-300 from-base-300 to-base-300;
-		@apply text-base-content/30;
+		background: #e0d4c0;
+		color: #a1887f;
+		border-color: #bcaaa4;
+		box-shadow: 0 3px 0 #a1887f;
 		@apply cursor-not-allowed;
 	}
 
 	.not-enough {
-		@apply mt-2;
-		@apply text-sm;
-		@apply text-error;
+		@apply mt-3;
+		@apply text-sm font-bold;
+		color: #d32f2f;
 	}
 </style>
