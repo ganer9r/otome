@@ -53,7 +53,7 @@
 	}
 
 	function goBack() {
-		goto('/cook2');
+		history.back();
 	}
 </script>
 

@@ -66,7 +66,7 @@
 	}
 
 	function goBack() {
-		goto('/cook2/upgrade');
+		history.back();
 	}
 </script>
 
