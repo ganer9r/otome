@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Play, Trophy, Utensils, Coins, ArrowUpCircle, Sparkles } from 'lucide-svelte';
+	import { onMount } from 'svelte';
 	import { unlockedIngredientsStore, unlockedDishesStore, runStore, starStore } from './lib/store';
 	import { INGREDIENTS } from './lib/data/ingredients';
 	import { RECIPES } from './lib/data/recipes';
@@ -17,8 +17,19 @@
 	let unlockedIngredients = $derived($unlockedIngredientsStore.length);
 	let unlockedDishes = $derived($unlockedDishesStore.size);
 
-	let ingredientProgress = $derived(Math.round((unlockedIngredients / totalIngredients) * 100));
-	let recipeProgress = $derived(Math.round((unlockedDishes / totalRecipes) * 100));
+	// 캐릭터 대사
+	const GREETINGS = [
+		'오늘도 요리 한 판?',
+		'재료는 준비됐어!',
+		'뭘 만들어 볼까?',
+		'손님들이 기다려!',
+		'자, 시작해보자고!'
+	];
+	let greeting = $state(GREETINGS[0]);
+
+	onMount(() => {
+		greeting = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
+	});
 
 	function startGame() {
 		goto('/cook2/play');
@@ -35,301 +46,320 @@
 	function goUnlock() {
 		goto('/cook2/unlock');
 	}
+
+	function goCollection() {
+		goto('/cook2/collection');
+	}
 </script>
 
 <div class="home-container">
-	<!-- 헤더 -->
-	<header class="header">
-		<div class="logo">
-			<img src="/imgs/ui/icon_circle.png" alt="" class="logo-icon" />
-			<h1 class="title">요리 대작전</h1>
-		</div>
-		<!-- 보유 스타 -->
-		<div class="star-badge">
-			<img src="/imgs/ui/star.png" alt="star" class="star-icon" />
-			<span class="star-count">{totalStars}</span>
+	<!-- 상단 리소스 바 -->
+	<header class="top-bar">
+		<div class="resource-group">
+			<div class="resource-badge star">
+				<img src="/imgs/ui/star.png" alt="star" class="resource-icon" />
+				<span class="resource-value">{totalStars}</span>
+			</div>
 		</div>
 	</header>
 
-	<!-- 진행률 카드 -->
-	<section class="progress-section">
-		<div class="progress-card">
-			<div class="progress-header">
-				<Utensils size={20} />
-				<span>재료 수집</span>
-			</div>
-			<div class="progress-bar">
-				<div class="progress-fill" style="width: {ingredientProgress}%"></div>
-			</div>
-			<div class="progress-text">
-				{unlockedIngredients} / {totalIngredients}
-			</div>
-		</div>
+	<!-- 타이틀 로고 -->
+	<div class="title-area">
+		<h1 class="game-title">요리 대작전</h1>
+	</div>
 
-		<div class="progress-card">
-			<div class="progress-header">
-				<Trophy size={20} />
-				<span>레시피 발견</span>
-			</div>
-			<div class="progress-bar">
-				<div class="progress-fill recipe" style="width: {recipeProgress}%"></div>
-			</div>
-			<div class="progress-text">
-				{unlockedDishes} / {totalRecipes}
-			</div>
+	<!-- 캐릭터 영역 -->
+	<div class="character-area">
+		<div class="speech-bubble">
+			<span>{greeting}</span>
 		</div>
-	</section>
+		<img src="/imgs/character/chef_default.png" alt="셰프" class="character-img" />
+	</div>
 
-	<!-- 런 상태 카드 (진행 중일 때) -->
+	<!-- 런 진행 중 표시 -->
 	{#if runState.isRunning}
-		<section class="run-section">
-			<div class="run-card">
-				<div class="run-header">
-					<Coins size={24} class="text-yellow-500" />
-					<span class="run-title">진행 중인 런</span>
-				</div>
-				<div class="run-capital">
-					{runState.capital.toLocaleString()}원
-				</div>
-				<div class="run-turn">
-					턴 {runState.turn}
-				</div>
+		<div class="run-status">
+			<div class="run-info">
+				<span class="run-badge">PLAYING</span>
+				<span class="run-capital">{runState.capital.toLocaleString()}원</span>
 			</div>
-		</section>
+		</div>
 	{/if}
 
-	<!-- 메인 버튼 -->
-	<section class="action-section">
-		<div class="button-group">
-			{#if runState.isRunning}
-				<button class="game-button primary" onclick={continueGame}>
-					<Play size={28} />
-					<span>계속하기</span>
-				</button>
-			{:else}
-				<button class="game-button primary" onclick={startGame}>
-					<Play size={28} />
-					<span>요리 시작!</span>
-				</button>
-			{/if}
+	<!-- 메인 플레이 버튼 -->
+	<div class="main-action">
+		{#if runState.isRunning}
+			<button class="play-button" onclick={continueGame}>
+				<span class="play-icon">▶</span>
+				<span class="play-text">계속하기</span>
+			</button>
+		{:else}
+			<button class="play-button" onclick={startGame}>
+				<span class="play-icon">▶</span>
+				<span class="play-text">요리 시작</span>
+			</button>
+		{/if}
+	</div>
 
-			<div class="sub-buttons">
-				<button class="game-button secondary" onclick={goUpgrade}>
-					<ArrowUpCircle size={20} />
-					<span>업그레이드</span>
-				</button>
-				<button class="game-button secondary" onclick={goUnlock}>
-					<Sparkles size={20} />
-					<span>재료 해금</span>
-				</button>
+	<!-- 하단 메뉴 버튼들 -->
+	<nav class="bottom-menu">
+		<button class="menu-btn" onclick={goCollection}>
+			<div class="menu-icon-wrap">
+				<span class="menu-icon">📖</span>
 			</div>
-		</div>
-	</section>
+			<span class="menu-label">도감</span>
+			<span class="menu-badge">{unlockedDishes}/{totalRecipes}</span>
+		</button>
+
+		<button class="menu-btn" onclick={goUpgrade}>
+			<div class="menu-icon-wrap">
+				<span class="menu-icon">⬆️</span>
+			</div>
+			<span class="menu-label">강화</span>
+		</button>
+
+		<button class="menu-btn" onclick={goUnlock}>
+			<div class="menu-icon-wrap">
+				<span class="menu-icon">🔓</span>
+			</div>
+			<span class="menu-label">해금</span>
+			<span class="menu-badge">{unlockedIngredients}/{totalIngredients}</span>
+		</button>
+	</nav>
 </div>
 
 <style lang="postcss">
 	@reference '$styles/app.css';
 
 	.home-container {
-		@apply flex flex-col items-center;
-		@apply min-h-full;
-		@apply p-6;
+		@apply flex flex-col;
+		@apply h-full min-h-screen;
 		@apply relative;
-		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
+		background: linear-gradient(180deg, #4a90c2 0%, #7bb8d9 40%, #a8d4ea 70%, #d4eaf5 100%);
 	}
 
-	.header {
-		@apply py-6;
+	/* ===== 상단 리소스 바 ===== */
+	.top-bar {
+		@apply flex items-center justify-end;
+		@apply px-4 py-3;
+		@apply relative z-20;
 	}
 
-	.logo {
-		@apply flex flex-col items-center gap-2;
+	.resource-group {
+		@apply flex gap-2;
 	}
 
-	.logo-icon {
-		width: 56px;
-		height: 56px;
-		filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
-	}
-
-	.title {
-		@apply text-3xl font-bold;
-		color: #5d4037;
-		text-shadow:
-			2px 2px 0 #fff,
-			-1px -1px 0 #fff,
-			1px -1px 0 #fff,
-			-1px 1px 0 #fff;
-	}
-
-	.progress-section {
-		@apply w-full max-w-sm;
-		@apply flex flex-col gap-3;
-		@apply my-6;
-	}
-
-	.progress-card {
-		@apply rounded-2xl;
-		@apply p-4;
-		background: rgba(255, 255, 255, 0.85);
-		border: 3px solid #e8d4a8;
-		box-shadow:
-			0 4px 8px rgba(0, 0, 0, 0.1),
-			inset 0 1px 0 rgba(255, 255, 255, 0.8);
-	}
-
-	.progress-header {
-		@apply flex items-center gap-2;
-		@apply text-sm font-bold;
-		color: #6d4c41;
-		@apply mb-2;
-	}
-
-	.progress-bar {
-		@apply h-4;
-		background: #e0d4c0;
-		@apply rounded-full;
-		@apply overflow-hidden;
-		border: 2px solid #c9b896;
-		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-	}
-
-	.progress-fill {
-		@apply h-full;
-		background: linear-gradient(to bottom, #ffb74d, #ff9800);
-		@apply rounded-full;
-		@apply transition-all duration-500;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	}
-
-	.progress-fill.recipe {
-		background: linear-gradient(to bottom, #81c784, #4caf50);
-	}
-
-	.progress-text {
-		@apply text-right;
-		@apply text-sm font-bold;
-		color: #8d6e63;
-		@apply mt-1;
-	}
-
-	.action-section {
-		@apply flex-1;
-		@apply flex items-center justify-center;
-		@apply w-full;
-	}
-
-	.button-group {
-		@apply flex flex-col gap-4;
-		@apply w-full max-w-xs;
-	}
-
-	/* 게임 버튼 - 이미지 기반 */
-	.game-button {
-		@apply flex items-center justify-center gap-3;
-		@apply w-full;
-		@apply font-bold;
-		@apply transition-transform active:scale-95;
-		border: none;
-		background: none;
-		position: relative;
-		cursor: pointer;
-	}
-
-	.game-button.primary {
-		@apply py-5;
-		@apply text-xl;
-		color: #5d4037;
-		background: url('/imgs/ui/button_rectangle_depth_flat.png') center/100% 100% no-repeat;
-		min-height: 70px;
-		filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
-	}
-
-	.game-button.primary:hover {
-		filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2)) brightness(1.05);
-	}
-
-	.game-button.primary:active {
-		filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2)) brightness(0.95);
-	}
-
-	.game-button.secondary {
-		@apply flex-1;
-		@apply py-3;
-		@apply text-sm;
-		color: #5d4037;
-		background: url('/imgs/ui/button_rectangle_depth_gradient.png') center/100% 100% no-repeat;
-		min-height: 52px;
-		filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.15));
-	}
-
-	.game-button.secondary:hover {
-		filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.15)) brightness(1.05);
-	}
-
-	/* 런 상태 카드 */
-	.run-section {
-		@apply w-full max-w-sm;
-		@apply mb-4;
-	}
-
-	.run-card {
-		@apply rounded-2xl;
-		@apply p-4;
-		@apply text-center;
-		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
-		border: 3px solid #ffc107;
-		box-shadow:
-			0 4px 8px rgba(0, 0, 0, 0.15),
-			inset 0 1px 0 rgba(255, 255, 255, 0.8);
-	}
-
-	.run-header {
-		@apply flex items-center justify-center gap-2;
-		@apply mb-2;
-	}
-
-	.run-title {
-		@apply text-sm font-bold;
-		color: #f57c00;
-	}
-
-	.run-capital {
-		@apply text-3xl font-bold;
-		color: #e65100;
-		text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
-	}
-
-	.run-turn {
-		@apply text-sm font-medium;
-		color: #ff9800;
-		@apply mt-1;
-	}
-
-	/* 서브 버튼 그룹 */
-	.sub-buttons {
-		@apply flex gap-3;
-		@apply w-full;
-	}
-
-	/* 스타 뱃지 */
-	.star-badge {
+	.resource-badge {
 		@apply flex items-center gap-1;
-		@apply px-4 py-2;
+		@apply px-3 py-1.5;
 		@apply rounded-full;
-		@apply absolute top-6 right-6;
-		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
-		border: 3px solid #ffc107;
-		box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+		background: linear-gradient(180deg, #3d3d3d 0%, #1a1a1a 100%);
+		border: 3px solid #5a5a5a;
+		box-shadow:
+			0 4px 0 #0d0d0d,
+			inset 0 2px 0 rgba(255, 255, 255, 0.1);
 	}
 
-	.star-icon {
+	.resource-icon {
 		width: 24px;
 		height: 24px;
 	}
 
-	.star-count {
-		@apply text-base font-bold;
-		color: #e65100;
+	.resource-value {
+		@apply font-bold text-white;
+		font-size: 16px;
+		text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+	}
+
+	/* ===== 타이틀 영역 ===== */
+	.title-area {
+		@apply text-center;
+		@apply py-4;
+	}
+
+	.game-title {
+		@apply font-black;
+		font-size: clamp(36px, 10vw, 56px);
+		color: #fff;
+		text-shadow:
+			0 4px 0 #c17a30,
+			0 8px 0 #8b5a20,
+			0 2px 8px rgba(0, 0, 0, 0.3);
+		letter-spacing: 2px;
+		-webkit-text-stroke: 3px #8b5a20;
+		paint-order: stroke fill;
+	}
+
+	/* ===== 캐릭터 영역 ===== */
+	.character-area {
+		@apply flex-1;
+		@apply flex flex-col items-center justify-center;
+		@apply relative;
+		@apply px-4;
+		margin-top: -20px;
+	}
+
+	.speech-bubble {
+		@apply relative;
+		@apply px-6 py-3;
+		@apply rounded-3xl;
+		@apply font-bold;
+		font-size: clamp(16px, 4.5vw, 22px);
+		color: #4a3728;
+		background: #fff;
+		border: 4px solid #4a3728;
+		box-shadow: 0 4px 0 #2d2218;
+		margin-bottom: 16px;
+	}
+
+	.speech-bubble::after {
+		content: '';
+		@apply absolute;
+		bottom: -16px;
+		left: 50%;
+		transform: translateX(-50%);
+		border-left: 12px solid transparent;
+		border-right: 12px solid transparent;
+		border-top: 16px solid #4a3728;
+	}
+
+	.speech-bubble::before {
+		content: '';
+		@apply absolute;
+		bottom: -10px;
+		left: 50%;
+		transform: translateX(-50%);
+		border-left: 10px solid transparent;
+		border-right: 10px solid transparent;
+		border-top: 14px solid #fff;
+		z-index: 1;
+	}
+
+	.character-img {
+		width: clamp(200px, 55vw, 300px);
+		height: auto;
+		filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.15));
+	}
+
+	/* ===== 런 상태 ===== */
+	.run-status {
+		@apply flex justify-center;
+		@apply px-4 py-2;
+	}
+
+	.run-info {
+		@apply flex items-center gap-3;
+		@apply px-5 py-2;
+		@apply rounded-full;
+		background: linear-gradient(180deg, #3d3d3d 0%, #1a1a1a 100%);
+		border: 3px solid #5a5a5a;
+		box-shadow: 0 4px 0 #0d0d0d;
+	}
+
+	.run-badge {
+		@apply px-2 py-0.5;
+		@apply rounded;
+		@apply text-xs font-black;
+		background: #4caf50;
+		color: white;
+	}
+
+	.run-capital {
+		@apply font-bold text-white;
+		font-size: 18px;
+	}
+
+	/* ===== 메인 플레이 버튼 ===== */
+	.main-action {
+		@apply flex justify-center;
+		@apply px-6 py-4;
+	}
+
+	.play-button {
+		@apply flex items-center justify-center gap-3;
+		@apply w-full max-w-xs;
+		@apply py-5;
+		@apply rounded-2xl;
+		@apply font-black;
+		font-size: clamp(22px, 6vw, 28px);
+		color: #fff;
+		background: linear-gradient(180deg, #7cc576 0%, #4caf50 50%, #3d9140 100%);
+		border: none;
+		border-bottom: 6px solid #2d6b2f;
+		box-shadow:
+			0 6px 0 #1e4620,
+			0 10px 20px rgba(0, 0, 0, 0.3);
+		cursor: pointer;
+		text-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+		transition:
+			transform 0.1s,
+			box-shadow 0.1s;
+	}
+
+	.play-button:active {
+		transform: translateY(4px);
+		border-bottom-width: 2px;
+		box-shadow:
+			0 2px 0 #1e4620,
+			0 4px 10px rgba(0, 0, 0, 0.3);
+	}
+
+	.play-icon {
+		font-size: 24px;
+	}
+
+	/* ===== 하단 메뉴 ===== */
+	.bottom-menu {
+		@apply flex justify-center gap-4;
+		@apply px-4 py-6;
+		@apply pb-8;
+		background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+	}
+
+	.menu-btn {
+		@apply flex flex-col items-center gap-1;
+		@apply px-4 py-3;
+		@apply rounded-2xl;
+		@apply relative;
+		min-width: 80px;
+		background: linear-gradient(180deg, #fff 0%, #e8e8e8 100%);
+		border: 4px solid #8b7355;
+		border-bottom-width: 6px;
+		box-shadow: 0 4px 0 #5c4a38;
+		cursor: pointer;
+		transition: transform 0.1s;
+	}
+
+	.menu-btn:active {
+		transform: translateY(3px);
+		border-bottom-width: 3px;
+		box-shadow: 0 1px 0 #5c4a38;
+	}
+
+	.menu-icon-wrap {
+		@apply flex items-center justify-center;
+		width: 40px;
+		height: 40px;
+	}
+
+	.menu-icon {
+		font-size: 28px;
+	}
+
+	.menu-label {
+		@apply font-bold;
+		font-size: 13px;
+		color: #4a3728;
+	}
+
+	.menu-badge {
+		@apply absolute -top-2 -right-2;
+		@apply px-2 py-0.5;
+		@apply rounded-full;
+		@apply text-xs font-bold;
+		background: #ff5722;
+		color: white;
+		border: 2px solid #fff;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 	}
 </style>

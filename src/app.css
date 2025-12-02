@@ -3,6 +3,29 @@
 @plugin '@tailwindcss/typography';
 @plugin "daisyui";
 
+/* Jua 폰트 - 게임 UI용 */
+html,
+body {
+	font-family: 'Jua', sans-serif;
+	font-size: 18px; /* 기본 16px → 18px */
+}
+
+/* Jua 폰트 baseline 보정 */
+button,
+.btn,
+[class*='button'] {
+	line-height: 1;
+	padding-top: 0.1em;
+}
+
+/* Jua 폰트 baseline 보정 */
+button,
+.btn,
+[class*='button'] {
+	line-height: 1;
+	padding-top: 0.15em;
+}
+
 :root {
 	--color-primary: oklch(49% 0.27 292.581);
 	--color-primary-content: oklch(90% 0.1 292.581);
