@@ -1,135 +1,158 @@
 <script lang="ts">
-	import IngredientSelectScreen from './components/IngredientSelectScreen.svelte';
-	import CookingScreen from './components/CookingScreen.svelte';
-	import DishResultScreen from './components/DishResultScreen.svelte';
-	import RestartModal from './components/RestartModal.svelte';
-	import { findRecipe } from './lib/usecase/findRecipe';
-	import {
-		unlockedIngredientsStore,
-		failedCombinationsStore,
-		triedCombinationsStore,
-		successCombinationsStore,
-		newIngredientsStore
-	} from './lib/store';
-	import { findIngredientById } from './lib/data/ingredients';
-	import { modalStore } from '$lib/stores/modal';
-	import type { Recipe, Ingredient } from './lib/types';
+	import { goto } from '$app/navigation';
+	import { ChefHat, Play, Trophy, Utensils } from 'lucide-svelte';
+	import { unlockedIngredientsStore, unlockedDishesStore } from './lib/store';
+	import { INGREDIENTS } from './lib/data/ingredients';
+	import { RECIPES } from './lib/data/recipes';
 
-	// 선택 상태
-	let selectedIngredients = $state<number[]>([]);
+	// 통계 계산
+	let totalIngredients = INGREDIENTS.filter((i) => i.isIngredient).length;
+	let totalRecipes = RECIPES.length;
+	let unlockedIngredients = $derived($unlockedIngredientsStore.length);
+	let unlockedDishes = $derived($unlockedDishesStore.size);
 
-	// 단계별 상태 관리
-	let step = $state<'ingredient' | 'cooking' | 'result'>('ingredient');
-	let currentRecipe = $state<Recipe | null>(null);
-	let resultIngredient = $state<Ingredient | null>(null);
+	let ingredientProgress = $derived(Math.round((unlockedIngredients / totalIngredients) * 100));
+	let recipeProgress = $derived(Math.round((unlockedDishes / totalRecipes) * 100));
 
-	// 조리 시작 (조리기구 선택 없이 바로)
-	function handleCookRequest() {
-		// 1. 레시피 찾기
-		const recipe = findRecipe(selectedIngredients);
-
-		if (!recipe) {
-			// 실패한 조합 저장
-			failedCombinationsStore.addFailed(selectedIngredients);
-			triedCombinationsStore.addTried(selectedIngredients);
-			alert('해당 조합으로 만들 수 있는 요리가 없습니다!');
-			return;
-		}
-
-		// 2. 성공한 조합 저장
-		triedCombinationsStore.addTried(selectedIngredients);
-		successCombinationsStore.addSuccess(selectedIngredients, recipe.resultIngredientId);
-
-		// 3. 조리 시작 (cooking 화면 전환)
-		currentRecipe = recipe;
-		step = 'cooking';
-	}
-
-	// 조리 완료
-	async function handleCookingComplete() {
-		if (!currentRecipe) return;
-
-		// 1. 결과 재료 가져오기
-		const result = findIngredientById(currentRecipe.resultIngredientId);
-		if (result) {
-			resultIngredient = result;
-			// 2. 재료 오픈
-			unlockedIngredientsStore.unlock(currentRecipe.resultIngredientId);
-			// 3. 재료인 경우 NEW 뱃지 추가
-			if (result.isIngredient) {
-				newIngredientsStore.add(currentRecipe.resultIngredientId);
-			}
-		}
-
-		// 4. 결과 화면 표시
-		step = 'result';
-	}
-
-	// 결과 확인 완료
-	async function handleResultComplete() {
-		// 다시하기 모달 표시
-		await modalStore.open({
-			component: RestartModal,
-			props: {},
-			hideClose: true
-		});
-
-		// 초기화
-		step = 'ingredient';
-		selectedIngredients = [];
-		currentRecipe = null;
-		resultIngredient = null;
-	}
-
-	// 바로 써보기 (새 재료를 첫 번째 슬롯에 넣고 시작)
-	function handleUseNow(ingredientId: number) {
-		step = 'ingredient';
-		selectedIngredients = [ingredientId];
-		currentRecipe = null;
-		resultIngredient = null;
+	function startGame() {
+		goto('/cook2/play');
 	}
 </script>
 
-<svelte:head>
-	<meta
-		name="viewport"
-		content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-	/>
-</svelte:head>
+<div class="home-container">
+	<!-- 헤더 -->
+	<header class="header">
+		<div class="logo">
+			<ChefHat size={40} class="text-primary" />
+			<h1 class="title">요리 대작전</h1>
+		</div>
+	</header>
 
-{#if step === 'ingredient'}
-	<!-- 재료 선택 화면 -->
-	<IngredientSelectScreen bind:selectedIds={selectedIngredients} onCook={handleCookRequest} />
-{:else if step === 'cooking'}
-	<!-- 조리 화면 -->
-	<CookingScreen onComplete={handleCookingComplete} {selectedIngredients} />
-{:else if step === 'result' && resultIngredient && currentRecipe}
-	<!-- 결과 화면 -->
-	<DishResultScreen
-		{resultIngredient}
-		recipe={currentRecipe}
-		onComplete={handleResultComplete}
-		onUseNow={resultIngredient.isIngredient ? handleUseNow : undefined}
-	/>
-{/if}
+	<!-- 진행률 카드 -->
+	<section class="progress-section">
+		<div class="progress-card">
+			<div class="progress-header">
+				<Utensils size={20} />
+				<span>재료 수집</span>
+			</div>
+			<div class="progress-bar">
+				<div class="progress-fill" style="width: {ingredientProgress}%"></div>
+			</div>
+			<div class="progress-text">
+				{unlockedIngredients} / {totalIngredients}
+			</div>
+		</div>
+
+		<div class="progress-card">
+			<div class="progress-header">
+				<Trophy size={20} />
+				<span>레시피 발견</span>
+			</div>
+			<div class="progress-bar">
+				<div class="progress-fill recipe" style="width: {recipeProgress}%"></div>
+			</div>
+			<div class="progress-text">
+				{unlockedDishes} / {totalRecipes}
+			</div>
+		</div>
+	</section>
+
+	<!-- 메인 버튼 -->
+	<section class="action-section">
+		<button class="start-button" onclick={startGame}>
+			<Play size={32} />
+			<span>요리 시작!</span>
+		</button>
+	</section>
+</div>
 
 <style lang="postcss">
 	@reference '$styles/app.css';
 
-	:global(:root) {
-		/* vw 기반 폰트 크기 */
-		--font-xxl: clamp(28px, 7vw, 48px);
-		--font-xl: clamp(24px, 6vw, 40px);
-		--font-lg: clamp(18px, 4.5vw, 32px);
-		--font-md: clamp(14px, 3.5vw, 24px);
-		--font-sm: clamp(12px, 3vw, 18px);
-		--font-xs: clamp(10px, 2.5vw, 14px);
+	.home-container {
+		@apply flex flex-col items-center;
+		@apply min-h-full;
+		@apply p-6;
+		@apply from-base-200 to-base-100 bg-gradient-to-b;
+	}
 
-		/* vw 기반 간격 */
-		--spacing-xl: clamp(24px, 6vw, 40px);
-		--spacing-lg: clamp(16px, 4vw, 32px);
-		--spacing-md: clamp(12px, 3vw, 24px);
-		--spacing-sm: clamp(8px, 2vw, 16px);
-		--spacing-xs: clamp(4px, 1vw, 8px);
+	.header {
+		@apply py-8;
+	}
+
+	.logo {
+		@apply flex flex-col items-center gap-2;
+	}
+
+	.title {
+		@apply text-3xl font-bold;
+		@apply text-base-content;
+	}
+
+	.progress-section {
+		@apply w-full max-w-sm;
+		@apply flex flex-col gap-4;
+		@apply my-8;
+	}
+
+	.progress-card {
+		@apply bg-base-100;
+		@apply rounded-xl;
+		@apply p-4;
+		@apply shadow-md;
+	}
+
+	.progress-header {
+		@apply flex items-center gap-2;
+		@apply text-sm font-medium;
+		@apply text-base-content/70;
+		@apply mb-2;
+	}
+
+	.progress-bar {
+		@apply h-3;
+		@apply bg-base-300;
+		@apply rounded-full;
+		@apply overflow-hidden;
+	}
+
+	.progress-fill {
+		@apply h-full;
+		@apply bg-primary;
+		@apply rounded-full;
+		@apply transition-all duration-500;
+	}
+
+	.progress-fill.recipe {
+		@apply bg-secondary;
+	}
+
+	.progress-text {
+		@apply text-right;
+		@apply text-sm;
+		@apply text-base-content/50;
+		@apply mt-1;
+	}
+
+	.action-section {
+		@apply flex-1;
+		@apply flex items-center justify-center;
+		@apply w-full;
+	}
+
+	.start-button {
+		@apply flex items-center justify-center gap-3;
+		@apply w-full max-w-xs;
+		@apply py-5;
+		@apply bg-primary;
+		@apply text-primary-content;
+		@apply text-xl font-bold;
+		@apply rounded-2xl;
+		@apply shadow-lg;
+		@apply transition-transform active:scale-95;
+	}
+
+	.start-button:hover {
+		@apply bg-primary/90;
 	}
 </style>

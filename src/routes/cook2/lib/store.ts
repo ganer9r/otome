@@ -386,3 +386,37 @@ function createNewIngredientsStore() {
 }
 
 export const newIngredientsStore = createNewIngredientsStore();
+
+/**
+ * 해금된 요리(레시피 결과물) Store
+ * unlockedIngredientsStore에서 isIngredient=false인 것만 필터링
+ */
+export function getUnlockedDishIds(): Set<number> {
+	const unlockedIds = getUnlockedIngredientsCore();
+	const dishIds = new Set<number>();
+
+	for (const id of unlockedIds) {
+		const ing = findIngredientById(id);
+		if (ing && !ing.isIngredient) {
+			dishIds.add(id);
+		}
+	}
+	return dishIds;
+}
+
+function createUnlockedDishesStore() {
+	const { subscribe, set } = writable<Set<number>>(getUnlockedDishIds());
+
+	return {
+		subscribe,
+		refresh: () => {
+			set(getUnlockedDishIds());
+		},
+		reset: () => {
+			// unlockedIngredientsStore.reset()이 호출되면 이것도 같이 리셋됨
+			set(new Set());
+		}
+	};
+}
+
+export const unlockedDishesStore = createUnlockedDishesStore();
