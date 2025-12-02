@@ -2,7 +2,7 @@
 	import { Flame } from 'lucide-svelte';
 	import IngredientGrid from './IngredientGrid.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
-	import { runStore } from '../lib/store';
+	import { runStore, upgradeStore } from '../lib/store';
 	import type { Ingredient } from '../lib/types';
 
 	interface Props {
@@ -16,6 +16,15 @@
 
 	// 런 상태
 	let runState = $derived($runStore);
+
+	// 업그레이드 효과
+	let upgradeEffects = $derived(upgradeStore.getEffects());
+
+	// 할인 적용된 가격 계산
+	function getDiscountedPrice(basePrice: number): number {
+		const discount = upgradeEffects.ingredientDiscountRate;
+		return Math.round(basePrice * (1 - discount));
+	}
 
 	// 슬롯 DOM 참조
 	let slot1: HTMLButtonElement | undefined = $state();
@@ -38,8 +47,10 @@
 	// 요리하기 버튼 활성화 여부 (1개 이상 선택 시)
 	let canCook = $derived(selectedIds.length >= 1);
 
-	// 총 재료 비용
-	let totalCost = $derived(ingredients.reduce((sum, ing) => sum + (ing?.buyPrice ?? 0), 0));
+	// 총 재료 비용 (할인 적용)
+	let totalCost = $derived(
+		ingredients.reduce((sum, ing) => sum + getDiscountedPrice(ing?.buyPrice ?? 0), 0)
+	);
 
 	// 요리하기 버튼 핸들러
 	function handleCook() {
@@ -54,7 +65,7 @@
 		if (ingredientId !== undefined) {
 			const ingredient = findIngredientById(ingredientId);
 			if (ingredient?.buyPrice) {
-				runStore.earn(ingredient.buyPrice); // 환불
+				runStore.earn(getDiscountedPrice(ingredient.buyPrice)); // 할인된 가격으로 환불
 			}
 			selectedIds = selectedIds.filter((_, i) => i !== slotIndex);
 		}

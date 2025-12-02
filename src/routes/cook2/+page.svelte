@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { ChefHat, Play, Trophy, Utensils, Coins } from 'lucide-svelte';
-	import { unlockedIngredientsStore, unlockedDishesStore, runStore } from './lib/store';
+	import { ChefHat, Play, Trophy, Utensils, Coins, Star, ArrowUpCircle } from 'lucide-svelte';
+	import { unlockedIngredientsStore, unlockedDishesStore, runStore, starStore } from './lib/store';
 	import { INGREDIENTS } from './lib/data/ingredients';
 	import { RECIPES } from './lib/data/recipes';
 
 	// 런 상태
 	let runState = $derived($runStore);
+
+	// 보유 스타
+	let totalStars = $derived($starStore);
 
 	// 통계 계산
 	let totalIngredients = INGREDIENTS.filter((i) => i.isIngredient).length;
@@ -24,6 +27,10 @@
 	function continueGame() {
 		goto('/cook2/play');
 	}
+
+	function goUpgrade() {
+		goto('/cook2/upgrade');
+	}
 </script>
 
 <div class="home-container">
@@ -32,6 +39,11 @@
 		<div class="logo">
 			<ChefHat size={40} class="text-primary" />
 			<h1 class="title">요리 대작전</h1>
+		</div>
+		<!-- 보유 스타 -->
+		<div class="star-badge">
+			<Star size={20} class="star-icon" />
+			<span class="star-count">{totalStars}</span>
 		</div>
 	</header>
 
@@ -84,17 +96,24 @@
 
 	<!-- 메인 버튼 -->
 	<section class="action-section">
-		{#if runState.isRunning}
-			<button class="continue-button" onclick={continueGame}>
-				<Play size={32} />
-				<span>계속하기</span>
+		<div class="button-group">
+			{#if runState.isRunning}
+				<button class="continue-button" onclick={continueGame}>
+					<Play size={32} />
+					<span>계속하기</span>
+				</button>
+			{:else}
+				<button class="start-button" onclick={startGame}>
+					<Play size={32} />
+					<span>요리 시작!</span>
+				</button>
+			{/if}
+
+			<button class="upgrade-button" onclick={goUpgrade}>
+				<ArrowUpCircle size={24} />
+				<span>업그레이드</span>
 			</button>
-		{:else}
-			<button class="start-button" onclick={startGame}>
-				<Play size={32} />
-				<span>요리 시작!</span>
-			</button>
-		{/if}
+		</div>
 	</section>
 </div>
 
@@ -172,6 +191,11 @@
 		@apply w-full;
 	}
 
+	.button-group {
+		@apply flex flex-col gap-3;
+		@apply w-full max-w-xs;
+	}
+
 	.start-button {
 		@apply flex items-center justify-center gap-3;
 		@apply w-full max-w-xs;
@@ -240,5 +264,22 @@
 
 	.continue-button:hover {
 		@apply from-yellow-600 to-amber-600;
+	}
+
+	/* 업그레이드 버튼 */
+	.upgrade-button {
+		@apply flex items-center justify-center gap-2;
+		@apply w-full;
+		@apply py-3;
+		@apply bg-base-200;
+		@apply text-base-content;
+		@apply text-lg font-medium;
+		@apply rounded-xl;
+		@apply border-base-300 border;
+		@apply transition-all active:scale-95;
+	}
+
+	.upgrade-button:hover {
+		@apply bg-base-300;
 	}
 </style>

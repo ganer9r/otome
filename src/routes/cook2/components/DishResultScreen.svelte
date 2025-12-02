@@ -3,7 +3,7 @@
 	import type { Ingredient, Recipe } from '../lib/types';
 	import { GRADE_COLORS } from '../lib/types';
 	import { getProgressByGrade, getTotalProgress } from '../lib/data/ingredients';
-	import { unlockedIngredientsStore, runStore } from '../lib/store';
+	import { unlockedIngredientsStore, runStore, upgradeStore } from '../lib/store';
 	import ResultCard from './ResultCard.svelte';
 
 	interface Props {
@@ -20,8 +20,12 @@
 	// 런 상태
 	let runState = $derived($runStore);
 
-	// 판매 금액
-	let sellPrice = $derived(resultIngredient.sellPrice ?? 0);
+	// 업그레이드 효과
+	let upgradeEffects = $derived(upgradeStore.getEffects());
+
+	// 판매 금액 (업그레이드 보너스 적용)
+	let baseSellPrice = $derived(resultIngredient.sellPrice ?? 0);
+	let sellPrice = $derived(Math.round(baseSellPrice * (1 + upgradeEffects.sellBonusRate)));
 	// 순이익 (판매가 - 재료비)
 	let profit = $derived(sellPrice - ingredientCost);
 	let sold = $state(false);

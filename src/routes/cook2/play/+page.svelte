@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { Coins } from 'lucide-svelte';
+	import { Coins, Star } from 'lucide-svelte';
 	import IngredientSelectScreen from '../components/IngredientSelectScreen.svelte';
 	import CookingScreen from '../components/CookingScreen.svelte';
 	import DishResultScreen from '../components/DishResultScreen.svelte';
 	import RestartModal from '../components/RestartModal.svelte';
 	import TaxModal from '../components/TaxModal.svelte';
-	import BankruptModal from '../components/BankruptModal.svelte';
+	import RunEndModal from '../components/RunEndModal.svelte';
 	import { findRecipe } from '../lib/usecase/findRecipe';
 	import {
 		unlockedIngredientsStore,
@@ -16,7 +16,8 @@
 		successCombinationsStore,
 		newIngredientsStore,
 		runStore,
-		RUN_CONFIG
+		starStore,
+		upgradeStore
 	} from '../lib/store';
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { modalStore } from '$lib/stores/modal';
@@ -29,6 +30,15 @@
 	// 다음 세금까지 남은 턴
 	let turnsUntilTax = $derived(runStore.getTurnsUntilTax(runState.turn));
 
+	// 업그레이드 효과
+	let upgradeEffects = $derived(upgradeStore.getEffects());
+
+	// 할인 적용된 가격 계산
+	function getDiscountedPrice(basePrice: number): number {
+		const discount = upgradeEffects.ingredientDiscountRate;
+		return Math.round(basePrice * (1 - discount));
+	}
+
 	// 선택 상태
 	let selectedIngredients = $state<number[]>([]);
 
@@ -38,9 +48,9 @@
 	let resultIngredient = $state<Ingredient | null>(null);
 	let currentIngredientCost = $state(0);
 
-	// 세금/파산 모달 상태
+	// 세금/런종료 모달 상태
 	let showTaxModal = $state(false);
-	let showBankruptModal = $state(false);
+	let showRunEndModal = $state(false);
 	let lastTaxResult = $state<TaxResult | null>(null);
 
 	// 조리 시작 (조리기구 선택 없이 바로)
@@ -59,7 +69,7 @@
 			if (taxResult.collected) {
 				lastTaxResult = taxResult;
 				if (taxResult.isBankrupt) {
-					showBankruptModal = true;
+					showRunEndModal = true;
 				} else {
 					showTaxModal = true;
 				}
@@ -72,10 +82,10 @@
 			return;
 		}
 
-		// 2. 재료비 계산 (이미 차감되었으므로 기록만)
+		// 2. 재료비 계산 (할인 적용, 이미 차감되었으므로 기록만)
 		currentIngredientCost = selectedIngredients.reduce((sum, id) => {
 			const ing = findIngredientById(id);
-			return sum + (ing?.buyPrice ?? 0);
+			return sum + getDiscountedPrice(ing?.buyPrice ?? 0);
 		}, 0);
 
 		// 3. 성공한 조합 저장
@@ -116,8 +126,8 @@
 			lastTaxResult = taxResult;
 
 			if (taxResult.isBankrupt) {
-				// 파산 모달 표시
-				showBankruptModal = true;
+				// 파산 → 런 종료 모달 표시
+				showRunEndModal = true;
 			} else {
 				// 세금 모달 표시
 				showTaxModal = true;
@@ -142,9 +152,13 @@
 		continueAfterTax();
 	}
 
-	// 파산 모달 확인
-	function handleBankruptConfirm() {
-		showBankruptModal = false;
+	// 런 종료 모달 확인 (파산/포기)
+	function handleRunEndConfirm() {
+		// 스타 지급
+		if (runState.earnedStars > 0) {
+			starStore.add(runState.earnedStars);
+		}
+		showRunEndModal = false;
 		runStore.endRun();
 		goto('/cook2');
 	}
@@ -195,11 +209,19 @@
 	<!-- 상단 자본 표시 (조리 중에는 숨김) -->
 	{#if step !== 'cooking'}
 		<div class="capital-bar">
-			<div class="capital-display">
-				<Coins size={20} class="text-yellow-500" />
-				<span class="capital-amount" class:negative={runState.capital < 0}>
-					{runState.capital.toLocaleString()}원
-				</span>
+			<div class="left-section">
+				<div class="capital-display">
+					<Coins size={20} class="text-yellow-500" />
+					<span class="capital-amount" class:negative={runState.capital < 0}>
+						{runState.capital.toLocaleString()}원
+					</span>
+				</div>
+				{#if runState.earnedStars > 0}
+					<div class="star-display">
+						<Star size={16} class="star-icon" />
+						<span class="star-count">{runState.earnedStars}</span>
+					</div>
+				{/if}
 			</div>
 			<div class="turn-display">
 				<span class="turn-label">세금까지</span>
@@ -217,9 +239,15 @@
 		/>
 	{/if}
 
-	<!-- 파산 모달 -->
-	{#if showBankruptModal}
-		<BankruptModal finalCapital={runState.capital} onConfirm={handleBankruptConfirm} />
+	<!-- 런 종료 모달 (파산/포기) -->
+	{#if showRunEndModal}
+		<RunEndModal
+			isBankrupt={runState.isBankrupt}
+			survivedTurns={runState.turn}
+			earnedStars={runState.earnedStars}
+			finalCapital={runState.capital}
+			onConfirm={handleRunEndConfirm}
+		/>
 	{/if}
 
 	<!-- 게임 화면 -->
@@ -277,6 +305,10 @@
 		flex-shrink: 0;
 	}
 
+	.left-section {
+		@apply flex items-center gap-4;
+	}
+
 	.capital-display {
 		@apply flex items-center gap-2;
 	}
@@ -288,6 +320,21 @@
 
 	.capital-amount.negative {
 		@apply text-red-500;
+	}
+
+	.star-display {
+		@apply flex items-center gap-1;
+		@apply px-2 py-0.5;
+		@apply rounded-full bg-yellow-100;
+	}
+
+	.star-display :global(.star-icon) {
+		@apply text-yellow-500;
+		fill: currentColor;
+	}
+
+	.star-count {
+		@apply text-sm font-bold text-yellow-600;
 	}
 
 	.turn-display {

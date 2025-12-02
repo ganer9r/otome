@@ -4,7 +4,8 @@
 		triedCombinationsStore,
 		successCombinationsStore,
 		newIngredientsStore,
-		runStore
+		runStore,
+		upgradeStore
 	} from '../lib/store';
 	import { INGREDIENTS, findIngredientById } from '../lib/data/ingredients';
 	import { getPossiblePairsFor } from '../lib/data/recipes';
@@ -22,6 +23,9 @@
 
 	// 현재 자본
 	let runState = $derived($runStore);
+
+	// 업그레이드 효과
+	let upgradeEffects = $derived(upgradeStore.getEffects());
 
 	// 재료/요리 탭
 	// 등급 필터 탭 (G, F, E, D, C, B, A, R)
@@ -88,18 +92,25 @@
 		return true; // 항상 구매 가능
 	}
 
+	// 할인 적용된 가격 계산
+	function getDiscountedPrice(basePrice: number): number {
+		const discount = upgradeEffects.ingredientDiscountRate;
+		return Math.round(basePrice * (1 - discount));
+	}
+
 	// 재료 추가 (같은 재료도 추가 가능, 최대 2개)
 	function addIngredient(ingredient: Ingredient, event: MouseEvent) {
 		if (selectedIds.length < 2) {
-			const price = ingredient.buyPrice ?? 0;
+			const basePrice = ingredient.buyPrice ?? 0;
+			const discountedPrice = getDiscountedPrice(basePrice);
 
 			// 돈 부족하면 선택 불가
 			if (!canAfford(ingredient)) {
 				return;
 			}
 
-			// 돈 차감
-			runStore.spend(price);
+			// 돈 차감 (할인 적용)
+			runStore.spend(discountedPrice);
 
 			const target = event.currentTarget as HTMLElement;
 			const rect = target.getBoundingClientRect();
