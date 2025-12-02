@@ -29,6 +29,7 @@
 	let step = $state<'ingredient' | 'cooking' | 'result'>('ingredient');
 	let currentRecipe = $state<Recipe | null>(null);
 	let resultIngredient = $state<Ingredient | null>(null);
+	let currentIngredientCost = $state(0);
 
 	// 조리 시작 (조리기구 선택 없이 바로)
 	function handleCookRequest() {
@@ -43,11 +44,17 @@
 			return;
 		}
 
-		// 2. 성공한 조합 저장
+		// 2. 재료비 계산 (이미 차감되었으므로 기록만)
+		currentIngredientCost = selectedIngredients.reduce((sum, id) => {
+			const ing = findIngredientById(id);
+			return sum + (ing?.buyPrice ?? 0);
+		}, 0);
+
+		// 3. 성공한 조합 저장
 		triedCombinationsStore.addTried(selectedIngredients);
 		successCombinationsStore.addSuccess(selectedIngredients, recipe.resultIngredientId);
 
-		// 3. 조리 시작 (cooking 화면 전환)
+		// 4. 조리 시작 (cooking 화면 전환)
 		currentRecipe = recipe;
 		step = 'cooking';
 	}
@@ -86,6 +93,7 @@
 		selectedIngredients = [];
 		currentRecipe = null;
 		resultIngredient = null;
+		currentIngredientCost = 0;
 	}
 
 	// 바로 써보기 (새 재료를 첫 번째 슬롯에 넣고 시작)
@@ -141,6 +149,7 @@
 			<DishResultScreen
 				{resultIngredient}
 				recipe={currentRecipe}
+				ingredientCost={currentIngredientCost}
 				onComplete={handleResultComplete}
 				onUseNow={resultIngredient.isIngredient ? handleUseNow : undefined}
 			/>

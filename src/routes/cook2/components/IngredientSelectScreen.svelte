@@ -2,6 +2,7 @@
 	import { Flame } from 'lucide-svelte';
 	import IngredientGrid from './IngredientGrid.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
+	import { runStore } from '../lib/store';
 	import type { Ingredient } from '../lib/types';
 
 	interface Props {
@@ -12,6 +13,9 @@
 	}
 
 	let { selectedIds = $bindable(), onCook }: Props = $props();
+
+	// 런 상태
+	let runState = $derived($runStore);
 
 	// 슬롯 DOM 참조
 	let slot1: HTMLButtonElement | undefined = $state();
@@ -34,6 +38,9 @@
 	// 요리하기 버튼 활성화 여부 (1개 이상 선택 시)
 	let canCook = $derived(selectedIds.length >= 1);
 
+	// 총 재료 비용
+	let totalCost = $derived(ingredients.reduce((sum, ing) => sum + (ing?.buyPrice ?? 0), 0));
+
 	// 요리하기 버튼 핸들러
 	function handleCook() {
 		if (canCook) {
@@ -41,9 +48,14 @@
 		}
 	}
 
-	// 슬롯 클릭 시 해당 재료 제거
+	// 슬롯 클릭 시 해당 재료 제거 + 환불
 	function removeIngredient(slotIndex: number) {
-		if (selectedIds[slotIndex] !== undefined) {
+		const ingredientId = selectedIds[slotIndex];
+		if (ingredientId !== undefined) {
+			const ingredient = findIngredientById(ingredientId);
+			if (ingredient?.buyPrice) {
+				runStore.earn(ingredient.buyPrice); // 환불
+			}
 			selectedIds = selectedIds.filter((_, i) => i !== slotIndex);
 		}
 	}
@@ -109,7 +121,6 @@
 					<div class="slot-filled">
 						<img src={ingredients[0].imageUrl} alt={ingredients[0].name} class="slot-image" />
 						<span class="ingredient-text">{ingredients[0].name}</span>
-						<span class="remove-hint">탭하여 제거</span>
 					</div>
 				{:else}
 					<div class="slot-empty">
@@ -131,7 +142,6 @@
 					<div class="slot-filled">
 						<img src={ingredients[1].imageUrl} alt={ingredients[1].name} class="slot-image" />
 						<span class="ingredient-text">{ingredients[1].name}</span>
-						<span class="remove-hint">탭하여 제거</span>
 					</div>
 				{:else}
 					<div class="slot-empty">
@@ -144,6 +154,9 @@
 
 		<!-- 요리하기 버튼 -->
 		<div class="button-section">
+			{#if totalCost > 0}
+				<div class="cost-display">재료비: {totalCost}원</div>
+			{/if}
 			<button type="button" class="cook-button" disabled={!canCook} onclick={handleCook}>
 				<Flame size={20} class="flame-icon" />
 				<span class="button-text">요리하기</span>
@@ -270,16 +283,19 @@
 		font-size: var(--font-sm);
 	}
 
-	.remove-hint {
-		@apply text-orange-500/70;
-		@apply mt-0.5;
-		font-size: clamp(8px, 2vw, 10px);
-	}
-
 	/* 버튼 섹션 */
 	.button-section {
-		@apply flex justify-center;
+		@apply flex flex-col items-center gap-2;
 		@apply px-4 pb-6;
+	}
+
+	.cost-display {
+		@apply font-bold text-white;
+		@apply px-3 py-1;
+		@apply rounded-full;
+		@apply bg-black/40;
+		font-size: var(--font-sm);
+		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 	}
 
 	.cook-button {

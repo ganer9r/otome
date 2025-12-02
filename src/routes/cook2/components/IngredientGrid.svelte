@@ -168,9 +168,6 @@
 					>
 						<img src={ingredient.imageUrl} alt={ingredient.name} class="ingredient-image" />
 						<div class="ingredient-name">{ingredient.name}</div>
-						<div class="price-tag" class:unaffordable={!affordable}>
-							{price}원
-						</div>
 						{#if isNew}
 							<div class="new-badge">NEW</div>
 						{/if}
@@ -229,9 +226,6 @@
 								>
 									<img src={ingredient.imageUrl} alt={ingredient.name} class="ingredient-image" />
 									<div class="ingredient-name">{ingredient.name}</div>
-									<div class="price-tag" class:unaffordable={!affordable}>
-										{price}원
-									</div>
 									{#if isNew}
 										<div class="new-badge">NEW</div>
 									{/if}
@@ -532,20 +526,6 @@
 	.result-image {
 		@apply h-5 w-5;
 		@apply object-contain;
-	}
-
-	/* 가격 표시 */
-	.price-tag {
-		@apply text-xs font-bold;
-		@apply text-yellow-600;
-		@apply bg-yellow-100;
-		@apply px-1.5 py-0.5;
-		@apply rounded-md;
-	}
-
-	.price-tag.unaffordable {
-		@apply text-red-500;
-		@apply bg-red-100;
 	}
 
 	/* 구매 불가 */

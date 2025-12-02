@@ -9,24 +9,27 @@
 	interface Props {
 		resultIngredient: Ingredient;
 		recipe: Recipe;
+		/** 재료비 (이미 차감됨) */
+		ingredientCost?: number;
 		onComplete?: () => void;
 		onUseNow?: (ingredientId: number) => void;
 	}
 
-	let { resultIngredient, recipe, onComplete, onUseNow }: Props = $props();
+	let { resultIngredient, recipe, ingredientCost = 0, onComplete, onUseNow }: Props = $props();
 
 	// 런 상태
 	let runState = $derived($runStore);
 
-	// 자동 판매 금액
-	let earnedAmount = $state(0);
+	// 판매 금액
+	let sellPrice = $derived(resultIngredient.sellPrice ?? 0);
+	// 순이익 (판매가 - 재료비)
+	let profit = $derived(sellPrice - ingredientCost);
 	let sold = $state(false);
 
 	// 런 진행 중이면 자동 판매 (1회만)
 	$effect(() => {
-		if (!sold && runState.isRunning && resultIngredient.sellPrice) {
-			earnedAmount = resultIngredient.sellPrice;
-			runStore.earn(resultIngredient.sellPrice);
+		if (!sold && runState.isRunning && sellPrice > 0) {
+			runStore.earn(sellPrice);
 			sold = true;
 		}
 	});
@@ -177,12 +180,31 @@
 
 				{#if stage === 'result'}
 					<div class="result-ui">
-						{#if earnedAmount > 0}
-							<div class="earned-amount">+{earnedAmount.toLocaleString()}원</div>
-						{/if}
-
-						{#if earnedAmount > 0}
-							<div class="earned-amount">+{earnedAmount.toLocaleString()}원</div>
+						<!-- 수익 정보 -->
+						{#if sellPrice > 0}
+							<div class="profit-section">
+								<div class="profit-row">
+									<span class="profit-label">판매</span>
+									<span class="profit-value sell">+{sellPrice.toLocaleString()}원</span>
+								</div>
+								{#if ingredientCost > 0}
+									<div class="profit-row">
+										<span class="profit-label">재료비</span>
+										<span class="profit-value cost">-{ingredientCost.toLocaleString()}원</span>
+									</div>
+									<div class="profit-divider"></div>
+									<div class="profit-row total">
+										<span class="profit-label">순이익</span>
+										<span
+											class="profit-value"
+											class:positive={profit > 0}
+											class:negative={profit < 0}
+										>
+											{profit > 0 ? '+' : ''}{profit.toLocaleString()}원
+										</span>
+									</div>
+								{/if}
+							</div>
 						{/if}
 						<div class="progress-section">
 							<div class="progress-item">
@@ -511,6 +533,59 @@
 			opacity: 1;
 			transform: translateY(0);
 		}
+	}
+
+	/* 수익 섹션 */
+	.profit-section {
+		@apply flex w-full flex-col rounded-xl bg-white/80 shadow-md;
+		padding: 1.5vh 2vh;
+		gap: 0.6vh;
+	}
+
+	.profit-row {
+		@apply flex w-full items-center justify-between;
+	}
+
+	.profit-row.total {
+		@apply pt-1;
+	}
+
+	.profit-label {
+		@apply font-medium text-gray-600;
+		font-size: clamp(11px, 1.5vh, 13px);
+	}
+
+	.profit-row.total .profit-label {
+		@apply font-bold text-gray-800;
+		font-size: clamp(12px, 1.7vh, 14px);
+	}
+
+	.profit-value {
+		@apply font-bold;
+		font-size: clamp(12px, 1.6vh, 14px);
+	}
+
+	.profit-value.sell {
+		@apply text-green-600;
+	}
+
+	.profit-value.cost {
+		@apply text-red-500;
+	}
+
+	.profit-value.positive {
+		@apply text-green-600;
+		font-size: clamp(14px, 2vh, 18px);
+	}
+
+	.profit-value.negative {
+		@apply text-red-500;
+		font-size: clamp(14px, 2vh, 18px);
+	}
+
+	.profit-divider {
+		@apply w-full border-t border-gray-300;
+		margin: 0.3vh 0;
 	}
 
 	.progress-section {
