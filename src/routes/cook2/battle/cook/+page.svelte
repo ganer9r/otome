@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { Tween } from 'svelte/motion';
+	import { cubicOut, elasticOut } from 'svelte/easing';
 	import { battleStore } from '../lib/battle-store';
 	import { findIngredientById } from '../../lib/data/ingredients';
 
@@ -13,295 +15,341 @@
 	let currentStepNum = $derived(battleState.currentStepIndex + 1);
 
 	// 조리 애니메이션 상태
-	let phase = $state<'drop' | 'cooking' | 'explode' | 'result' | 'serve'>('drop');
+	let phase = $state<'intro' | 'drop' | 'cooking' | 'result' | 'serve'>('intro');
 
-	// 냄비 이미지
-	const potImage = '/imgs/cw_pot.webp';
+	// 진행 게이지
+	const progress = new Tween(0, { duration: 2000, easing: cubicOut });
+
+	// 캐릭터 스케일
+	const chefScale = new Tween(1, { duration: 300, easing: elasticOut });
+
+	// 파티클
+	let particles = $state<Array<{ id: number; x: number; delay: number; type: 'steam' | 'spark' }>>(
+		[]
+	);
+	let particleId = 0;
+
+	// 배경 회전
+	const bgRotation = new Tween(0, { duration: 100 });
 
 	onMount(() => {
-		// 대결 중이 아니거나 레시피 선택 안됐으면 돌아가기
 		if (!battleState.isInBattle || !battleState.selectedRecipeId) {
 			goto('/cook2/battle');
 			return;
 		}
 
-		// 조리 시작
-		startCooking();
+		// 배경 회전
+		const rotateBg = () => {
+			bgRotation.set(bgRotation.current + 0.3);
+			requestAnimationFrame(rotateBg);
+		};
+		rotateBg();
+
+		// 인트로 후 시작
+		setTimeout(() => {
+			startCooking();
+		}, 500);
 	});
+
+	function createParticles(type: 'steam' | 'spark', count: number) {
+		const newParticles: Array<{ id: number; x: number; delay: number; type: 'steam' | 'spark' }> =
+			[];
+		for (let i = 0; i < count; i++) {
+			newParticles.push({
+				id: particleId++,
+				x: 40 + Math.random() * 20,
+				delay: Math.random() * 0.5,
+				type
+			});
+		}
+		particles = [...particles, ...newParticles];
+
+		setTimeout(() => {
+			particles = particles.filter((p) => !newParticles.includes(p));
+		}, 2000);
+	}
 
 	function startCooking() {
 		phase = 'drop';
+		chefScale.set(1.05);
 
-		// 1초 후 조리 시작
+		setTimeout(() => {
+			chefScale.set(1);
+		}, 200);
+
+		// 재료 떨어진 후 조리 시작
 		setTimeout(() => {
 			phase = 'cooking';
+			progress.set(0);
+			progress.set(100, { duration: 2500 });
 
-			// 2초 후 폭발
+			// 증기 파티클
+			createParticles('steam', 5);
+			const steamInterval = setInterval(() => {
+				if (phase === 'cooking') {
+					createParticles('steam', 3);
+				} else {
+					clearInterval(steamInterval);
+				}
+			}, 800);
+
+			// 조리 완료
 			setTimeout(() => {
-				phase = 'explode';
+				phase = 'result';
+				chefScale.set(1.1);
+				createParticles('spark', 8);
 
-				// 0.5초 후 결과 표시
 				setTimeout(() => {
-					phase = 'result';
+					chefScale.set(1);
+				}, 300);
 
-					// 1.5초 후 다음 단계 또는 서빙
-					setTimeout(() => {
-						if (currentStepNum < totalSteps) {
-							battleStore.nextStep();
-							startCooking();
-						} else {
-							// 마지막 단계 → 서빙 화면 (버튼 클릭 대기)
-							phase = 'serve';
-						}
-					}, 1500);
-				}, 500);
-			}, 2000);
-		}, 1000);
+				// 다음 단계 또는 서빙
+				setTimeout(() => {
+					if (currentStepNum < totalSteps) {
+						battleStore.nextStep();
+						progress.set(0);
+						startCooking();
+					} else {
+						phase = 'serve';
+						chefScale.set(1.15);
+						createParticles('spark', 12);
+					}
+				}, 1500);
+			}, 2500);
+		}, 1200);
 	}
 
 	function goToBattle() {
-		// 대결 화면으로 이동
 		goto('/cook2/battle/versus');
 	}
 </script>
 
-<div class="cook-container">
-	<!-- 단계 표시 -->
-	<header class="header">
-		<div class="step-indicator">
-			<span class="step-current">{currentStepNum}</span>
-			<span class="step-divider">/</span>
-			<span class="step-total">{totalSteps}</span>
+<div class="cook-screen">
+	<!-- 배경 레이어 -->
+	<div class="bg-layer">
+		<div class="sunburst" style="transform: rotate({bgRotation.current}deg)">
+			<img src="/imgs/bg-sunburst.png" alt="" />
 		</div>
-	</header>
+		<div class="bg-gradient"></div>
+	</div>
 
-	{#if currentStep}
-		<div class="cooking-area">
-			<!-- 재료 떨어지기 -->
-			{#if phase === 'drop'}
-				<div class="drop-area">
+	<!-- 파티클 -->
+	<div class="particles-layer">
+		{#each particles as particle (particle.id)}
+			{#if particle.type === 'steam'}
+				<div
+					class="particle steam"
+					style="left: {particle.x}%; animation-delay: {particle.delay}s"
+				></div>
+			{:else}
+				<div
+					class="particle spark"
+					style="left: {particle.x}%; animation-delay: {particle.delay}s"
+				></div>
+			{/if}
+		{/each}
+	</div>
+
+	<!-- 메인 컨텐츠 -->
+	<div class="content">
+		<!-- 헤더: 단계 표시 -->
+		<header class="header">
+			<div class="step-badge">
+				<span class="step-label">STEP</span>
+				<span class="step-current">{currentStepNum}</span>
+				<span class="step-divider">/</span>
+				<span class="step-total">{totalSteps}</span>
+			</div>
+		</header>
+
+		{#if currentStep}
+			<!-- 상단 영역: 조합 공식 + 결과/게이지 -->
+			<div class="top-area">
+				<!-- 조합 공식 표시 -->
+				<div class="recipe-formula" class:show={phase === 'drop' || phase === 'cooking'}>
 					{#each currentStep.ingredientIds as ingId, i}
 						{@const ing = findIngredientById(ingId)}
-						<div class="dropping-ingredient" style="--delay: {i * 0.3}s">
+						<div class="formula-item" style="animation-delay: {i * 0.15}s">
 							{#if ing?.imageUrl}
 								<img src={ing.imageUrl} alt={ing.name} />
 							{:else}
-								<span>🥬</span>
+								<span class="emoji">🥬</span>
 							{/if}
 						</div>
+						{#if i < currentStep.ingredientIds.length - 1}
+							<span class="formula-plus">+</span>
+						{/if}
 					{/each}
+					<span class="formula-arrow">→</span>
+					<div class="formula-result">
+						<span class="result-question">?</span>
+					</div>
 				</div>
-			{/if}
 
-			<!-- 냄비 -->
-			{#if phase !== 'serve'}
-				<div class="pot-area">
+				<!-- 진행 게이지 -->
+				{#if phase === 'cooking'}
+					<div class="progress-section">
+						<div class="progress-bar">
+							<div class="progress-fill" style="width: {progress.current}%">
+								<div class="progress-shine"></div>
+							</div>
+							<div class="progress-glow" style="left: {progress.current}%"></div>
+						</div>
+						<div class="progress-label">조리 중...</div>
+					</div>
+				{/if}
+
+				<!-- 결과 표시 (캐릭터 위에) -->
+				{#if phase === 'result'}
+					{@const result = findIngredientById(currentStep.resultId)}
+					<div class="result-popup">
+						<div class="result-dish">
+							{#if result?.imageUrl}
+								<img src={result.imageUrl} alt={result.name} />
+							{:else}
+								<span>🍽️</span>
+							{/if}
+						</div>
+						<div class="result-info">
+							<span class="result-name">{currentStep.resultName}</span>
+							<span class="result-grade grade-{currentStep.resultGrade}"
+								>{currentStep.resultGrade}급</span
+							>
+						</div>
+					</div>
+				{/if}
+
+				<!-- 서빙 결과 (캐릭터 위에) -->
+				{#if phase === 'serve'}
+					{@const finalDish = findIngredientById(battleState.selectedRecipeId ?? 0)}
+					<div class="serve-wrapper">
+						<div class="serve-result">
+							<div class="serve-banner">
+								<span class="banner-text">요리 완성!</span>
+							</div>
+							<div class="serve-dish">
+								{#if finalDish?.imageUrl}
+									<img src={finalDish.imageUrl} alt={finalDish.name} />
+								{:else}
+									<span>🍽️</span>
+								{/if}
+							</div>
+							<span class="serve-name">{finalDish?.name ?? '???'}</span>
+						</div>
+						<button class="battle-button" onclick={goToBattle}>
+							<img src="/imgs/ui/button_rectangle_depth_gradient.png" alt="" class="btn-bg" />
+							<span class="btn-content">
+								<span class="btn-icon">⚔️</span>
+								<span class="btn-text">대결 출전!</span>
+							</span>
+						</button>
+					</div>
+				{/if}
+			</div>
+
+			<!-- 캐릭터 영역 (하단 고정) -->
+			<div class="cooking-area">
+				<!-- 캐릭터 -->
+				<div class="chef-container" style="transform: scale({chefScale.current})">
 					<img
-						src={potImage}
-						alt="냄비"
-						class="pot-image"
-						class:shaking={phase === 'cooking'}
-						class:exploding={phase === 'explode'}
+						src="/imgs/character/chef_cooking.webp"
+						alt="셰프"
+						class="chef-img"
+						class:cooking={phase === 'cooking'}
 					/>
-
-					<!-- 조리 중 이펙트 -->
-					{#if phase === 'cooking'}
-						<div class="steam-effects">
-							<span class="steam" style="--delay: 0s">💨</span>
-							<span class="steam" style="--delay: 0.3s">💨</span>
-							<span class="steam" style="--delay: 0.6s">💨</span>
-						</div>
-					{/if}
-
-					<!-- 폭발 이펙트 -->
-					{#if phase === 'explode'}
-						<div class="explode-effects">
-							<span class="spark" style="--x: -60px; --y: -80px">✨</span>
-							<span class="spark" style="--x: 60px; --y: -70px">✨</span>
-							<span class="spark" style="--x: -40px; --y: -100px">⭐</span>
-							<span class="spark" style="--x: 40px; --y: -90px">⭐</span>
-							<span class="spark" style="--x: 0px; --y: -120px">💥</span>
-						</div>
+					<!-- 캐릭터 후광 -->
+					{#if phase === 'serve'}
+						<div class="chef-glow"></div>
 					{/if}
 				</div>
-			{/if}
 
-			<!-- 결과 요리 -->
-			{#if phase === 'result'}
-				{@const result = findIngredientById(currentStep.resultId)}
-				<div class="result-area">
-					<div class="result-dish">
-						{#if result?.imageUrl}
-							<img src={result.imageUrl} alt={result.name} />
-						{:else}
-							<span>🍽️</span>
-						{/if}
+				<!-- 재료 떨어지는 애니메이션 -->
+				{#if phase === 'drop'}
+					<div class="dropping-ingredients">
+						{#each currentStep.ingredientIds as ingId, i}
+							{@const ing = findIngredientById(ingId)}
+							<div class="drop-item" style="--delay: {i * 0.2}s; --x: {(i - 0.5) * 60}px">
+								{#if ing?.imageUrl}
+									<img src={ing.imageUrl} alt={ing.name} />
+								{:else}
+									<span>🥬</span>
+								{/if}
+							</div>
+						{/each}
 					</div>
-					<span class="result-name">{currentStep.resultName}</span>
-					<span class="result-grade">{currentStep.resultGrade}급</span>
-				</div>
-			{/if}
-
-			<!-- 서빙 (마지막 단계 후) -->
-			{#if phase === 'serve'}
-				{@const finalDish = findIngredientById(battleState.selectedRecipeId ?? 0)}
-				<div class="serve-area">
-					<div class="serve-text">대결 요리 완성!</div>
-					<div class="serve-dish">
-						{#if finalDish?.imageUrl}
-							<img src={finalDish.imageUrl} alt={finalDish.name} />
-						{:else}
-							<span>🍽️</span>
-						{/if}
-					</div>
-					<span class="serve-name">{finalDish?.name ?? '???'}</span>
-					<button class="serve-button" onclick={goToBattle}>
-						<span class="serve-icon">⚔️</span>
-						<span class="serve-label">대결 출전!</span>
-					</button>
-				</div>
-			{/if}
-
-			<!-- 조리 중 텍스트 -->
-			{#if phase === 'cooking'}
-				<div class="cooking-text">조리 중...</div>
-			{/if}
-		</div>
-	{/if}
+				{/if}
+			</div>
+		{/if}
+	</div>
 </div>
 
 <style lang="postcss">
 	@reference '$styles/app.css';
 
-	.cook-container {
-		@apply flex flex-col;
+	.cook-screen {
+		@apply relative;
 		@apply h-full min-h-screen;
-		background: linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 50%, #0f3460 100%);
-		overflow: hidden;
+		@apply overflow-hidden;
 	}
 
-	.header {
-		@apply flex items-center justify-center;
-		@apply px-4 py-4;
+	/* 배경 */
+	.bg-layer {
+		@apply absolute inset-0;
+		background: linear-gradient(180deg, #ff9a56 0%, #ff6b35 30%, #d84315 70%, #bf360c 100%);
 	}
 
-	.step-indicator {
-		@apply px-4 py-2;
-		@apply rounded-full;
-		@apply font-bold;
-		background: rgba(255, 255, 255, 0.1);
-		color: #fff;
-	}
-
-	.step-current {
-		color: #ffd700;
-		font-size: 20px;
-	}
-
-	.step-divider {
-		@apply mx-1;
-		color: #6b7280;
-	}
-
-	.step-total {
-		color: #9ca3af;
-	}
-
-	/* ===== 조리 영역 ===== */
-	.cooking-area {
-		@apply flex-1;
-		@apply flex flex-col items-center justify-center;
-		@apply relative;
-	}
-
-	/* 재료 떨어지기 */
-	.drop-area {
-		@apply absolute top-0;
-		@apply flex gap-8;
-	}
-
-	.dropping-ingredient {
-		@apply h-20 w-20;
-		animation: dropToPot 1s ease-in forwards;
-		animation-delay: var(--delay);
-		opacity: 0;
-	}
-
-	.dropping-ingredient img,
-	.dropping-ingredient span {
-		@apply h-full w-full object-contain;
-		font-size: 48px;
-	}
-
-	@keyframes dropToPot {
-		0% {
-			transform: translateY(0) rotate(0deg);
-			opacity: 1;
-		}
-		80% {
-			opacity: 1;
-		}
-		100% {
-			transform: translateY(300px) rotate(360deg);
-			opacity: 0;
-		}
-	}
-
-	/* 냄비 */
-	.pot-area {
-		@apply relative;
-		@apply flex items-center justify-center;
-	}
-
-	.pot-image {
-		width: 160px;
-		height: 160px;
-		object-fit: contain;
-		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
-		transition: transform 0.1s;
-	}
-
-	.pot-image.shaking {
-		animation: shake 0.2s ease-in-out infinite;
-	}
-
-	.pot-image.exploding {
-		animation: explodePot 0.5s ease-out;
-	}
-
-	@keyframes shake {
-		0%,
-		100% {
-			transform: rotate(-3deg) scale(1);
-		}
-		50% {
-			transform: rotate(3deg) scale(1.02);
-		}
-	}
-
-	@keyframes explodePot {
-		0% {
-			transform: scale(1);
-		}
-		50% {
-			transform: scale(1.3);
-		}
-		100% {
-			transform: scale(1);
-		}
-	}
-
-	/* 증기 */
-	.steam-effects {
+	.sunburst {
 		@apply absolute;
-		top: -60px;
+		top: 30%;
+		left: 50%;
+		width: 200%;
+		height: 200%;
+		margin-top: -100%;
+		margin-left: -100%;
+		opacity: 0.2;
+		will-change: transform;
 	}
 
-	.steam {
+	.sunburst img {
+		@apply h-full w-full object-cover;
+		filter: brightness(1.5);
+	}
+
+	.bg-gradient {
+		@apply absolute inset-0;
+		background: radial-gradient(ellipse at center 70%, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+	}
+
+	/* 파티클 */
+	.particles-layer {
+		@apply absolute inset-0;
+		@apply pointer-events-none;
+		z-index: 5;
+	}
+
+	.particle {
 		@apply absolute;
-		font-size: 32px;
-		animation: steamRise 1s ease-out infinite;
-		animation-delay: var(--delay);
+		bottom: 30%;
+	}
+
+	.particle.steam {
+		width: 20px;
+		height: 20px;
+		background: rgba(255, 255, 255, 0.6);
+		border-radius: 50%;
+		filter: blur(8px);
+		animation: steamRise 2s ease-out forwards;
+		animation-delay: var(--delay, 0s);
+	}
+
+	.particle.spark {
+		width: 8px;
+		height: 8px;
+		background: #ffd700;
+		border-radius: 50%;
+		box-shadow: 0 0 10px #ffd700;
+		animation: sparkBurst 0.8s ease-out forwards;
+		animation-delay: var(--delay, 0s);
 	}
 
 	@keyframes steamRise {
@@ -310,89 +358,285 @@
 			opacity: 0.8;
 		}
 		100% {
-			transform: translateY(-80px) scale(1.2);
+			transform: translateY(-150px) scale(2);
 			opacity: 0;
 		}
 	}
 
-	/* 폭발 이펙트 */
-	.explode-effects {
-		@apply absolute;
-		top: 0;
-	}
-
-	.spark {
-		@apply absolute;
-		font-size: 32px;
-		animation: sparkExplode 0.5s ease-out forwards;
-		transform: translate(var(--x), var(--y));
-	}
-
-	@keyframes sparkExplode {
+	@keyframes sparkBurst {
 		0% {
-			transform: translate(0, 0) scale(0);
-			opacity: 0;
-		}
-		50% {
+			transform: translateY(0) scale(0);
 			opacity: 1;
 		}
 		100% {
-			transform: translate(var(--x), var(--y)) scale(1.5);
+			transform: translateY(-100px) translateX(calc((var(--x, 0) - 50%) * 2)) scale(1);
 			opacity: 0;
 		}
 	}
 
-	/* 결과 */
-	.result-area {
-		@apply absolute;
-		@apply flex flex-col items-center gap-2;
-		top: 20%;
-		animation: resultPop 0.5s ease-out;
+	/* 메인 컨텐츠 */
+	.content {
+		@apply relative z-10;
+		@apply flex flex-col items-center;
+		@apply h-full min-h-screen;
+		@apply px-4 py-4;
 	}
 
-	.result-dish {
-		@apply h-32 w-32;
-		filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.5));
+	/* 헤더 */
+	.header {
+		@apply py-2;
 	}
 
-	.result-dish img,
-	.result-dish span {
-		@apply h-full w-full object-contain;
-		font-size: 80px;
+	.step-badge {
+		@apply flex items-center gap-1;
+		@apply px-5 py-2;
+		@apply rounded-full;
+		background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 100%);
+		border: 3px solid rgba(255, 255, 255, 0.3);
+		box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
 	}
 
-	.result-name {
-		@apply font-black text-white;
-		font-size: 24px;
-		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-	}
-
-	.result-grade {
+	.step-label {
 		@apply font-bold;
+		font-size: 12px;
+		color: rgba(255, 255, 255, 0.7);
+		letter-spacing: 2px;
+	}
+
+	.step-current {
+		@apply font-black;
+		font-size: 24px;
 		color: #ffd700;
+		text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+	}
+
+	.step-divider {
+		color: rgba(255, 255, 255, 0.5);
 		font-size: 18px;
 	}
 
-	@keyframes resultPop {
+	.step-total {
+		@apply font-bold;
+		font-size: 18px;
+		color: rgba(255, 255, 255, 0.8);
+	}
+
+	/* 상단 영역 (결과가 캐릭터 위로) */
+	.top-area {
+		@apply absolute;
+		@apply top-16 right-0 left-0;
+		@apply flex flex-col items-center justify-start;
+		@apply gap-4;
+		@apply pt-4;
+		z-index: 20;
+		pointer-events: none;
+	}
+
+	.top-area > * {
+		pointer-events: auto;
+	}
+
+	/* 조합 공식 */
+	.recipe-formula {
+		@apply flex items-center justify-center gap-2;
+		opacity: 0;
+		transform: translateY(-20px);
+		transition: all 0.3s ease-out;
+	}
+
+	.recipe-formula.show {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	.formula-item {
+		@apply h-12 w-12;
+		@apply rounded-xl;
+		@apply flex items-center justify-center;
+		background: rgba(255, 255, 255, 0.9);
+		border: 3px solid #8b5a20;
+		box-shadow: 0 3px 0 #5c3d15;
+		animation: formulaPop 0.3s ease-out backwards;
+	}
+
+	.formula-item img {
+		@apply h-10 w-10 object-contain;
+	}
+
+	.formula-item .emoji {
+		font-size: 28px;
+	}
+
+	.formula-plus,
+	.formula-arrow {
+		@apply font-black;
+		font-size: 20px;
+		color: #fff;
+		text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+	}
+
+	.formula-result {
+		@apply h-12 w-12;
+		@apply rounded-xl;
+		@apply flex items-center justify-center;
+		background: linear-gradient(180deg, #ffd700 0%, #ff9800 100%);
+		border: 3px solid #8b5a20;
+		box-shadow: 0 3px 0 #5c3d15;
+	}
+
+	.result-question {
+		@apply font-black;
+		font-size: 24px;
+		color: #fff;
+		text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+	}
+
+	@keyframes formulaPop {
 		0% {
-			transform: scale(0) translateY(50px);
+			transform: scale(0) rotate(-10deg);
 			opacity: 0;
 		}
-		60% {
-			transform: scale(1.2) translateY(0);
-		}
 		100% {
-			transform: scale(1) translateY(0);
+			transform: scale(1) rotate(0);
 			opacity: 1;
 		}
 	}
 
-	/* 조리 중 텍스트 */
-	.cooking-text {
-		@apply absolute bottom-32;
+	/* 요리 영역 (캐릭터) */
+	.cooking-area {
+		@apply absolute;
+		@apply top-1/4;
+		@apply right-0 left-0;
+		@apply flex flex-col items-center;
+		z-index: 10;
+	}
+
+	.chef-container {
+		@apply relative;
+		will-change: transform;
+	}
+
+	.chef-img {
+		width: clamp(180px, 50vw, 280px);
+		height: auto;
+		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+	}
+
+	.chef-img.cooking {
+		animation: chefBounce 0.6s ease-in-out infinite;
+	}
+
+	@keyframes chefBounce {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(-8px);
+		}
+	}
+
+	.chef-glow {
+		@apply absolute inset-0;
+		background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.4) 0%, transparent 70%);
+		animation: glowPulse 1s ease-in-out infinite alternate;
+	}
+
+	@keyframes glowPulse {
+		0% {
+			opacity: 0.5;
+			transform: scale(1);
+		}
+		100% {
+			opacity: 1;
+			transform: scale(1.1);
+		}
+	}
+
+	/* 재료 떨어지기 */
+	.dropping-ingredients {
+		@apply absolute;
+		top: -80px;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
+	.drop-item {
+		@apply absolute;
+		@apply h-16 w-16;
+		left: var(--x);
+		animation: dropIn 1s ease-in forwards;
+		animation-delay: var(--delay);
+		opacity: 0;
+	}
+
+	.drop-item img,
+	.drop-item span {
+		@apply h-full w-full object-contain;
+		font-size: 40px;
+	}
+
+	@keyframes dropIn {
+		0% {
+			transform: translateY(-50px) rotate(0deg);
+			opacity: 1;
+		}
+		80% {
+			opacity: 1;
+		}
+		100% {
+			transform: translateY(150px) rotate(360deg);
+			opacity: 0;
+		}
+	}
+
+	/* 진행 게이지 */
+	.progress-section {
+		@apply w-full max-w-xs;
+		@apply flex flex-col items-center gap-2;
+	}
+
+	.progress-bar {
+		@apply relative;
+		@apply h-6 w-full;
+		@apply rounded-full;
+		@apply overflow-visible;
+		background: linear-gradient(180deg, #1a1a1a 0%, #333 100%);
+		border: 3px solid #555;
+		box-shadow:
+			0 4px 0 #111,
+			inset 0 2px 4px rgba(0, 0, 0, 0.8);
+	}
+
+	.progress-fill {
+		@apply absolute top-0 bottom-0 left-0;
+		@apply rounded-full;
+		background: linear-gradient(180deg, #7dff7d 0%, #4caf50 50%, #2e7d32 100%);
+		box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4);
+		transition: width 0.1s;
+	}
+
+	.progress-shine {
+		@apply absolute inset-0;
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 50%);
+		border-radius: inherit;
+	}
+
+	.progress-glow {
+		@apply absolute top-1/2;
+		width: 16px;
+		height: 24px;
+		margin-left: -8px;
+		margin-top: -12px;
+		background: radial-gradient(ellipse, #fff 0%, transparent 70%);
+		transition: left 0.1s;
+	}
+
+	.progress-label {
 		@apply font-bold;
-		font-size: 24px;
-		color: #ff7043;
+		font-size: 16px;
+		color: #fff;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 		animation: pulse 1s ease-in-out infinite;
 	}
 
@@ -402,110 +646,217 @@
 			opacity: 1;
 		}
 		50% {
-			opacity: 0.5;
+			opacity: 0.6;
 		}
 	}
 
-	/* 서빙 (대결 출전) */
-	.serve-area {
-		@apply flex flex-col items-center gap-4;
-		animation: serveIn 0.8s ease-out;
+	/* 결과 팝업 (캐릭터 위로 겹침, 눈에 띄게) */
+	.result-popup {
+		@apply flex flex-col items-center gap-2;
+		@apply px-6 py-4;
+		@apply rounded-2xl;
+		background: rgba(0, 0, 0, 0.7);
+		border: 3px solid #ffd700;
+		box-shadow:
+			0 0 30px rgba(255, 215, 0, 0.5),
+			0 8px 32px rgba(0, 0, 0, 0.5);
+		animation: resultPop 0.5s ease-out;
 	}
 
-	@keyframes serveIn {
+	.result-dish {
+		@apply h-24 w-24;
+		filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.6));
+	}
+
+	.result-dish img,
+	.result-dish span {
+		@apply h-full w-full object-contain;
+		font-size: 64px;
+	}
+
+	.result-info {
+		@apply flex flex-col items-center;
+	}
+
+	.result-name {
+		@apply font-black;
+		font-size: 22px;
+		color: #fff;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+	}
+
+	.result-grade {
+		@apply font-bold;
+		@apply px-3 py-1;
+		@apply rounded-full;
+		font-size: 14px;
+	}
+
+	.result-grade.grade-D {
+		background: #78909c;
+		color: #fff;
+	}
+	.result-grade.grade-C {
+		background: #66bb6a;
+		color: #fff;
+	}
+	.result-grade.grade-B {
+		background: #42a5f5;
+		color: #fff;
+	}
+	.result-grade.grade-A {
+		background: #ab47bc;
+		color: #fff;
+	}
+	.result-grade.grade-S {
+		background: linear-gradient(90deg, #ffd700, #ff9800);
+		color: #fff;
+	}
+
+	@keyframes resultPop {
 		0% {
-			transform: scale(0.5) translateY(100px);
+			transform: scale(0) rotate(-10deg);
 			opacity: 0;
 		}
 		60% {
-			transform: scale(1.1) translateY(-20px);
+			transform: scale(1.2) rotate(5deg);
 		}
 		100% {
-			transform: scale(1) translateY(0);
+			transform: scale(1) rotate(0);
 			opacity: 1;
 		}
 	}
 
-	.serve-text {
+	/* 서빙 wrapper */
+	.serve-wrapper {
+		@apply relative;
+		@apply flex flex-col items-center;
+		animation: serveIn 0.8s ease-out;
+	}
+
+	/* 서빙 결과 (캐릭터 위로 겹침, 눈에 띄게) */
+	.serve-result {
+		@apply relative;
+		@apply flex flex-col items-center gap-2;
+		@apply px-8 py-6;
+		@apply pt-10;
+		@apply rounded-2xl;
+		background: rgba(0, 0, 0, 0.7);
+		border: 3px solid #ffd700;
+		box-shadow:
+			0 0 40px rgba(255, 215, 0, 0.6),
+			0 8px 32px rgba(0, 0, 0, 0.5);
+	}
+
+	.serve-banner {
+		@apply absolute;
+		@apply left-1/2;
+		top: -24px;
+		transform: translateX(-50%);
+		@apply px-5 py-2;
+		@apply rounded-full;
+		background: #ffd700;
+		border: 3px solid #5c3d15;
+		z-index: 10;
+	}
+
+	.banner-bg {
+		display: none;
+	}
+
+	.banner-text {
 		@apply font-black;
-		font-size: 28px;
-		color: #ffd700;
-		text-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+		@apply whitespace-nowrap;
+		font-size: 18px;
+		color: #5c3d15;
 	}
 
 	.serve-dish {
-		@apply h-40 w-40;
-		filter: drop-shadow(0 8px 24px rgba(255, 215, 0, 0.4));
-		animation: dishGlow 1.5s ease-in-out infinite;
-	}
-
-	@keyframes dishGlow {
-		0%,
-		100% {
-			filter: drop-shadow(0 8px 24px rgba(255, 215, 0, 0.4));
-		}
-		50% {
-			filter: drop-shadow(0 8px 32px rgba(255, 215, 0, 0.7));
-		}
+		@apply h-28 w-28;
+		filter: drop-shadow(0 8px 24px rgba(255, 215, 0, 0.5));
+		animation: dishFloat 2s ease-in-out infinite;
 	}
 
 	.serve-dish img,
 	.serve-dish span {
 		@apply h-full w-full object-contain;
-		font-size: 100px;
+		font-size: 80px;
+	}
+
+	@keyframes dishFloat {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(-10px);
+		}
 	}
 
 	.serve-name {
-		@apply font-black text-white;
+		@apply font-black;
 		font-size: 24px;
+		color: #fff;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 	}
 
-	.serve-button {
-		@apply flex items-center gap-2;
-		@apply px-8 py-4;
-		@apply rounded-full;
-		@apply mt-4;
+	.battle-button {
+		@apply relative;
+		@apply mt-6;
 		@apply cursor-pointer;
-		background: linear-gradient(180deg, #ff7043 0%, #d84315 100%);
+		background: none;
 		border: none;
-		border-bottom: 4px solid #bf360c;
-		box-shadow: 0 4px 0 #8d2608;
-		animation: actionPulse 1s ease-in-out infinite;
-		transition: transform 0.1s;
 	}
 
-	.serve-button:active {
-		transform: translateY(2px);
-		border-bottom-width: 2px;
-		box-shadow: 0 2px 0 #8d2608;
+	.battle-button:active {
+		transform: scale(0.95);
 	}
 
-	@keyframes actionPulse {
-		0%,
-		100% {
-			transform: scale(1);
-		}
-		50% {
-			transform: scale(1.05);
-		}
+	.btn-bg {
+		width: 200px;
+		height: auto;
 	}
 
-	@keyframes actionPulse {
-		0%,
-		100% {
-			transform: scale(1);
-		}
-		50% {
-			transform: scale(1.05);
-		}
+	.btn-content {
+		@apply absolute inset-0;
+		@apply flex items-center justify-center gap-2;
 	}
 
-	.serve-icon {
+	.btn-icon {
 		font-size: 24px;
 	}
 
-	.serve-label {
-		@apply font-black text-white;
+	.btn-text {
+		@apply font-black;
 		font-size: 18px;
+		color: #5c3d15;
+	}
+
+	@keyframes buttonPulse {
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.05);
+		}
+	}
+
+	.battle-button:active {
+		transform: scale(0.95);
+	}
+
+	@keyframes serveIn {
+		0% {
+			transform: scale(0) translateY(50px);
+			opacity: 0;
+		}
+		60% {
+			transform: scale(1.1) translateY(-10px);
+		}
+		100% {
+			transform: scale(1) translateY(0);
+			opacity: 1;
+		}
 	}
 </style>

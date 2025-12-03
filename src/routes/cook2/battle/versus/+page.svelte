@@ -119,6 +119,22 @@
 		}, 200);
 	}
 
+	// 점수 비율 계산 (내가 얼마나 유리한지, 0.3 ~ 0.7 범위로 제한)
+	function getMyPowerRatio() {
+		const total = myScore + opponentPower;
+		if (total === 0) return 0.5;
+		const raw = myScore / total;
+		// 너무 극단적이지 않게 0.3 ~ 0.7 범위로 제한
+		return Math.max(0.3, Math.min(0.7, raw));
+	}
+
+	// 실제 비율 (제한 없는 원본)
+	function getRealPowerRatio() {
+		const total = myScore + opponentPower;
+		if (total === 0) return 0.5;
+		return myScore / total;
+	}
+
 	async function myAttack() {
 		comboCount++;
 		battleText = comboCount > 2 ? `${comboCount} COMBO!` : '맛있다!';
@@ -133,8 +149,10 @@
 		vsScale.set(1);
 		shake(18);
 
-		// 게이지 상승
-		const damage = 8 + Math.random() * 12;
+		// 게이지 상승 - 내 점수 비율에 따라 데미지 결정 (작은 범위)
+		const ratio = getRealPowerRatio();
+		const baseDamage = 2 + ratio * 4; // 2~6 범위
+		const damage = baseDamage + Math.random() * 2;
 		gauge.set(Math.min(95, gauge.current + damage));
 	}
 
@@ -152,20 +170,28 @@
 		vsScale.set(1);
 		shake(18);
 
-		// 게이지 하락
-		const damage = 8 + Math.random() * 12;
+		// 게이지 하락 - 상대 점수 비율에 따라 데미지 결정 (작은 범위)
+		const ratio = 1 - getRealPowerRatio(); // 상대 비율
+		const baseDamage = 2 + ratio * 4; // 2~6 범위
+		const damage = baseDamage + Math.random() * 2;
 		gauge.set(Math.max(5, gauge.current - damage));
 	}
 
 	async function startBattle() {
 		const rounds = 12;
 
+		// 시작 게이지: 50 기준으로 비율만큼 조정 (40~60 범위)
+		const realRatio = getRealPowerRatio();
+		const startGauge = 50 + (realRatio - 0.5) * 20; // 40~60 범위
+		gauge.set(startGauge, { duration: 500 });
+		await new Promise((r) => setTimeout(r, 500));
+
 		for (let i = 0; i < rounds; i++) {
 			await new Promise((r) => setTimeout(r, 400));
 
-			// 승자 유리하게 확률 조정
-			const myAdvantage = myScore > opponentPower ? 0.6 : 0.4;
-			if (Math.random() < myAdvantage) {
+			// 점수 비율에 따라 공격 확률 결정 (0.3~0.7 범위)
+			const myAttackChance = getMyPowerRatio();
+			if (Math.random() < myAttackChance) {
 				await myAttack();
 			} else {
 				await opponentAttack();

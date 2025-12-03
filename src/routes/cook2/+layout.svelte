@@ -8,8 +8,10 @@
 
 	let { children }: Props = $props();
 
-	// 현재 경로가 play면 탭 숨김
-	let isPlayPage = $derived(page.url.pathname.includes('/cook2/play'));
+	// 현재 경로가 play 또는 battle이면 탭 숨김
+	let isFullScreen = $derived(
+		page.url.pathname.includes('/cook2/play') || page.url.pathname.includes('/cook2/battle')
+	);
 
 	const tabs = [
 		{ path: '/cook2', label: 'Home', icon: HomeIcon },
@@ -26,11 +28,11 @@
 </script>
 
 <div class="app-container">
-	<main class="main-content" class:full-screen={isPlayPage}>
+	<main class="main-content" class:full-screen={isFullScreen}>
 		{@render children()}
 	</main>
 
-	{#if !isPlayPage}
+	{#if !isFullScreen}
 		<nav class="bottom-tabs">
 			{#each tabs as tab}
 				<a href={tab.path} class="tab-item" class:active={isActive(tab.path)}>
