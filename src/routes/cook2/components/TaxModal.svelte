@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { getChefImage, getRandomDialogue } from '../lib/chef-images';
+
 	interface Props {
 		taxAmount: number;
 		capitalAfterTax: number;
@@ -6,11 +8,19 @@
 	}
 
 	let { taxAmount, capitalAfterTax, onConfirm }: Props = $props();
+
+	const chefImage = getChefImage('sad');
+	const chefDialogue = getRandomDialogue('sad');
 </script>
 
 <div class="tax-modal">
 	<div class="modal-content">
-		<div class="icon">🏛️</div>
+		<!-- 캐릭터 -->
+		<div class="chef-area">
+			<img src={chefImage} alt="셰프" class="chef-img" />
+			<div class="chef-bubble">{chefDialogue}</div>
+		</div>
+
 		<h2 class="title">세금 징수</h2>
 		<p class="description">국세청에서 세금을 징수합니다</p>
 
@@ -66,9 +76,26 @@
 		}
 	}
 
-	.icon {
-		font-size: 48px;
-		@apply mb-2;
+	/* 캐릭터 영역 */
+	.chef-area {
+		@apply flex flex-col items-center;
+		@apply mb-4;
+	}
+
+	.chef-img {
+		width: 100px;
+		height: auto;
+		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+	}
+
+	.chef-bubble {
+		@apply mt-2 px-4 py-2;
+		@apply rounded-xl;
+		@apply text-sm font-bold;
+		background: white;
+		border: 3px solid #5d4037;
+		color: #5d4037;
+		box-shadow: 0 3px 0 #3e2723;
 	}
 
 	.title {

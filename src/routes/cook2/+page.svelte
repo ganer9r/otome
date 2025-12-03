@@ -4,6 +4,9 @@
 	import { unlockedIngredientsStore, unlockedDishesStore, runStore, starStore } from './lib/store';
 	import { INGREDIENTS } from './lib/data/ingredients';
 	import { RECIPES } from './lib/data/recipes';
+	import { getChefImage, getRandomDialogue } from './lib/chef-images';
+	import { getChefByStage } from './battle/lib/chef-data';
+	import { battleStore } from './battle/lib/battle-store';
 
 	// 런 상태
 	let runState = $derived($runStore);
@@ -17,18 +20,12 @@
 	let unlockedIngredients = $derived($unlockedIngredientsStore.length);
 	let unlockedDishes = $derived($unlockedDishesStore.size);
 
-	// 캐릭터 대사
-	const GREETINGS = [
-		'오늘도 요리 한 판?',
-		'재료는 준비됐어!',
-		'뭘 만들어 볼까?',
-		'손님들이 기다려!',
-		'자, 시작해보자고!'
-	];
-	let greeting = $state(GREETINGS[0]);
+	// 캐릭터
+	const chefImage = getChefImage('default');
+	let greeting = $state(getRandomDialogue('default'));
 
 	onMount(() => {
-		greeting = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
+		greeting = getRandomDialogue('default');
 	});
 
 	function startGame() {
@@ -50,11 +47,20 @@
 	function goCollection() {
 		goto('/cook2/collection');
 	}
+
+	function goBattle() {
+		goto('/cook2/battle');
+	}
+
+	// 현재 대결 상대 (실제 데이터)
+	const clearedStage = battleStore.getClearedStage();
+	const currentChef = getChefByStage(clearedStage + 1);
 </script>
 
 <div class="home-container">
-	<!-- 상단 리소스 바 -->
+	<!-- 헤더: 타이틀 + 리소스 -->
 	<header class="top-bar">
+		<h1 class="game-title">흑백의 셰프</h1>
 		<div class="resource-group">
 			<div class="resource-badge star">
 				<img src="/imgs/ui/star.png" alt="star" class="resource-icon" />
@@ -63,17 +69,12 @@
 		</div>
 	</header>
 
-	<!-- 타이틀 로고 -->
-	<div class="title-area">
-		<h1 class="game-title">요리 대작전</h1>
-	</div>
-
 	<!-- 캐릭터 영역 -->
 	<div class="character-area">
 		<div class="speech-bubble">
 			<span>{greeting}</span>
 		</div>
-		<img src="/imgs/character/chef_default.png" alt="셰프" class="character-img" />
+		<img src={chefImage} alt="셰프" class="character-img" />
 	</div>
 
 	<!-- 런 진행 중 표시 -->
@@ -126,6 +127,20 @@
 			<span class="menu-badge">{unlockedIngredients}/{totalIngredients}</span>
 		</button>
 	</nav>
+
+	<!-- 플로팅 대결 버튼 -->
+	{#if currentChef}
+		<button class="floating-battle" onclick={goBattle}>
+			<span class="floating-icon">{currentChef.emoji}</span>
+			<span class="floating-vs">VS</span>
+			<span class="floating-badge">Stage {currentChef.stage}</span>
+		</button>
+	{:else}
+		<button class="floating-battle complete" onclick={goBattle}>
+			<span class="floating-icon">🏆</span>
+			<span class="floating-badge">완료!</span>
+		</button>
+	{/if}
 </div>
 
 <style lang="postcss">
@@ -138,14 +153,29 @@
 		background: linear-gradient(180deg, #4a90c2 0%, #7bb8d9 40%, #a8d4ea 70%, #d4eaf5 100%);
 	}
 
-	/* ===== 상단 리소스 바 ===== */
+	/* ===== 헤더: 타이틀 + 리소스 ===== */
 	.top-bar {
-		@apply flex items-center justify-end;
+		@apply relative;
+		@apply flex items-center justify-center;
 		@apply px-4 py-3;
-		@apply relative z-20;
+		@apply z-20;
+	}
+
+	.game-title {
+		@apply font-black;
+		@apply text-center;
+		font-size: clamp(32px, 8vw, 48px);
+		color: #fff;
+		text-shadow:
+			0 3px 0 #c17a30,
+			0 6px 0 #8b5a20;
+		letter-spacing: 2px;
+		-webkit-text-stroke: 2px #8b5a20;
+		paint-order: stroke fill;
 	}
 
 	.resource-group {
+		@apply absolute right-4;
 		@apply flex gap-2;
 	}
 
@@ -169,25 +199,6 @@
 		@apply font-bold text-white;
 		font-size: 16px;
 		text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
-	}
-
-	/* ===== 타이틀 영역 ===== */
-	.title-area {
-		@apply text-center;
-		@apply py-4;
-	}
-
-	.game-title {
-		@apply font-black;
-		font-size: clamp(36px, 10vw, 56px);
-		color: #fff;
-		text-shadow:
-			0 4px 0 #c17a30,
-			0 8px 0 #8b5a20,
-			0 2px 8px rgba(0, 0, 0, 0.3);
-		letter-spacing: 2px;
-		-webkit-text-stroke: 3px #8b5a20;
-		paint-order: stroke fill;
 	}
 
 	/* ===== 캐릭터 영역 ===== */
@@ -306,6 +317,52 @@
 
 	.play-icon {
 		font-size: 24px;
+	}
+
+	/* ===== 플로팅 대결 버튼 ===== */
+	.floating-battle {
+		@apply absolute;
+		@apply flex flex-col items-center justify-center;
+		right: 16px;
+		top: 180px;
+		width: 56px;
+		height: 56px;
+		@apply rounded-full;
+		background: #fff;
+		border: 3px solid #d84315;
+		cursor: pointer;
+		z-index: 50;
+		transition: transform 0.1s;
+	}
+
+	.floating-battle:active {
+		transform: scale(0.95);
+	}
+
+	.floating-icon {
+		font-size: 28px;
+	}
+
+	.floating-vs {
+		@apply absolute;
+		@apply px-1.5 py-0.5;
+		@apply rounded;
+		@apply font-black;
+		bottom: -10px;
+		background: #fff;
+		color: #d84315;
+		border: 2px solid #d84315;
+		font-size: 10px;
+		z-index: 10;
+	}
+
+	.floating-badge {
+		@apply absolute;
+		bottom: -38px;
+		@apply text-xs font-bold;
+		@apply whitespace-nowrap;
+		color: #4a3728;
+		text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 	}
 
 	/* ===== 하단 메뉴 ===== */

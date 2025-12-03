@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { getChefImage, getRandomDialogue, type ChefEmotion } from '../lib/chef-images';
+
 	interface Props {
 		/** 파산 여부 */
 		isBankrupt: boolean;
@@ -13,17 +15,18 @@
 	}
 
 	let { isBankrupt, survivedTurns, earnedStars, finalCapital, onConfirm }: Props = $props();
+
+	const emotion: ChefEmotion = isBankrupt ? 'angry' : 'proud';
+	const chefImage = getChefImage(emotion);
+	const chefDialogue = getRandomDialogue(emotion);
 </script>
 
 <div class="run-end-modal">
 	<div class="modal-content">
-		<!-- 아이콘 -->
-		<div class="icon">
-			{#if isBankrupt}
-				💸
-			{:else}
-				🏁
-			{/if}
+		<!-- 캐릭터 -->
+		<div class="chef-area">
+			<img src={chefImage} alt="셰프" class="chef-img" />
+			<div class="chef-bubble">{chefDialogue}</div>
 		</div>
 
 		<!-- 타이틀 -->
@@ -102,9 +105,26 @@
 		}
 	}
 
-	.icon {
-		font-size: 56px;
-		@apply mb-2;
+	/* 캐릭터 영역 */
+	.chef-area {
+		@apply flex flex-col items-center;
+		@apply mb-4;
+	}
+
+	.chef-img {
+		width: 100px;
+		height: auto;
+		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+	}
+
+	.chef-bubble {
+		@apply mt-2 px-4 py-2;
+		@apply rounded-xl;
+		@apply text-sm font-bold;
+		background: white;
+		border: 3px solid #5d4037;
+		color: #5d4037;
+		box-shadow: 0 3px 0 #3e2723;
 	}
 
 	.title {

@@ -4,6 +4,7 @@
 	import { GRADE_COLORS } from '../lib/types';
 	import { getProgressByGrade, getTotalProgress } from '../lib/data/ingredients';
 	import { unlockedIngredientsStore, runStore, upgradeStore } from '../lib/store';
+	import { getChefImage, getRandomDialogue, type ChefEmotion } from '../lib/chef-images';
 	import ResultCard from './ResultCard.svelte';
 
 	interface Props {
@@ -47,6 +48,21 @@
 	let canSkip = $state(true);
 
 	const potImage = '/imgs/cw_pot.webp';
+
+	// 캐릭터 이모션 결정
+	let chefEmotion = $derived((): ChefEmotion => {
+		if (resultIngredient.isIngredient) return 'surprised'; // 새 재료 발견
+		const gradeIndex = ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'R'].indexOf(resultIngredient.grade);
+		if (gradeIndex >= 6) return 'surprised'; // A, R 등급
+		if (gradeIndex >= 4) return 'happy'; // C, B 등급
+		return 'proud'; // 일반
+	});
+	let chefImage = $derived(getChefImage(chefEmotion()));
+	let chefDialogue = $state('');
+
+	$effect(() => {
+		chefDialogue = getRandomDialogue(chefEmotion());
+	});
 
 	let explosionTheme = $derived(() => {
 		// 재료 획득: 빨간색
@@ -173,72 +189,59 @@
 	{:else}
 		<div class="stage-card">
 			<div class="card-result-container">
-				<!-- 카드 -->
-				<div class="card-wrapper" class:card-entered={stage === 'card' || stage === 'result'}>
-					<!-- 후광 효과 (카드 중앙 기준) -->
-					<div class="sunburst-wrapper" class:card-entered={stage === 'card' || stage === 'result'}>
-						<img src="/imgs/bg-sunburst.png" alt="" class="sunburst-img" />
+				<!-- 카드 + 캐릭터 레이어드 영역 -->
+				<div class="card-chef-area">
+					<!-- 카드 -->
+					<div class="card-wrapper" class:card-entered={stage === 'card' || stage === 'result'}>
+						<div
+							class="sunburst-wrapper"
+							class:card-entered={stage === 'card' || stage === 'result'}
+						>
+							<img src="/imgs/bg-sunburst.png" alt="" class="sunburst-img" />
+						</div>
+						<ResultCard ingredient={resultIngredient} flipped={cardFlipped} />
 					</div>
-					<ResultCard ingredient={resultIngredient} flipped={cardFlipped} />
+
+					<!-- 캐릭터 (카드 우측 하단 레이어드) -->
+					{#if stage === 'result'}
+						<div class="chef-overlay">
+							<div class="chef-bubble">{chefDialogue}</div>
+							<img src={chefImage} alt="셰프" class="chef-img" />
+						</div>
+					{/if}
 				</div>
 
+				<!-- 하단 정보 (심플) -->
 				{#if stage === 'result'}
-					<div class="result-ui">
-						<!-- 수익 정보 -->
+					<div class="result-info">
+						<!-- 수익 표시 -->
 						{#if sellPrice > 0}
-							<div class="profit-section">
-								<div class="profit-row">
-									<span class="profit-label">판매</span>
-									<span class="profit-value sell">+{sellPrice.toLocaleString()}원</span>
-								</div>
-								{#if ingredientCost > 0}
-									<div class="profit-row">
-										<span class="profit-label">재료비</span>
-										<span class="profit-value cost">-{ingredientCost.toLocaleString()}원</span>
-									</div>
-									<div class="profit-divider"></div>
-									<div class="profit-row total">
-										<span class="profit-label">순이익</span>
-										<span
-											class="profit-value"
-											class:positive={profit > 0}
-											class:negative={profit < 0}
-										>
-											{profit > 0 ? '+' : ''}{profit.toLocaleString()}원
-										</span>
-									</div>
-								{/if}
+							<div class="profit-display">
+								<span
+									class="profit-amount"
+									class:positive={profit >= 0}
+									class:negative={profit < 0}
+								>
+									{profit >= 0 ? '+' : ''}{profit.toLocaleString()}원
+								</span>
 							</div>
 						{/if}
-						<div class="progress-section">
-							<div class="progress-item">
-								<span class="progress-label" style="color: {GRADE_COLORS[resultIngredient.grade]}"
-									>{resultIngredient.grade}등급</span
-								>
-								<span class="progress-value"
-									>{gradeProgress.discovered}/{gradeProgress.total} ({gradeProgress.percent}%)</span
-								>
-							</div>
-							<div class="progress-bar">
-								<div
-									class="progress-fill"
-									style="width: {gradeProgress.percent}%; background-color: {GRADE_COLORS[
-										resultIngredient.grade
-									]}"
-								></div>
-							</div>
-							<div class="progress-total">
-								전체 발견: {totalProgress.discovered}/{totalProgress.total}
-							</div>
+
+						<!-- 진행률 -->
+						<div class="progress-display">
+							<span class="progress-text" style="color: {GRADE_COLORS[resultIngredient.grade]}">
+								{resultIngredient.grade}등급 {gradeProgress.discovered}/{gradeProgress.total}
+							</span>
 						</div>
-						<div class="button-group">
+
+						<!-- 버튼 -->
+						<div class="button-row">
 							{#if resultIngredient.isIngredient && onUseNow}
-								<button type="button" class="use-now-button" onclick={handleUseNow}
-									>🧪 바로 써보기</button
+								<button type="button" class="btn-secondary" onclick={handleUseNow}
+									>바로 써보기</button
 								>
 							{/if}
-
-							<button type="button" class="confirm-button" onclick={handleConfirm}>확인</button>
+							<button type="button" class="btn-primary" onclick={handleConfirm}>확인</button>
 						</div>
 					</div>
 				{/if}
@@ -691,5 +694,128 @@
 		50% {
 			opacity: 0.8;
 		}
+	}
+
+	/* ===== 카드 + 캐릭터 레이어드 ===== */
+	.card-chef-area {
+		@apply relative;
+		@apply flex justify-center;
+	}
+
+	.chef-overlay {
+		@apply absolute;
+		right: -25%;
+		bottom: 5%;
+		z-index: 20;
+		@apply flex flex-col items-center;
+		animation: chefSlideIn 0.4s ease-out;
+	}
+
+	@keyframes chefSlideIn {
+		from {
+			opacity: 0;
+			transform: translateX(40px) scale(0.8);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0) scale(1);
+		}
+	}
+
+	.chef-img {
+		width: clamp(100px, 28vw, 140px);
+		height: auto;
+		filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
+	}
+
+	.chef-bubble {
+		@apply px-4 py-2;
+		@apply rounded-2xl;
+		@apply font-bold;
+		font-size: clamp(12px, 3vw, 16px);
+		background: white;
+		border: 3px solid #5d4037;
+		color: #5d4037;
+		box-shadow: 0 4px 0 #3e2723;
+		margin-bottom: 8px;
+		max-width: 160px;
+		text-align: center;
+	}
+
+	/* ===== 하단 결과 정보 (심플) ===== */
+	.result-info {
+		@apply flex flex-col items-center gap-3;
+		@apply mt-4 px-4;
+		@apply w-full max-w-sm;
+		animation: resultFadeIn 0.4s ease-out;
+	}
+
+	.profit-display {
+		@apply text-center;
+	}
+
+	.profit-amount {
+		@apply font-black;
+		font-size: clamp(28px, 7vw, 40px);
+		text-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+	}
+
+	.profit-amount.positive {
+		color: #4caf50;
+	}
+
+	.profit-amount.negative {
+		color: #d32f2f;
+	}
+
+	.progress-display {
+		@apply text-center;
+	}
+
+	.progress-text {
+		@apply font-bold;
+		font-size: clamp(14px, 3.5vw, 18px);
+	}
+
+	.button-row {
+		@apply flex gap-3;
+		@apply w-full;
+	}
+
+	.btn-primary {
+		@apply flex-1;
+		@apply py-4;
+		@apply rounded-2xl;
+		@apply font-bold;
+		font-size: clamp(16px, 4vw, 20px);
+		background: linear-gradient(180deg, #7cc576 0%, #4caf50 100%);
+		color: white;
+		border: none;
+		border-bottom: 5px solid #2d6b2f;
+		box-shadow: 0 4px 12px rgba(45, 107, 47, 0.3);
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	}
+
+	.btn-primary:active {
+		border-bottom-width: 2px;
+		transform: translateY(3px);
+	}
+
+	.btn-secondary {
+		@apply flex-1;
+		@apply py-4;
+		@apply rounded-2xl;
+		@apply font-bold;
+		font-size: clamp(14px, 3.5vw, 18px);
+		background: linear-gradient(180deg, #fff 0%, #f5f5f5 100%);
+		color: #5d4037;
+		border: 3px solid #8b7355;
+		border-bottom-width: 5px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	}
+
+	.btn-secondary:active {
+		border-bottom-width: 2px;
+		transform: translateY(3px);
 	}
 </style>
