@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { Tween } from 'svelte/motion';
+	import { cubicOut, elasticOut, backOut, cubicInOut } from 'svelte/easing';
 	import { battleStore } from '../lib/battle-store';
 	import { findIngredientById } from '../../lib/data/ingredients';
 
@@ -14,14 +16,35 @@
 	let myScore = $derived(myDish?.sellPrice ?? 0);
 	let opponentPower = $derived(battleState.currentChef?.power ?? 0);
 
-	// 게이지 상태 (0 = 상대 완전 우세, 100 = 내가 완전 우세)
-	let gaugeValue = $state(50);
-	let phase = $state<'battle' | 'result'>('battle');
-	let isWin = $state(false);
+	// Tween 게이지 (0 = 상대 완승, 100 = 나 완승)
+	const gauge = new Tween(50, {
+		duration: 400,
+		easing: elasticOut
+	});
 
-	// 이펙트 상태
-	let myAttack = $state(false);
-	let opponentAttack = $state(false);
+	// Tween 스케일 (공격 이펙트)
+	const myScale = new Tween(1, { duration: 200, easing: backOut });
+	const opponentScale = new Tween(1, { duration: 200, easing: backOut });
+	const vsScale = new Tween(1, { duration: 150, easing: elasticOut });
+
+	// 배경 회전
+	const bgRotation = new Tween(0, { duration: 100, easing: cubicInOut });
+
+	// 화면 흔들림
+	let shakeX = $state(0);
+	let shakeY = $state(0);
+
+	// 상태
+	let phase = $state<'intro' | 'ready' | 'battle' | 'final' | 'result'>('intro');
+	let isWin = $state(false);
+	let battleText = $state('');
+	let comboCount = $state(0);
+	let showHitEffect = $state(false);
+	let hitSide = $state<'my' | 'opponent'>('my');
+
+	// 스파크 이펙트
+	let sparks = $state<Array<{ id: number; x: number; y: number; angle: number }>>([]);
+	let sparkId = 0;
 
 	onMount(() => {
 		if (!battleState.isInBattle || !battleState.selectedRecipeId) {
@@ -29,391 +52,967 @@
 			return;
 		}
 
-		// 대결 시작
-		startBattle();
+		// 배경 회전 애니메이션
+		const rotateBackground = () => {
+			bgRotation.set(bgRotation.current + 0.5);
+			requestAnimationFrame(rotateBackground);
+		};
+		rotateBackground();
+
+		// 인트로 연출
+		setTimeout(() => {
+			phase = 'ready';
+		}, 500);
+
+		setTimeout(() => {
+			phase = 'battle';
+			startBattle();
+		}, 1500);
 	});
 
-	function startBattle() {
-		let round = 0;
-		const maxRounds = 12;
+	function shake(intensity: number = 10) {
+		const duration = 300;
+		const startTime = Date.now();
 
-		const battleInterval = setInterval(() => {
-			round++;
+		function animateShake() {
+			const elapsed = Date.now() - startTime;
+			const progress = elapsed / duration;
 
-			// 랜덤하게 공격 (누가 이길지는 랜덤하게 왔다갔다)
-			const attackerIsMe = Math.random() > 0.5;
-
-			if (attackerIsMe) {
-				// 내가 공격
-				myAttack = true;
-				setTimeout(() => {
-					myAttack = false;
-				}, 300);
-
-				// 게이지 상승 (내 쪽으로)
-				const damage = 8 + Math.random() * 12;
-				gaugeValue = Math.min(95, gaugeValue + damage);
+			if (progress < 1) {
+				const decay = 1 - progress;
+				shakeX = (Math.random() - 0.5) * intensity * decay;
+				shakeY = (Math.random() - 0.5) * intensity * decay;
+				requestAnimationFrame(animateShake);
 			} else {
-				// 상대가 공격
-				opponentAttack = true;
-				setTimeout(() => {
-					opponentAttack = false;
-				}, 300);
-
-				// 게이지 하락 (상대 쪽으로)
-				const damage = 8 + Math.random() * 12;
-				gaugeValue = Math.max(5, gaugeValue - damage);
+				shakeX = 0;
+				shakeY = 0;
 			}
+		}
 
-			// 마지막 라운드
-			if (round >= maxRounds) {
-				clearInterval(battleInterval);
+		requestAnimationFrame(animateShake);
+	}
 
-				// 최종 결과 (실제 점수 기반)
-				isWin = myScore > opponentPower;
+	function createSparks(side: 'my' | 'opponent') {
+		const newSparks: Array<{ id: number; x: number; y: number; angle: number }> = [];
+		const baseX = side === 'my' ? 25 : 75;
+		for (let i = 0; i < 8; i++) {
+			newSparks.push({
+				id: sparkId++,
+				x: baseX,
+				y: 35,
+				angle: Math.random() * 360
+			});
+		}
+		sparks = [...sparks, ...newSparks];
 
-				// 최종 게이지 위치
-				setTimeout(() => {
-					if (isWin) {
-						// 승리: 게이지를 내 쪽으로 확 밀기
-						gaugeValue = 75 + Math.random() * 20;
-					} else {
-						// 패배: 게이지를 상대 쪽으로 확 밀기
-						gaugeValue = 5 + Math.random() * 20;
-					}
+		// 스파크 제거
+		setTimeout(() => {
+			sparks = sparks.filter((s) => !newSparks.includes(s));
+		}, 500);
+	}
 
-					// 결과 표시
-					setTimeout(() => {
-						phase = 'result';
-						battleStore.setResult(myScore, opponentPower);
+	function showHit(side: 'my' | 'opponent') {
+		hitSide = side;
+		showHitEffect = true;
+		setTimeout(() => {
+			showHitEffect = false;
+		}, 200);
+	}
 
-						// 2초 후 결과 화면
-						setTimeout(() => {
-							goto('/cook2/battle/result');
-						}, 2000);
-					}, 500);
-				}, 300);
+	async function myAttack() {
+		comboCount++;
+		battleText = comboCount > 2 ? `${comboCount} COMBO!` : '맛있다!';
+		myScale.set(1.4);
+		vsScale.set(1.6);
+		showHit('opponent');
+		createSparks('opponent');
+
+		await new Promise((r) => setTimeout(r, 150));
+
+		myScale.set(1);
+		vsScale.set(1);
+		shake(18);
+
+		// 게이지 상승
+		const damage = 8 + Math.random() * 12;
+		gauge.set(Math.min(95, gauge.current + damage));
+	}
+
+	async function opponentAttack() {
+		comboCount = 0;
+		battleText = '반격!';
+		opponentScale.set(1.4);
+		vsScale.set(1.6);
+		showHit('my');
+		createSparks('my');
+
+		await new Promise((r) => setTimeout(r, 150));
+
+		opponentScale.set(1);
+		vsScale.set(1);
+		shake(18);
+
+		// 게이지 하락
+		const damage = 8 + Math.random() * 12;
+		gauge.set(Math.max(5, gauge.current - damage));
+	}
+
+	async function startBattle() {
+		const rounds = 12;
+
+		for (let i = 0; i < rounds; i++) {
+			await new Promise((r) => setTimeout(r, 400));
+
+			// 승자 유리하게 확률 조정
+			const myAdvantage = myScore > opponentPower ? 0.6 : 0.4;
+			if (Math.random() < myAdvantage) {
+				await myAttack();
+			} else {
+				await opponentAttack();
 			}
-		}, 400);
+		}
+
+		// 최종 결정
+		phase = 'final';
+		battleText = '심사중...';
+
+		await new Promise((r) => setTimeout(r, 1000));
+
+		// 실제 승패
+		isWin = myScore > opponentPower;
+
+		// 최종 게이지 이동 (극적으로)
+		if (isWin) {
+			gauge.set(95, { duration: 800, easing: cubicOut });
+			await new Promise((r) => setTimeout(r, 800));
+			battleText = '';
+
+			// 승리 연출
+			myScale.set(1.5);
+			shake(25);
+			await new Promise((r) => setTimeout(r, 400));
+			myScale.set(1.2);
+		} else {
+			gauge.set(5, { duration: 800, easing: cubicOut });
+			await new Promise((r) => setTimeout(r, 800));
+			battleText = '';
+
+			// 패배 연출
+			opponentScale.set(1.5);
+			shake(25);
+			await new Promise((r) => setTimeout(r, 400));
+			opponentScale.set(1.2);
+		}
+
+		phase = 'result';
+		battleStore.setResult(myScore, opponentPower);
+
+		// 결과 화면으로
+		await new Promise((r) => setTimeout(r, 2500));
+		goto('/cook2/battle/result');
 	}
 </script>
 
-<div class="versus-container">
-	<!-- 상단 VS 텍스트 -->
-	<div class="vs-header">
-		<span class="vs-text">⚔️ 대결 ⚔️</span>
+<div class="versus-screen" style="transform: translate({shakeX}px, {shakeY}px)">
+	<!-- 배경 레이어 -->
+	<div class="bg-layer">
+		<!-- 회전하는 sunburst -->
+		<div class="sunburst" style="transform: rotate({bgRotation.current}deg)">
+			<img src="/imgs/bg-sunburst.png" alt="" />
+		</div>
+		<!-- 그라데이션 오버레이 -->
+		<div class="bg-overlay"></div>
+		<!-- 파티클 -->
+		<div class="particles">
+			{#each Array(20) as _, i}
+				<div class="particle" style="--delay: {i * 0.2}s; --x: {Math.random() * 100}%"></div>
+			{/each}
+		</div>
 	</div>
 
-	<!-- 대결자들 -->
-	<div class="fighters">
-		<!-- 내 요리 (왼쪽) -->
-		<div
-			class="fighter my-side"
-			class:attacking={myAttack}
-			class:winner={phase === 'result' && isWin}
-		>
-			<div class="fighter-dish">
-				{#if myDish?.imageUrl}
-					<img src={myDish.imageUrl} alt={myDish.name} />
-				{:else}
-					<span>🍽️</span>
+	<!-- 메인 컨텐츠 -->
+	<div class="content">
+		<!-- 스테이지 정보 -->
+		<div class="stage-info">
+			<div class="stage-badge">
+				<span class="stage-label">STAGE</span>
+				<span class="stage-num">{battleState.currentChef?.stage ?? 1}</span>
+			</div>
+		</div>
+
+		<!-- 대결자들 -->
+		<div class="arena">
+			<!-- 내 요리 (왼쪽) -->
+			<div
+				class="fighter-card my-side"
+				class:winner={phase === 'result' && isWin}
+				class:loser={phase === 'result' && !isWin}
+				class:hit={showHitEffect && hitSide === 'my'}
+				style="transform: scale({myScale.current})"
+			>
+				<div class="card-glow my"></div>
+				<div class="card-inner">
+					<div class="fighter-visual">
+						{#if myDish?.imageUrl}
+							<img src={myDish.imageUrl} alt={myDish.name} class="dish-img" />
+						{:else}
+							<span class="dish-emoji">🍽️</span>
+						{/if}
+					</div>
+					<div class="fighter-info">
+						<span class="fighter-label">나의 요리</span>
+						<span class="fighter-name">{myDish?.name ?? '???'}</span>
+					</div>
+					<div class="score-box my">
+						<span class="score-value">{myScore}</span>
+						<span class="score-unit">점</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- VS 영역 (중앙) -->
+			<div class="vs-zone">
+				<div class="vs-emblem" style="transform: scale({vsScale.current})">
+					<div class="vs-inner">VS</div>
+					<div class="vs-ring"></div>
+				</div>
+				{#if battleText}
+					<div class="action-text" class:combo={comboCount > 2}>
+						{battleText}
+					</div>
 				{/if}
 			</div>
-			<span class="fighter-name">{myDish?.name ?? '???'}</span>
-			<span class="fighter-score">{myScore}점</span>
-			{#if myAttack}
-				<div class="attack-effect">💥</div>
-			{/if}
-		</div>
 
-		<!-- VS -->
-		<div class="vs-badge" class:clash={myAttack || opponentAttack}>VS</div>
-
-		<!-- 상대 (오른쪽) -->
-		<div
-			class="fighter opponent-side"
-			class:attacking={opponentAttack}
-			class:winner={phase === 'result' && !isWin}
-		>
-			<div class="fighter-avatar">
-				{battleState.currentChef?.emoji ?? '🧑‍🍳'}
+			<!-- 상대 (오른쪽) -->
+			<div
+				class="fighter-card opponent-side"
+				class:winner={phase === 'result' && !isWin}
+				class:loser={phase === 'result' && isWin}
+				class:hit={showHitEffect && hitSide === 'opponent'}
+				style="transform: scale({opponentScale.current})"
+			>
+				<div class="card-glow opponent"></div>
+				<div class="card-inner">
+					<div class="fighter-visual">
+						<span class="chef-emoji">{battleState.currentChef?.emoji ?? '🧑‍🍳'}</span>
+					</div>
+					<div class="fighter-info">
+						<span class="fighter-label">도전자</span>
+						<span class="fighter-name">{battleState.currentChef?.name ?? '???'}</span>
+					</div>
+					<div class="score-box opponent">
+						<span class="score-value">{opponentPower}</span>
+						<span class="score-unit">점</span>
+					</div>
+				</div>
 			</div>
-			<span class="fighter-name">{battleState.currentChef?.name ?? '???'}</span>
-			<span class="fighter-score">{opponentPower}점</span>
-			{#if opponentAttack}
-				<div class="attack-effect">💥</div>
+		</div>
+
+		<!-- 파워 게이지 -->
+		<div class="gauge-section">
+			<div class="gauge-frame">
+				<div class="gauge-track">
+					<div class="gauge-fill my" style="width: {gauge.current}%">
+						<div class="gauge-shine"></div>
+					</div>
+					<div class="gauge-fill opponent" style="width: {100 - gauge.current}%">
+						<div class="gauge-shine"></div>
+					</div>
+					<div class="gauge-center-marker"></div>
+					<!-- 현재 위치 인디케이터 -->
+					<div class="gauge-indicator" style="left: {gauge.current}%">
+						<div class="indicator-glow"></div>
+					</div>
+				</div>
+				<!-- 게이지 라벨 -->
+				<div class="gauge-ends">
+					<div class="gauge-end my">
+						<img src="/imgs/ui/icon_circle.png" alt="" class="end-icon" />
+					</div>
+					<div class="gauge-end opponent">
+						<img src="/imgs/ui/icon_circle.png" alt="" class="end-icon" />
+					</div>
+				</div>
+			</div>
+			<div class="gauge-names">
+				<span class="name my">나</span>
+				<span class="name opponent">상대</span>
+			</div>
+		</div>
+
+		<!-- 상태 표시 -->
+		<div class="status-area">
+			{#if phase === 'intro'}
+				<div class="status-text intro">대결 준비...</div>
+			{:else if phase === 'ready'}
+				<div class="status-text ready">READY...</div>
+			{:else if phase === 'battle'}
+				<div class="status-text battle">FIGHT!</div>
+			{:else if phase === 'final'}
+				<div class="status-text final">심사중...</div>
+			{:else if phase === 'result'}
+				<div class="result-banner" class:win={isWin} class:lose={!isWin}>
+					<div class="result-bg"></div>
+					<div class="result-content">
+						<span class="result-label">{isWin ? 'VICTORY' : 'DEFEAT'}</span>
+						<span class="result-sub">{isWin ? '승리!' : '패배...'}</span>
+					</div>
+				</div>
 			{/if}
 		</div>
 	</div>
 
-	<!-- 게이지 바 -->
-	<div class="gauge-area">
-		<div class="gauge-bar">
-			<!-- 내 게이지 (왼쪽에서 채워짐) -->
-			<div class="my-gauge" style="width: {gaugeValue}%"></div>
-			<!-- 상대 게이지 (오른쪽에서 채워짐) -->
-			<div class="opponent-gauge" style="width: {100 - gaugeValue}%"></div>
-			<!-- 중앙선 -->
-			<div class="center-line"></div>
-		</div>
-		<div class="gauge-labels">
-			<span class="label-me">나</span>
-			<span class="label-opponent">상대</span>
-		</div>
-	</div>
+	<!-- 스파크 이펙트 -->
+	{#each sparks as spark (spark.id)}
+		<div class="spark" style="left: {spark.x}%; top: {spark.y}%; --angle: {spark.angle}deg"></div>
+	{/each}
 
-	<!-- 상태 텍스트 -->
-	<div class="status-area">
-		{#if phase === 'battle'}
-			<span class="status-text battle">대결 중...</span>
-		{:else}
-			<span class="status-text" class:win={isWin} class:lose={!isWin}>
-				{isWin ? '🎉 승리!' : '😢 패배...'}
-			</span>
-		{/if}
-	</div>
+	<!-- 히트 플래시 -->
+	{#if showHitEffect}
+		<div
+			class="hit-flash"
+			class:my={hitSide === 'my'}
+			class:opponent={hitSide === 'opponent'}
+		></div>
+	{/if}
 </div>
 
 <style lang="postcss">
 	@reference '$styles/app.css';
 
-	.versus-container {
-		@apply flex flex-col items-center;
-		@apply h-full min-h-screen;
-		@apply px-6 py-8;
-		background: linear-gradient(180deg, #1a0a2e 0%, #2d1b4e 50%, #1a1a2e 100%);
-	}
-
-	/* VS 헤더 */
-	.vs-header {
-		@apply py-4;
-	}
-
-	.vs-text {
-		@apply font-black;
-		font-size: 32px;
-		color: #ffd700;
-		text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-	}
-
-	/* 대결자들 */
-	.fighters {
-		@apply flex items-center justify-center gap-4;
-		@apply py-8;
-		@apply w-full;
-	}
-
-	.fighter {
+	.versus-screen {
 		@apply relative;
-		@apply flex flex-col items-center gap-2;
-		@apply p-4;
-		@apply rounded-xl;
-		background: rgba(255, 255, 255, 0.05);
-		border: 2px solid rgba(255, 255, 255, 0.1);
-		transition: all 0.2s;
+		@apply h-full min-h-screen;
+		@apply overflow-hidden;
+		will-change: transform;
 	}
 
-	.fighter.attacking {
-		transform: scale(1.1);
-		border-color: #ffd700;
-		box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+	/* 배경 레이어 */
+	.bg-layer {
+		@apply absolute inset-0;
+		@apply overflow-hidden;
+		background: linear-gradient(180deg, #1a0a2e 0%, #0d0d1a 50%, #0a0a12 100%);
 	}
 
-	.fighter.winner {
-		background: rgba(255, 215, 0, 0.2);
-		border-color: #ffd700;
-		box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
-		animation: winnerGlow 1s ease-in-out infinite;
+	.sunburst {
+		@apply absolute;
+		top: 50%;
+		left: 50%;
+		width: 200%;
+		height: 200%;
+		margin-top: -100%;
+		margin-left: -100%;
+		opacity: 0.15;
+		will-change: transform;
 	}
 
-	@keyframes winnerGlow {
+	.sunburst img {
+		@apply h-full w-full object-cover;
+		filter: hue-rotate(270deg) saturate(2);
+	}
+
+	.bg-overlay {
+		@apply absolute inset-0;
+		background: radial-gradient(
+			ellipse at center,
+			transparent 0%,
+			rgba(26, 10, 46, 0.5) 50%,
+			rgba(10, 10, 18, 0.9) 100%
+		);
+	}
+
+	.particles {
+		@apply absolute inset-0;
+		@apply pointer-events-none;
+	}
+
+	.particle {
+		@apply absolute;
+		width: 4px;
+		height: 4px;
+		background: #ffd700;
+		border-radius: 50%;
+		left: var(--x);
+		animation: float 4s ease-in-out infinite;
+		animation-delay: var(--delay);
+		opacity: 0.6;
+	}
+
+	@keyframes float {
 		0%,
 		100% {
-			box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+			transform: translateY(100vh) scale(0);
+			opacity: 0;
 		}
-		50% {
-			box-shadow: 0 0 50px rgba(255, 215, 0, 0.9);
+		10% {
+			opacity: 0.6;
+		}
+		90% {
+			opacity: 0.6;
+		}
+		100% {
+			transform: translateY(-20vh) scale(1);
+			opacity: 0;
 		}
 	}
 
-	.fighter-dish {
+	/* 메인 컨텐츠 */
+	.content {
+		@apply relative z-10;
+		@apply flex flex-col items-center;
+		@apply h-full min-h-screen;
+		@apply px-3 py-4;
+	}
+
+	/* 스테이지 정보 */
+	.stage-info {
+		@apply py-2;
+	}
+
+	.stage-badge {
+		@apply flex items-center gap-2;
+		@apply px-4 py-2;
+		@apply rounded-full;
+		background: linear-gradient(180deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.05) 100%);
+		border: 2px solid rgba(255, 215, 0, 0.5);
+	}
+
+	.stage-label {
+		@apply font-bold;
+		font-size: 12px;
+		color: rgba(255, 215, 0, 0.8);
+		letter-spacing: 2px;
+	}
+
+	.stage-num {
+		@apply font-black;
+		font-size: 20px;
+		color: #ffd700;
+		text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+	}
+
+	/* 아레나 */
+	.arena {
+		@apply flex items-center justify-center gap-2;
+		@apply w-full;
+		@apply py-4;
+		@apply flex-1;
+	}
+
+	/* 파이터 카드 */
+	.fighter-card {
+		@apply relative;
+		@apply flex flex-col items-center;
+		width: 120px;
+		will-change: transform;
+		transition: filter 0.3s;
+	}
+
+	.fighter-card.hit {
+		filter: brightness(2) saturate(0.5);
+	}
+
+	.fighter-card.loser {
+		filter: grayscale(0.7) brightness(0.6);
+	}
+
+	.card-glow {
+		@apply absolute inset-0;
+		@apply rounded-2xl;
+		@apply opacity-0;
+		transition: opacity 0.3s;
+		z-index: -1;
+	}
+
+	.fighter-card.winner .card-glow {
+		@apply opacity-100;
+	}
+
+	.card-glow.my {
+		background: radial-gradient(ellipse, rgba(46, 204, 113, 0.6) 0%, transparent 70%);
+		box-shadow: 0 0 40px rgba(46, 204, 113, 0.8);
+	}
+
+	.card-glow.opponent {
+		background: radial-gradient(ellipse, rgba(231, 76, 60, 0.6) 0%, transparent 70%);
+		box-shadow: 0 0 40px rgba(231, 76, 60, 0.8);
+	}
+
+	.card-inner {
+		@apply flex flex-col items-center gap-2;
+		@apply p-3;
+		@apply rounded-2xl;
+		background: linear-gradient(
+			180deg,
+			rgba(255, 255, 255, 0.1) 0%,
+			rgba(255, 255, 255, 0.02) 100%
+		);
+		border: 2px solid rgba(255, 255, 255, 0.15);
+		backdrop-filter: blur(10px);
+	}
+
+	.fighter-card.winner .card-inner {
+		border-color: #ffd700;
+		box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+	}
+
+	.fighter-visual {
+		@apply relative;
 		@apply h-20 w-20;
-	}
-
-	.fighter-dish img,
-	.fighter-dish span {
-		@apply h-full w-full object-contain;
-		font-size: 56px;
-	}
-
-	.fighter-avatar {
 		@apply flex items-center justify-center;
-		@apply h-20 w-20;
-		font-size: 56px;
+	}
+
+	.dish-img {
+		@apply h-full w-full object-contain;
+		filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
+	}
+
+	.dish-emoji,
+	.chef-emoji {
+		font-size: 52px;
+		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+	}
+
+	.fighter-info {
+		@apply flex flex-col items-center;
+	}
+
+	.fighter-label {
+		font-size: 10px;
+		color: rgba(255, 255, 255, 0.5);
+		letter-spacing: 1px;
 	}
 
 	.fighter-name {
 		@apply font-bold text-white;
-		font-size: 14px;
+		font-size: 13px;
+		text-align: center;
 	}
 
-	.fighter-score {
-		@apply font-black;
+	.score-box {
+		@apply flex items-baseline gap-1;
+		@apply px-3 py-1;
+		@apply rounded-lg;
+	}
+
+	.score-box.my {
+		background: linear-gradient(180deg, #2ecc71 0%, #27ae60 100%);
+	}
+
+	.score-box.opponent {
+		background: linear-gradient(180deg, #e74c3c 0%, #c0392b 100%);
+	}
+
+	.score-value {
+		@apply font-black text-white;
 		font-size: 18px;
-		color: #ffd700;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 	}
 
-	.attack-effect {
-		@apply absolute;
-		top: -10px;
-		right: -10px;
-		font-size: 32px;
-		animation: attackPop 0.3s ease-out;
+	.score-unit {
+		@apply font-bold;
+		font-size: 11px;
+		color: rgba(255, 255, 255, 0.8);
 	}
 
-	@keyframes attackPop {
+	/* VS 영역 */
+	.vs-zone {
+		@apply flex flex-col items-center;
+		@apply mx-2;
+		min-width: 70px;
+	}
+
+	.vs-emblem {
+		@apply relative;
+		@apply h-16 w-16;
+		@apply flex items-center justify-center;
+		will-change: transform;
+	}
+
+	.vs-inner {
+		@apply relative z-10;
+		@apply font-black;
+		font-size: 24px;
+		color: #fff;
+		text-shadow:
+			0 0 10px rgba(255, 107, 53, 1),
+			0 0 20px rgba(255, 107, 53, 0.8),
+			0 4px 0 #a02020;
+	}
+
+	.vs-ring {
+		@apply absolute inset-0;
+		@apply rounded-full;
+		background: linear-gradient(180deg, #ff6b35 0%, #d63031 100%);
+		animation: vsGlow 1.5s ease-in-out infinite alternate;
+	}
+
+	@keyframes vsGlow {
 		0% {
-			transform: scale(0) rotate(0deg);
-			opacity: 0;
-		}
-		50% {
-			transform: scale(1.5) rotate(15deg);
-			opacity: 1;
+			box-shadow:
+				0 0 20px rgba(255, 107, 53, 0.6),
+				inset 0 0 10px rgba(255, 255, 255, 0.2);
 		}
 		100% {
-			transform: scale(1) rotate(0deg);
-			opacity: 0;
+			box-shadow:
+				0 0 40px rgba(255, 107, 53, 0.9),
+				inset 0 0 15px rgba(255, 255, 255, 0.3);
 		}
 	}
 
-	.vs-badge {
-		@apply px-3 py-1;
-		@apply rounded;
+	.action-text {
+		@apply mt-2;
 		@apply font-black;
-		font-size: 20px;
-		color: #fff;
-		background: linear-gradient(180deg, #ff7043 0%, #d84315 100%);
-		transition: all 0.1s;
+		font-size: 14px;
+		color: #ffd700;
+		text-shadow:
+			0 0 10px rgba(255, 215, 0, 1),
+			0 2px 0 rgba(0, 0, 0, 0.5);
+		animation: actionPop 0.2s ease-out;
 	}
 
-	.vs-badge.clash {
-		transform: scale(1.3);
-		background: linear-gradient(180deg, #ffd700 0%, #ff9800 100%);
-		color: #1a1a1a;
+	.action-text.combo {
+		font-size: 16px;
+		color: #ff6b35;
+		animation: comboPop 0.3s ease-out;
 	}
 
-	/* 게이지 */
-	.gauge-area {
+	@keyframes actionPop {
+		0% {
+			transform: scale(0) translateY(10px);
+			opacity: 0;
+		}
+		100% {
+			transform: scale(1) translateY(0);
+			opacity: 1;
+		}
+	}
+
+	@keyframes comboPop {
+		0% {
+			transform: scale(0) rotate(-10deg);
+		}
+		60% {
+			transform: scale(1.3) rotate(5deg);
+		}
+		100% {
+			transform: scale(1) rotate(0);
+		}
+	}
+
+	/* 게이지 섹션 */
+	.gauge-section {
 		@apply w-full max-w-sm;
-		@apply mt-8;
+		@apply px-4;
 	}
 
-	.gauge-bar {
+	.gauge-frame {
 		@apply relative;
-		@apply h-10;
+		@apply p-1;
 		@apply rounded-full;
-		@apply overflow-hidden;
+		background: linear-gradient(180deg, #333 0%, #1a1a1a 100%);
+		border: 3px solid #444;
+		box-shadow:
+			0 4px 0 #111,
+			inset 0 2px 8px rgba(0, 0, 0, 0.8);
+	}
+
+	.gauge-track {
+		@apply relative;
+		@apply h-7;
+		@apply rounded-full;
 		@apply flex;
-		background: #1a1a1a;
-		border: 3px solid #333;
+		@apply overflow-hidden;
+		background: #0a0a0a;
 	}
 
-	.my-gauge {
-		@apply h-full;
-		background: linear-gradient(90deg, #4caf50, #8bc34a);
-		transition: width 0.3s ease-out;
-		box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3);
+	.gauge-fill {
+		@apply relative h-full;
+		@apply overflow-hidden;
+		transition: width 0.15s ease-out;
 	}
 
-	.opponent-gauge {
-		@apply h-full;
-		background: linear-gradient(90deg, #ff5722, #f44336);
-		transition: width 0.3s ease-out;
-		box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3);
+	.gauge-fill.my {
+		background: linear-gradient(180deg, #5dde8c 0%, #2ecc71 50%, #27ae60 100%);
 	}
 
-	.center-line {
+	.gauge-fill.opponent {
+		background: linear-gradient(180deg, #f07167 0%, #e74c3c 50%, #c0392b 100%);
+	}
+
+	.gauge-shine {
+		@apply absolute inset-0;
+		background: linear-gradient(
+			180deg,
+			rgba(255, 255, 255, 0.4) 0%,
+			transparent 50%,
+			rgba(0, 0, 0, 0.2) 100%
+		);
+	}
+
+	.gauge-center-marker {
 		@apply absolute top-0 bottom-0;
 		left: 50%;
 		width: 4px;
+		margin-left: -2px;
 		background: #fff;
-		transform: translateX(-50%);
-		box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+		box-shadow:
+			0 0 10px #fff,
+			0 0 20px rgba(255, 255, 255, 0.5);
+		z-index: 5;
 	}
 
-	.gauge-labels {
+	.gauge-indicator {
+		@apply absolute top-1/2;
+		width: 12px;
+		height: 20px;
+		margin-left: -6px;
+		margin-top: -10px;
+		z-index: 10;
+		transition: left 0.15s ease-out;
+	}
+
+	.indicator-glow {
+		@apply absolute inset-0;
+		background: radial-gradient(ellipse, #fff 0%, transparent 70%);
+		animation: indicatorPulse 0.5s ease-in-out infinite alternate;
+	}
+
+	@keyframes indicatorPulse {
+		0% {
+			transform: scale(1);
+			opacity: 0.8;
+		}
+		100% {
+			transform: scale(1.5);
+			opacity: 0.4;
+		}
+	}
+
+	.gauge-ends {
+		@apply absolute top-1/2 right-0 left-0;
+		@apply flex justify-between;
+		@apply px-1;
+		transform: translateY(-50%);
+		pointer-events: none;
+	}
+
+	.gauge-end {
+		@apply h-5 w-5;
+		@apply rounded-full;
+		@apply flex items-center justify-center;
+	}
+
+	.gauge-end.my {
+		background: #2ecc71;
+		box-shadow: 0 0 8px rgba(46, 204, 113, 0.8);
+	}
+
+	.gauge-end.opponent {
+		background: #e74c3c;
+		box-shadow: 0 0 8px rgba(231, 76, 60, 0.8);
+	}
+
+	.end-icon {
+		@apply h-3 w-3;
+		filter: brightness(2);
+	}
+
+	.gauge-names {
 		@apply flex justify-between;
 		@apply mt-2 px-2;
 	}
 
-	.label-me {
+	.gauge-names .name {
 		@apply font-bold;
-		color: #4caf50;
+		font-size: 13px;
 	}
 
-	.label-opponent {
-		@apply font-bold;
-		color: #f44336;
+	.gauge-names .name.my {
+		color: #2ecc71;
 	}
 
-	/* 상태 텍스트 */
+	.gauge-names .name.opponent {
+		color: #e74c3c;
+	}
+
+	/* 상태 표시 */
 	.status-area {
-		@apply mt-8;
+		@apply py-6;
+		min-height: 100px;
 	}
 
 	.status-text {
 		@apply font-black;
-		font-size: 28px;
+		font-size: 24px;
+		color: #fff;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+	}
+
+	.status-text.intro {
+		opacity: 0.5;
+		animation: pulse 1s ease-in-out infinite;
+	}
+
+	.status-text.ready {
+		color: #ffd700;
+		animation: readyPulse 0.5s ease-in-out infinite alternate;
 	}
 
 	.status-text.battle {
-		color: #fff;
-		animation: battlePulse 0.5s ease-in-out infinite;
+		color: #ff6b35;
+		font-size: 32px;
+		animation: fightPop 0.5s ease-out;
+		text-shadow:
+			0 0 20px rgba(255, 107, 53, 1),
+			0 4px 0 #a02020;
 	}
 
-	@keyframes battlePulse {
+	.status-text.final {
+		color: #ffd700;
+		animation: pulse 0.8s ease-in-out infinite;
+	}
+
+	@keyframes pulse {
 		0%,
 		100% {
-			opacity: 1;
-			transform: scale(1);
+			opacity: 0.5;
 		}
 		50% {
-			opacity: 0.7;
-			transform: scale(1.05);
+			opacity: 1;
 		}
 	}
 
-	.status-text.win {
-		color: #4caf50;
-		animation: winPop 0.5s ease-out;
-	}
-
-	.status-text.lose {
-		color: #f44336;
-		animation: losePop 0.5s ease-out;
-	}
-
-	@keyframes winPop {
+	@keyframes readyPulse {
 		0% {
-			transform: scale(0);
-		}
-		60% {
-			transform: scale(1.3);
-		}
-		100% {
 			transform: scale(1);
 		}
+		100% {
+			transform: scale(1.1);
+		}
 	}
 
-	@keyframes losePop {
+	@keyframes fightPop {
 		0% {
-			transform: scale(0);
+			transform: scale(0) rotate(-15deg);
+			opacity: 0;
 		}
 		60% {
-			transform: scale(1.2);
+			transform: scale(1.3) rotate(5deg);
 		}
 		100% {
-			transform: scale(1);
+			transform: scale(1) rotate(0);
+			opacity: 1;
+		}
+	}
+
+	/* 결과 배너 */
+	.result-banner {
+		@apply relative;
+		@apply px-8 py-4;
+		animation: bannerSlam 0.5s ease-out;
+	}
+
+	.result-bg {
+		@apply absolute inset-0;
+		@apply rounded-lg;
+		transform: skewX(-5deg);
+	}
+
+	.result-banner.win .result-bg {
+		background: linear-gradient(90deg, #27ae60 0%, #2ecc71 50%, #27ae60 100%);
+		box-shadow:
+			0 0 40px rgba(46, 204, 113, 0.8),
+			0 6px 0 #1e8449;
+	}
+
+	.result-banner.lose .result-bg {
+		background: linear-gradient(90deg, #c0392b 0%, #e74c3c 50%, #c0392b 100%);
+		box-shadow:
+			0 0 40px rgba(231, 76, 60, 0.8),
+			0 6px 0 #922b21;
+	}
+
+	.result-content {
+		@apply relative z-10;
+		@apply flex flex-col items-center;
+	}
+
+	.result-label {
+		@apply font-black;
+		font-size: 36px;
+		color: #fff;
+		text-shadow:
+			0 0 20px rgba(255, 255, 255, 0.5),
+			0 4px 0 rgba(0, 0, 0, 0.3);
+		letter-spacing: 4px;
+	}
+
+	.result-sub {
+		@apply font-bold;
+		font-size: 16px;
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	@keyframes bannerSlam {
+		0% {
+			transform: scale(3) rotate(-10deg);
+			opacity: 0;
+		}
+		60% {
+			transform: scale(0.9) rotate(2deg);
+		}
+		100% {
+			transform: scale(1) rotate(0);
+			opacity: 1;
+		}
+	}
+
+	/* 스파크 이펙트 */
+	.spark {
+		@apply absolute;
+		width: 8px;
+		height: 8px;
+		background: #ffd700;
+		border-radius: 50%;
+		pointer-events: none;
+		z-index: 100;
+		animation: sparkFly 0.5s ease-out forwards;
+	}
+
+	@keyframes sparkFly {
+		0% {
+			transform: translate(0, 0) scale(1);
+			opacity: 1;
+		}
+		100% {
+			transform: translate(calc(cos(var(--angle)) * 80px), calc(sin(var(--angle)) * 80px)) scale(0);
+			opacity: 0;
+		}
+	}
+
+	/* 히트 플래시 */
+	.hit-flash {
+		@apply absolute inset-0;
+		@apply pointer-events-none;
+		z-index: 50;
+		animation: flash 0.15s ease-out;
+	}
+
+	.hit-flash.my {
+		background: radial-gradient(ellipse at 25% 40%, rgba(46, 204, 113, 0.4) 0%, transparent 50%);
+	}
+
+	.hit-flash.opponent {
+		background: radial-gradient(ellipse at 75% 40%, rgba(231, 76, 60, 0.4) 0%, transparent 50%);
+	}
+
+	@keyframes flash {
+		0% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
 		}
 	}
 </style>
