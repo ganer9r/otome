@@ -3,6 +3,8 @@
 	import { onMount } from 'svelte';
 	import { unlockedIngredientsStore, unlockedDishesStore, runStore, starStore } from './lib/store';
 	import { missionStore } from './lib/mission-store';
+	import { DAILY_MISSIONS } from './lib/data/missions';
+	import type { MissionProgress } from './lib/types';
 	import { INGREDIENTS } from './lib/data/ingredients';
 	import { RECIPES } from './lib/data/recipes';
 	import { getChefImage, getRandomDialogue } from './lib/chef-images';
@@ -60,6 +62,19 @@
 	// 미수령 미션 개수
 	let unclaimedMissions = $derived(missionStore.getUnclaimedCount());
 
+	// 일일 미션 진행도
+	let missionProgress = $derived($missionStore);
+
+	function getMissionProgress(missionId: string): MissionProgress {
+		return (
+			missionProgress[missionId] || { missionId, current: 0, completed: false, claimed: false }
+		);
+	}
+
+	function claimMission(missionId: string) {
+		missionStore.claimReward(missionId);
+	}
+
 	function goBattle() {
 		goto('/cook2/battle');
 	}
@@ -99,6 +114,38 @@
 			</div>
 		</div>
 	{/if}
+
+	<!-- 일일 미션 -->
+	<div class="daily-missions">
+		<div class="mission-header">
+			<span class="mission-title">오늘의 미션</span>
+			<button class="mission-more" onclick={goMission}>더보기 →</button>
+		</div>
+		<div class="mission-list">
+			{#each DAILY_MISSIONS as mission (mission.id)}
+				{@const progress = getMissionProgress(mission.id)}
+				<div
+					class="mission-item"
+					class:completed={progress.completed}
+					class:claimed={progress.claimed}
+				>
+					<div class="mission-info">
+						<span class="mission-name">{mission.title}</span>
+						<span class="mission-progress">{progress.current}/{mission.target}</span>
+					</div>
+					{#if progress.claimed}
+						<span class="mission-done">✓</span>
+					{:else if progress.completed}
+						<button class="mission-claim" onclick={() => claimMission(mission.id)}
+							>+{mission.reward}⭐</button
+						>
+					{:else}
+						<span class="mission-reward">+{mission.reward}⭐</span>
+					{/if}
+				</div>
+			{/each}
+		</div>
+	</div>
 
 	<!-- 메인 플레이 버튼 -->
 	<div class="main-action">
@@ -473,5 +520,93 @@
 		50% {
 			transform: scale(1.1);
 		}
+	}
+
+	/* ===== 일일 미션 ===== */
+	.daily-missions {
+		@apply mx-4 mb-2;
+		@apply rounded-2xl;
+		@apply overflow-hidden;
+		background: rgba(255, 255, 255, 0.9);
+		border: 3px solid #8b7355;
+		box-shadow: 0 4px 0 #5c4a38;
+	}
+
+	.mission-header {
+		@apply flex items-center justify-between;
+		@apply px-4 py-2;
+		background: linear-gradient(180deg, #8b7355 0%, #6d5a45 100%);
+	}
+
+	.mission-title {
+		@apply font-bold;
+		color: #fff;
+		font-size: 14px;
+	}
+
+	.mission-more {
+		@apply font-bold;
+		color: #ffd54f;
+		font-size: 12px;
+	}
+
+	.mission-list {
+		@apply flex flex-col;
+	}
+
+	.mission-item {
+		@apply flex items-center justify-between;
+		@apply px-4 py-2;
+		border-bottom: 1px solid #e8d4a8;
+	}
+
+	.mission-item:last-child {
+		border-bottom: none;
+	}
+
+	.mission-item.completed {
+		background: rgba(76, 175, 80, 0.1);
+	}
+
+	.mission-item.claimed {
+		opacity: 0.5;
+	}
+
+	.mission-info {
+		@apply flex items-center gap-2;
+	}
+
+	.mission-name {
+		@apply font-bold;
+		font-size: 13px;
+		color: #4a3728;
+	}
+
+	.mission-progress {
+		font-size: 12px;
+		color: #8b7355;
+	}
+
+	.mission-reward {
+		font-size: 12px;
+		color: #ffc107;
+		font-weight: bold;
+	}
+
+	.mission-claim {
+		@apply px-2 py-1;
+		@apply rounded-lg;
+		@apply font-bold;
+		font-size: 12px;
+		background: linear-gradient(180deg, #ffd54f 0%, #ffb300 100%);
+		color: #5d4037;
+		border: 2px solid #ff8f00;
+		animation: pulse 1s ease-in-out infinite;
+	}
+
+	.mission-done {
+		@apply font-bold;
+		font-size: 16px;
+		color: #4caf50;
 	}
 </style>
