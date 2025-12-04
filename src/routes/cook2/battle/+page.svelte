@@ -47,7 +47,9 @@
 			</div>
 
 			<!-- VS -->
-			<div class="vs-badge">VS</div>
+			<div class="vs-wrapper">
+				<div class="vs-badge">VS</div>
+			</div>
 
 			<!-- 상대 캐릭터 -->
 			<div class="fighter opponent-fighter">
@@ -164,14 +166,21 @@
 		color: #5c3d15;
 	}
 
+	.vs-wrapper {
+		@apply flex items-start;
+		@apply self-stretch;
+		padding-top: 24px;
+	}
+
 	.vs-badge {
-		@apply px-4 py-2;
-		@apply rounded-lg;
 		@apply font-black;
-		font-size: 24px;
+		font-size: 42px;
 		color: #fff;
-		background: linear-gradient(180deg, #ff7043 0%, #d84315 100%);
-		border: 3px solid #bf360c;
+		text-shadow:
+			0 3px 0 #8b4513,
+			0 6px 0 #5c2e0a;
+		-webkit-text-stroke: 2px #5c2e0a;
+		paint-order: stroke fill;
 	}
 
 	/* ===== 상대 정보 ===== */

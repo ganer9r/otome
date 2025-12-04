@@ -233,19 +233,15 @@
 		phase = 'result';
 		battleStore.setResult(myScore, opponentPower);
 
-		// 결과 화면으로
-		await new Promise((r) => setTimeout(r, 2500));
-		goto('/cook2/battle/result');
+		// 결과 화면으로 자동 이동 제거
+		// await new Promise((r) => setTimeout(r, 2500));
+		// goto('/cook2/battle/result');
 	}
 </script>
 
 <div class="versus-screen" style="transform: translate({shakeX}px, {shakeY}px)">
 	<!-- 배경 레이어 -->
 	<div class="bg-layer">
-		<!-- 회전하는 sunburst -->
-		<div class="sunburst" style="transform: rotate({bgRotation.current}deg)">
-			<img src="/imgs/bg-sunburst.png" alt="" />
-		</div>
 		<!-- 그라데이션 오버레이 -->
 		<div class="bg-overlay"></div>
 		<!-- 파티클 -->
@@ -298,10 +294,7 @@
 
 			<!-- VS 영역 (중앙) -->
 			<div class="vs-zone">
-				<div class="vs-emblem" style="transform: scale({vsScale.current})">
-					<div class="vs-inner">VS</div>
-					<div class="vs-ring"></div>
-				</div>
+				<div class="vs-text">VS</div>
 				{#if battleText}
 					<div class="action-text" class:combo={comboCount > 2}>
 						{battleText}
@@ -417,34 +410,12 @@
 	.bg-layer {
 		@apply absolute inset-0;
 		@apply overflow-hidden;
-		background: linear-gradient(180deg, #1a0a2e 0%, #0d0d1a 50%, #0a0a12 100%);
-	}
-
-	.sunburst {
-		@apply absolute;
-		top: 50%;
-		left: 50%;
-		width: 200%;
-		height: 200%;
-		margin-top: -100%;
-		margin-left: -100%;
-		opacity: 0.15;
-		will-change: transform;
-	}
-
-	.sunburst img {
-		@apply h-full w-full object-cover;
-		filter: hue-rotate(270deg) saturate(2);
+		background: linear-gradient(180deg, #ffab70 0%, #ff8a50 30%, #e86a30 70%, #d05020 100%);
 	}
 
 	.bg-overlay {
 		@apply absolute inset-0;
-		background: radial-gradient(
-			ellipse at center,
-			transparent 0%,
-			rgba(26, 10, 46, 0.5) 50%,
-			rgba(10, 10, 18, 0.9) 100%
-		);
+		background: radial-gradient(ellipse at center 70%, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
 	}
 
 	.particles {
@@ -645,45 +616,18 @@
 	.vs-zone {
 		@apply flex flex-col items-center;
 		@apply mx-2;
-		min-width: 70px;
+		min-width: 50px;
 	}
 
-	.vs-emblem {
-		@apply relative;
-		@apply h-16 w-16;
-		@apply flex items-center justify-center;
-		will-change: transform;
-	}
-
-	.vs-inner {
-		@apply relative z-10;
+	.vs-text {
 		@apply font-black;
-		font-size: 24px;
+		font-size: 42px;
 		color: #fff;
 		text-shadow:
-			0 0 10px rgba(255, 107, 53, 1),
-			0 0 20px rgba(255, 107, 53, 0.8),
-			0 4px 0 #a02020;
-	}
-
-	.vs-ring {
-		@apply absolute inset-0;
-		@apply rounded-full;
-		background: linear-gradient(180deg, #ff6b35 0%, #d63031 100%);
-		animation: vsGlow 1.5s ease-in-out infinite alternate;
-	}
-
-	@keyframes vsGlow {
-		0% {
-			box-shadow:
-				0 0 20px rgba(255, 107, 53, 0.6),
-				inset 0 0 10px rgba(255, 255, 255, 0.2);
-		}
-		100% {
-			box-shadow:
-				0 0 40px rgba(255, 107, 53, 0.9),
-				inset 0 0 15px rgba(255, 255, 255, 0.3);
-		}
+			0 3px 0 #8b4513,
+			0 6px 0 #5c2e0a;
+		-webkit-text-stroke: 2px #5c2e0a;
+		paint-order: stroke fill;
 	}
 
 	.action-text {
@@ -728,28 +672,25 @@
 
 	/* 게이지 섹션 */
 	.gauge-section {
-		@apply w-full max-w-sm;
+		@apply w-full max-w-xs;
 		@apply px-4;
+		@apply flex flex-col items-center gap-2;
 	}
 
 	.gauge-frame {
 		@apply relative;
-		@apply p-1;
+		@apply h-6 w-full;
 		@apply rounded-full;
-		background: linear-gradient(180deg, #333 0%, #1a1a1a 100%);
-		border: 3px solid #444;
-		box-shadow:
-			0 4px 0 #111,
-			inset 0 2px 8px rgba(0, 0, 0, 0.8);
+		@apply overflow-visible;
+		background: linear-gradient(180deg, #1a1a1a 0%, #333 100%);
+		border: 3px solid #555;
 	}
 
 	.gauge-track {
-		@apply relative;
-		@apply h-7;
+		@apply absolute inset-0;
 		@apply rounded-full;
 		@apply flex;
 		@apply overflow-hidden;
-		background: #0a0a0a;
 	}
 
 	.gauge-fill {
@@ -759,107 +700,83 @@
 	}
 
 	.gauge-fill.my {
-		background: linear-gradient(180deg, #5dde8c 0%, #2ecc71 50%, #27ae60 100%);
+		background: linear-gradient(180deg, #7dff7d 0%, #4caf50 50%, #2e7d32 100%);
+		box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4);
 	}
 
 	.gauge-fill.opponent {
-		background: linear-gradient(180deg, #f07167 0%, #e74c3c 50%, #c0392b 100%);
+		background: linear-gradient(180deg, #ff7d7d 0%, #e74c3c 50%, #c0392b 100%);
+		box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4);
 	}
 
 	.gauge-shine {
 		@apply absolute inset-0;
-		background: linear-gradient(
-			180deg,
-			rgba(255, 255, 255, 0.4) 0%,
-			transparent 50%,
-			rgba(0, 0, 0, 0.2) 100%
-		);
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 50%);
+		border-radius: inherit;
 	}
 
 	.gauge-center-marker {
 		@apply absolute top-0 bottom-0;
 		left: 50%;
-		width: 4px;
-		margin-left: -2px;
+		width: 3px;
+		margin-left: -1.5px;
 		background: #fff;
-		box-shadow:
-			0 0 10px #fff,
-			0 0 20px rgba(255, 255, 255, 0.5);
 		z-index: 5;
 	}
 
 	.gauge-indicator {
 		@apply absolute top-1/2;
-		width: 12px;
-		height: 20px;
-		margin-left: -6px;
-		margin-top: -10px;
+		width: 16px;
+		height: 24px;
+		margin-left: -8px;
+		margin-top: -12px;
+		background: radial-gradient(ellipse, #fff 0%, transparent 70%);
 		z-index: 10;
 		transition: left 0.15s ease-out;
 	}
 
 	.indicator-glow {
-		@apply absolute inset-0;
-		background: radial-gradient(ellipse, #fff 0%, transparent 70%);
-		animation: indicatorPulse 0.5s ease-in-out infinite alternate;
-	}
-
-	@keyframes indicatorPulse {
-		0% {
-			transform: scale(1);
-			opacity: 0.8;
-		}
-		100% {
-			transform: scale(1.5);
-			opacity: 0.4;
-		}
+		display: none;
 	}
 
 	.gauge-ends {
-		@apply absolute top-1/2 right-0 left-0;
-		@apply flex justify-between;
-		@apply px-1;
-		transform: translateY(-50%);
-		pointer-events: none;
+		display: none;
 	}
 
 	.gauge-end {
-		@apply h-5 w-5;
-		@apply rounded-full;
-		@apply flex items-center justify-center;
+		display: none;
 	}
 
 	.gauge-end.my {
-		background: #2ecc71;
-		box-shadow: 0 0 8px rgba(46, 204, 113, 0.8);
+		display: none;
 	}
 
 	.gauge-end.opponent {
-		background: #e74c3c;
-		box-shadow: 0 0 8px rgba(231, 76, 60, 0.8);
+		display: none;
 	}
 
 	.end-icon {
-		@apply h-3 w-3;
-		filter: brightness(2);
+		display: none;
 	}
 
 	.gauge-names {
-		@apply flex justify-between;
-		@apply mt-2 px-2;
+		@apply flex w-full justify-between;
+		@apply px-1;
 	}
 
 	.gauge-names .name {
 		@apply font-bold;
-		font-size: 13px;
+		font-size: 14px;
+		color: #fff;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 	}
 
 	.gauge-names .name.my {
-		color: #2ecc71;
+		color: #fff;
 	}
 
 	.gauge-names .name.opponent {
-		color: #e74c3c;
+		color: #fff;
 	}
 
 	/* 상태 표시 */
