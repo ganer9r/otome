@@ -97,3 +97,58 @@ export const GRADE_PRICES: Record<IngredientGrade, number> = {
 export function getIngredientPrice(grade: IngredientGrade): number {
 	return GRADE_PRICES[grade];
 }
+
+// ============================================
+// 미션 시스템
+// ============================================
+
+/**
+ * 미션 타입
+ */
+export type MissionType =
+	| 'cook_count' // N번 요리하기
+	| 'cook_grade' // N등급 요리 M개 만들기
+	| 'earn_money' // N원 벌기
+	| 'discover_ingredient' // 새 재료 N개 발견
+	| 'discover_recipe'; // 새 레시피 N개 발견
+
+/**
+ * 미션 카테고리
+ */
+export type MissionCategory = 'daily' | 'achievement';
+
+/**
+ * 미션 정의 (템플릿)
+ */
+export interface MissionDefinition {
+	/** 미션 고유 ID */
+	id: string;
+	/** 카테고리 */
+	category: MissionCategory;
+	/** 미션 타입 */
+	type: MissionType;
+	/** 미션 제목 */
+	title: string;
+	/** 미션 설명 */
+	description: string;
+	/** 목표 수치 */
+	target: number;
+	/** 보상 (스타) */
+	reward: number;
+	/** 등급 조건 (cook_grade 타입일 때) */
+	grade?: IngredientGrade;
+}
+
+/**
+ * 미션 진행 상태
+ */
+export interface MissionProgress {
+	/** 미션 ID */
+	missionId: string;
+	/** 현재 진행도 */
+	current: number;
+	/** 완료 여부 */
+	completed: boolean;
+	/** 보상 수령 여부 */
+	claimed: boolean;
+}

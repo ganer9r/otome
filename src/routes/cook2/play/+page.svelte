@@ -18,6 +18,7 @@
 		starStore,
 		upgradeStore
 	} from '../lib/store';
+	import { missionStore } from '../lib/mission-store';
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { modalStore } from '$lib/stores/modal';
 	import type { Recipe, Ingredient } from '../lib/types';
@@ -104,15 +105,34 @@
 		const result = findIngredientById(currentRecipe.resultIngredientId);
 		if (result) {
 			resultIngredient = result;
-			// 2. 재료 오픈
+
+			// 2. 이미 발견한 레시피인지 확인
+			const alreadyDiscovered = $unlockedIngredientsStore.includes(
+				currentRecipe.resultIngredientId
+			);
+
+			// 3. 재료 오픈
 			unlockedIngredientsStore.unlock(currentRecipe.resultIngredientId);
-			// 3. 재료인 경우 NEW 뱃지 추가
+
+			// 4. 재료인 경우 NEW 뱃지 추가
 			if (result.isIngredient) {
 				newIngredientsStore.add(currentRecipe.resultIngredientId);
+				// 새 재료 발견 미션
+				if (!alreadyDiscovered) {
+					missionStore.onDiscoverIngredient();
+				}
+			}
+
+			// 5. 미션 업데이트
+			missionStore.onCook(result.grade, result.sellPrice ?? 0);
+
+			// 6. 새 레시피 발견 미션
+			if (!alreadyDiscovered) {
+				missionStore.onDiscoverRecipe();
 			}
 		}
 
-		// 4. 결과 화면 표시
+		// 7. 결과 화면 표시
 		step = 'result';
 	}
 

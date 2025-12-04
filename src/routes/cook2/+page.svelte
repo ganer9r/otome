@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { unlockedIngredientsStore, unlockedDishesStore, runStore, starStore } from './lib/store';
+	import { missionStore } from './lib/mission-store';
 	import { INGREDIENTS } from './lib/data/ingredients';
 	import { RECIPES } from './lib/data/recipes';
 	import { getChefImage, getRandomDialogue } from './lib/chef-images';
@@ -48,6 +49,17 @@
 		goto('/cook2/collection');
 	}
 
+	function goMission() {
+		goto('/cook2/mission');
+	}
+
+	function goMy() {
+		goto('/cook2/my');
+	}
+
+	// 미수령 미션 개수
+	let unclaimedMissions = $derived(missionStore.getUnclaimedCount());
+
 	function goBattle() {
 		goto('/cook2/battle');
 	}
@@ -60,6 +72,7 @@
 <div class="home-container">
 	<!-- 헤더: 타이틀 + 리소스 -->
 	<header class="top-bar">
+		<button class="settings-btn" onclick={goMy}>⚙️</button>
 		<h1 class="game-title">흑백의 셰프</h1>
 		<div class="resource-group">
 			<div class="resource-badge star">
@@ -126,6 +139,16 @@
 			<span class="menu-label">해금</span>
 			<span class="menu-badge">{unlockedIngredients}/{totalIngredients}</span>
 		</button>
+
+		<button class="menu-btn" onclick={goMission}>
+			<div class="menu-icon-wrap">
+				<span class="menu-icon">🎯</span>
+			</div>
+			<span class="menu-label">미션</span>
+			{#if unclaimedMissions > 0}
+				<span class="menu-badge alert">{unclaimedMissions}</span>
+			{/if}
+		</button>
 	</nav>
 
 	<!-- 플로팅 대결 버튼 -->
@@ -172,6 +195,23 @@
 		letter-spacing: 2px;
 		-webkit-text-stroke: 2px #8b5a20;
 		paint-order: stroke fill;
+	}
+
+	.settings-btn {
+		@apply absolute left-4;
+		@apply h-10 w-10;
+		@apply flex items-center justify-center;
+		@apply rounded-full;
+		font-size: 24px;
+		background: rgba(255, 255, 255, 0.9);
+		border: 3px solid #8b7355;
+		box-shadow: 0 3px 0 #5c4a38;
+		cursor: pointer;
+	}
+
+	.settings-btn:active {
+		box-shadow: 0 1px 0 #5c4a38;
+		transform: translateY(2px);
 	}
 
 	.resource-group {
@@ -418,5 +458,20 @@
 		color: white;
 		border: 2px solid #fff;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+	}
+
+	.menu-badge.alert {
+		background: #f44336;
+		animation: pulse 1s ease-in-out infinite;
+	}
+
+	@keyframes pulse {
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.1);
+		}
 	}
 </style>
