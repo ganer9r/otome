@@ -17,39 +17,24 @@
 	let progress = $state(0);
 	let stage = $state<'dropping' | 'cooking' | 'complete'>('dropping');
 
-	// 기본 조리기구 이미지 (냄비)
-	const toolImage = '/imgs/cw_pot.webp';
-
 	// 재료 정보
 	const ingredient1 = selectedIngredients[0] ? findIngredientById(selectedIngredients[0]) : null;
 	const ingredient2 = selectedIngredients[1] ? findIngredientById(selectedIngredients[1]) : null;
 
-	// 파티클 생성
-	const steamParticles = Array.from({ length: 4 }, (_, i) => ({
-		delay: i * 0.3,
-		x: (Math.random() - 0.5) * 40,
-		duration: 2 + Math.random() * 1
-	}));
-
-	const flameParticles = Array.from({ length: 3 }, (_, i) => ({
-		delay: i * 0.2,
-		x: (i - 1) * 30
-	}));
-
-	const sparkleParticles = Array.from({ length: 8 }, () => ({
-		delay: Math.random() * 2,
-		x: (Math.random() - 0.5) * 200,
-		y: (Math.random() - 0.5) * 200,
-		duration: 1 + Math.random() * 1
+	// 완료 시 터지는 파티클
+	const burstParticles = Array.from({ length: 12 }, (_, i) => ({
+		angle: i * 30 * (Math.PI / 180),
+		delay: Math.random() * 0.2,
+		distance: 80 + Math.random() * 40
 	}));
 
 	onMount(() => {
-		// Stage 1: 재료 떨어지기 (0-2초)
+		// Stage 1: 재료 떨어지기 (0-1.5초)
 		setTimeout(() => {
 			stage = 'cooking';
-		}, 2000);
+		}, 1500);
 
-		// Stage 2: 조리 중 (2-10초)
+		// Stage 2: 조리 중
 		const interval = setInterval(() => {
 			remainingTime -= 1;
 			progress = ((cookingTime - remainingTime) / cookingTime) * 100;
@@ -57,9 +42,10 @@
 			if (remainingTime <= 0) {
 				clearInterval(interval);
 				stage = 'complete';
+				// 터지는 효과 후 결과 화면으로
 				setTimeout(() => {
 					onComplete?.();
-				}, 500);
+				}, 1200);
 			}
 		}, 1000);
 
@@ -68,90 +54,83 @@
 </script>
 
 <div class="cooking-screen">
-	{#if stage === 'dropping'}
-		<!-- 재료 떨어지기 -->
-		<div class="dropping-container">
+	<!-- 상단: 조합 공식 -->
+	<div class="top-area">
+		<div class="recipe-formula">
 			{#if ingredient1}
-				<div class="ingredient-drop" style="--delay: 0s">
-					<img src={ingredient1.imageUrl} alt={ingredient1.name} class="ingredient-image" />
+				<div class="formula-item">
+					<img src={ingredient1.imageUrl} alt={ingredient1.name} />
 				</div>
 			{/if}
+			<span class="formula-plus">+</span>
 			{#if ingredient2}
-				<div class="ingredient-drop" style="--delay: 1s">
-					<img src={ingredient2.imageUrl} alt={ingredient2.name} class="ingredient-image" />
+				<div class="formula-item">
+					<img src={ingredient2.imageUrl} alt={ingredient2.name} />
 				</div>
 			{/if}
+			<span class="formula-arrow">→</span>
+			<div class="formula-result">
+				<span class="result-question">?</span>
+			</div>
 		</div>
 
-		<!-- 조리기구 (정지) -->
-		<div class="tool-container">
-			<img src={toolImage} alt="조리기구" class="tool-image" />
+		<!-- 프로그레스 영역 (항상 공간 확보) -->
+		<div class="progress-section">
+			{#if stage === 'cooking'}
+				<div class="progress-container">
+					<div class="progress-bar" style="width: {progress}%"></div>
+				</div>
+				<div class="progress-label">조리 중...</div>
+			{:else if stage === 'complete'}
+				<h1 class="complete-text">완성!</h1>
+			{/if}
 		</div>
-	{:else if stage === 'cooking'}
-		<!-- 조리 중 -->
-		<div class="cooking-container">
-			<!-- 증기 파티클 -->
-			<div class="steam-container">
-				{#each steamParticles as particle}
-					<div
-						class="steam"
-						style="
-							--delay: {particle.delay}s;
-							--x: {particle.x}px;
-							--duration: {particle.duration}s;
-						"
-					>
-						💨
+	</div>
+
+	<!-- 중앙: 캐릭터 -->
+	<div class="character-area">
+		<img
+			src="/imgs/character/chef_cooking.webp"
+			alt="셰프"
+			class="chef-img"
+			class:cooking={stage === 'cooking'}
+			class:complete={stage === 'complete'}
+		/>
+
+		<!-- 재료 떨어지기 -->
+		{#if stage === 'dropping'}
+			<div class="dropping-ingredients">
+				{#if ingredient1}
+					<div class="drop-item" style="--delay: 0s; --x: -40px">
+						<img src={ingredient1.imageUrl} alt={ingredient1.name} />
 					</div>
-				{/each}
+				{/if}
+				{#if ingredient2}
+					<div class="drop-item" style="--delay: 0.3s; --x: 40px">
+						<img src={ingredient2.imageUrl} alt={ingredient2.name} />
+					</div>
+				{/if}
 			</div>
+		{/if}
 
-			<!-- 조리기구 (흔들림) -->
-			<div class="tool-container">
-				<img src={toolImage} alt="조리중" class="tool-image tool-shaking" />
-			</div>
-
-			<!-- 불꽃 파티클 -->
-			<div class="flame-container">
-				{#each flameParticles as particle}
-					<div class="flame" style="--delay: {particle.delay}s; --x: {particle.x}px">🔥</div>
-				{/each}
-			</div>
-
-			<!-- 반짝이 파티클 -->
-			<div class="sparkle-container">
-				{#each sparkleParticles as particle}
+		<!-- 완료 시 터지는 파티클 -->
+		{#if stage === 'complete'}
+			<div class="burst-container">
+				{#each burstParticles as particle, i}
 					<div
-						class="sparkle"
+						class="burst-particle"
 						style="
+							--angle: {particle.angle}rad;
 							--delay: {particle.delay}s;
-							--x: {particle.x}px;
-							--y: {particle.y}px;
-							--duration: {particle.duration}s;
+							--distance: {particle.distance}px;
 						"
 					>
 						✨
 					</div>
 				{/each}
 			</div>
-
-			<!-- 조리 중 텍스트 -->
-			<h1 class="cooking-text">조리 중...</h1>
-
-			<!-- 프로그레스 바 -->
-			<div class="progress-container">
-				<div class="progress-bar" style="width: {progress}%"></div>
-			</div>
-		</div>
-	{:else if stage === 'complete'}
-		<!-- 완료 -->
-		<div class="complete-container">
-			<div class="tool-container">
-				<img src={toolImage} alt="완료!" class="tool-image tool-jump" />
-			</div>
-			<h1 class="complete-text">완성!</h1>
-		</div>
-	{/if}
+		{/if}
+	</div>
 </div>
 
 <style lang="postcss">
@@ -159,171 +138,89 @@
 
 	.cooking-screen {
 		@apply fixed inset-0 z-50;
-		@apply bg-gradient-to-br from-orange-100 via-amber-100 to-orange-200;
-		@apply flex flex-col items-center justify-center gap-8 p-6;
+		@apply flex flex-col;
 		@apply overflow-hidden;
+		@apply bg-gradient-to-br from-orange-100 via-amber-100 to-orange-200;
 	}
 
-	/* ===== Stage 1: 재료 떨어지기 ===== */
-	.dropping-container {
-		@apply absolute top-0 left-0 h-full w-full;
+	/* ===== 상단 영역 ===== */
+	.top-area {
+		@apply flex flex-col items-center;
+		@apply px-4 pt-8;
+		@apply gap-4;
+		z-index: 20;
+	}
+
+	/* 조합 공식 */
+	.recipe-formula {
+		@apply flex items-center justify-center gap-2;
+	}
+
+	.formula-item {
+		@apply h-14 w-14;
+		@apply rounded-xl;
 		@apply flex items-center justify-center;
-		@apply pointer-events-none;
+		background: rgba(255, 255, 255, 0.9);
+		border: 3px solid #8b5a20;
 	}
 
-	.ingredient-drop {
-		@apply absolute;
-		@apply flex flex-col items-center gap-2;
-		animation: ingredientDrop 1s ease-out forwards;
-		animation-delay: var(--delay);
-		opacity: 0;
+	.formula-item img {
+		@apply h-10 w-10 object-contain;
 	}
 
-	.ingredient-image {
-		@apply h-20 w-20 object-contain;
-		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+	.formula-plus,
+	.formula-arrow {
+		@apply font-black;
+		font-size: 24px;
+		color: #8b5a20;
+		text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 	}
 
-	@keyframes ingredientDrop {
-		0% {
-			transform: translateY(-100vh) rotate(0deg);
-			opacity: 0;
-		}
-		60% {
-			transform: translateY(0) rotate(360deg);
-			opacity: 1;
-		}
-		75% {
-			transform: translateY(-30px) rotate(360deg);
-		}
-		85% {
-			transform: translateY(-10px) rotate(360deg);
-		}
-		100% {
-			transform: translateY(0) rotate(360deg);
-			opacity: 1;
-		}
+	.formula-result {
+		@apply h-14 w-14;
+		@apply rounded-xl;
+		@apply flex items-center justify-center;
+		background: linear-gradient(180deg, #ffd700 0%, #ff9800 100%);
+		border: 3px solid #8b5a20;
 	}
 
-	/* ===== Stage 2: 조리 중 ===== */
-	.cooking-container {
-		@apply relative h-full w-full;
-		@apply flex flex-col items-center justify-center gap-6;
+	.result-question {
+		@apply font-black;
+		font-size: 28px;
+		color: #fff;
+		text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
 	}
 
-	.tool-container {
+	/* 프로그레스 섹션 (항상 공간 확보) */
+	.progress-section {
+		@apply w-full max-w-xs;
+		@apply flex flex-col items-center justify-center gap-2;
+		min-height: 60px;
+	}
+
+	.progress-container {
+		@apply h-6 w-full;
+		@apply rounded-full;
+		@apply overflow-hidden;
 		@apply relative;
-		@apply flex items-center justify-center;
+		background: linear-gradient(180deg, #1a1a1a 0%, #333 100%);
+		border: 3px solid #555;
 	}
 
-	.tool-image {
-		@apply h-48 w-48 object-contain;
-		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
+	.progress-bar {
+		@apply absolute top-0 bottom-0 left-0;
+		@apply rounded-full;
+		background: linear-gradient(180deg, #7dff7d 0%, #4caf50 50%, #2e7d32 100%);
+		box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4);
+		@apply transition-all duration-1000 ease-linear;
 	}
 
-	.tool-shaking {
-		animation: toolShake 0.5s ease-in-out infinite;
-	}
-
-	@keyframes toolShake {
-		0%,
-		100% {
-			transform: rotate(0deg) translateY(0);
-		}
-		25% {
-			transform: rotate(-2deg) translateY(-2px);
-		}
-		50% {
-			transform: rotate(0deg) translateY(0);
-		}
-		75% {
-			transform: rotate(2deg) translateY(-2px);
-		}
-	}
-
-	/* 증기 파티클 */
-	.steam-container {
-		@apply absolute top-20 left-1/2 -translate-x-1/2;
-		@apply h-full w-full;
-		@apply pointer-events-none;
-	}
-
-	.steam {
-		@apply absolute top-0 left-1/2;
-		@apply text-4xl;
-		animation: steamRise var(--duration) ease-out infinite;
-		animation-delay: var(--delay);
-		transform: translateX(var(--x)) rotate(-90deg);
-	}
-
-	@keyframes steamRise {
-		0% {
-			transform: translateX(var(--x)) translateY(0) scale(0.5) rotate(-90deg);
-			opacity: 1;
-		}
-		100% {
-			transform: translateX(var(--x)) translateY(-150px) scale(1.5) rotate(-90deg);
-			opacity: 0;
-		}
-	}
-
-	/* 불꽃 파티클 */
-	.flame-container {
-		@apply absolute bottom-32 left-1/2 -translate-x-1/2;
-		@apply flex gap-8;
-		@apply pointer-events-none;
-	}
-
-	.flame {
-		@apply text-3xl;
-		animation: flameFlicker 0.3s ease-in-out infinite alternate;
-		animation-delay: var(--delay);
-		transform: translateX(var(--x));
-	}
-
-	@keyframes flameFlicker {
-		0% {
-			transform: translateX(var(--x)) translateY(0) scale(1);
-			opacity: 0.8;
-		}
-		100% {
-			transform: translateX(var(--x)) translateY(-5px) scale(1.2);
-			opacity: 1;
-		}
-	}
-
-	/* 반짝이 파티클 */
-	.sparkle-container {
-		@apply absolute inset-0;
-		@apply pointer-events-none;
-	}
-
-	.sparkle {
-		@apply absolute top-1/2 left-1/2;
-		@apply text-2xl;
-		animation: sparkle var(--duration) ease-out infinite;
-		animation-delay: var(--delay);
-		transform: translate(var(--x), var(--y));
-	}
-
-	@keyframes sparkle {
-		0%,
-		100% {
-			opacity: 0;
-			transform: translate(var(--x), var(--y)) scale(0) rotate(0deg);
-		}
-		50% {
-			opacity: 1;
-			transform: translate(var(--x), var(--y)) scale(1) rotate(180deg);
-		}
-	}
-
-	/* 조리 중 텍스트 */
-	.cooking-text {
-		@apply font-bold text-gray-800;
-		@apply relative z-10;
-		font-size: var(--font-xxl);
-		animation: pulse 1.5s ease-in-out infinite;
+	.progress-label {
+		@apply font-bold;
+		font-size: 16px;
+		color: #8b5a20;
+		text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+		animation: pulse 1s ease-in-out infinite;
 	}
 
 	@keyframes pulse {
@@ -336,64 +233,59 @@
 		}
 	}
 
-	/* 프로그레스 바 */
-	.progress-container {
-		@apply h-4 w-full max-w-md overflow-hidden rounded-full bg-orange-200;
-		@apply shadow-inner;
-		@apply relative z-10;
+	/* ===== 캐릭터 영역 ===== */
+	.character-area {
+		@apply relative;
+		@apply flex-1;
+		@apply flex items-center justify-center;
 	}
 
-	.progress-bar {
-		@apply h-full bg-gradient-to-r from-orange-400 to-red-500;
-		@apply transition-all duration-1000 ease-linear;
-		animation: shimmer 1.5s infinite;
+	.chef-img {
+		width: clamp(200px, 60vw, 320px);
+		height: auto;
+		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
 	}
 
-	@keyframes shimmer {
-		0% {
-			opacity: 0.8;
+	.chef-img.cooking {
+		animation: chefBounce 0.6s ease-in-out infinite;
+	}
+
+	.chef-img.complete {
+		animation: chefJump 0.6s ease-out;
+	}
+
+	@keyframes chefBounce {
+		0%,
+		100% {
+			transform: translateY(0);
 		}
 		50% {
-			opacity: 1;
-		}
-		100% {
-			opacity: 0.8;
+			transform: translateY(-10px);
 		}
 	}
 
-	/* ===== Stage 3: 완료 ===== */
-	.complete-container {
-		@apply flex flex-col items-center justify-center gap-8;
-	}
-
-	.tool-jump {
-		animation: toolJump 0.6s ease-out;
-	}
-
-	@keyframes toolJump {
+	@keyframes chefJump {
 		0% {
 			transform: translateY(0) scale(1);
 		}
-		30% {
-			transform: translateY(-40px) scale(1.1);
-		}
 		50% {
-			transform: translateY(-50px) scale(1.15) rotate(5deg);
-		}
-		70% {
-			transform: translateY(-30px) scale(1.1) rotate(-5deg);
-		}
-		85% {
-			transform: translateY(-10px) scale(1.05);
+			transform: translateY(-30px) scale(1.1);
 		}
 		100% {
 			transform: translateY(0) scale(1);
 		}
 	}
 
+	/* 완성 텍스트 */
 	.complete-text {
-		@apply font-bold text-orange-600;
-		font-size: var(--font-xxl);
+		@apply font-black;
+		font-size: 32px;
+		color: #ffd700;
+		text-shadow:
+			0 3px 0 #8b6914,
+			0 6px 0 #5c4a0a;
+		-webkit-text-stroke: 2px #5c2e0a;
+		paint-order: stroke fill;
 		animation: completePop 0.5s ease-out;
 	}
 
@@ -408,6 +300,75 @@
 		100% {
 			transform: scale(1);
 			opacity: 1;
+		}
+	}
+
+	/* 재료 떨어지기 */
+	.dropping-ingredients {
+		@apply absolute;
+		top: -100px;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
+	.drop-item {
+		@apply absolute;
+		@apply h-16 w-16;
+		left: var(--x);
+		animation: dropIn 1s ease-in forwards;
+		animation-delay: var(--delay);
+		opacity: 0;
+	}
+
+	.drop-item img {
+		@apply h-full w-full object-contain;
+	}
+
+	@keyframes dropIn {
+		0% {
+			transform: translateY(-50px) rotate(0deg);
+			opacity: 1;
+		}
+		80% {
+			opacity: 1;
+		}
+		100% {
+			transform: translateY(200px) rotate(360deg);
+			opacity: 0;
+		}
+	}
+
+	/* 완료 시 터지는 파티클 */
+	.burst-container {
+		@apply absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		z-index: 30;
+	}
+
+	.burst-particle {
+		@apply absolute;
+		font-size: 32px;
+		animation: burst 0.8s ease-out forwards;
+		animation-delay: var(--delay);
+	}
+
+	@keyframes burst {
+		0% {
+			transform: translate(0, 0) scale(0);
+			opacity: 1;
+		}
+		50% {
+			opacity: 1;
+		}
+		100% {
+			transform: translate(
+					calc(cos(var(--angle)) * var(--distance)),
+					calc(sin(var(--angle)) * var(--distance))
+				)
+				scale(1);
+			opacity: 0;
 		}
 	}
 </style>
