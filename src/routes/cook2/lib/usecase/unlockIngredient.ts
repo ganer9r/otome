@@ -1,14 +1,14 @@
 import { browser } from '$app/environment';
 import { INITIAL_INGREDIENTS } from '../data/ingredients';
 
-const PERMANENT_UNLOCK_KEY = 'cook2_permanent_unlocks';
+const UNLOCKED_INGREDIENTS_KEY = 'cook2_unlocked_ingredients';
 
 /**
- * 영구 해금된 재료 가져오기
+ * localStorage에서 해금된 재료 가져오기
  */
-function getPermanentUnlocks(): number[] {
+function getStoredUnlocks(): number[] {
 	if (!browser) return [];
-	const stored = localStorage.getItem(PERMANENT_UNLOCK_KEY);
+	const stored = localStorage.getItem(UNLOCKED_INGREDIENTS_KEY);
 	if (!stored) return [];
 	try {
 		return JSON.parse(stored);
@@ -18,21 +18,29 @@ function getPermanentUnlocks(): number[] {
 }
 
 /**
- * 초기 해금 재료 (G등급 + 영구 해금)
+ * localStorage에 해금된 재료 저장
  */
-function getInitialUnlocks(): number[] {
-	const gGrade = INITIAL_INGREDIENTS.map((i) => i.id);
-	const permanent = getPermanentUnlocks();
-	return [...new Set([...gGrade, ...permanent])];
+function saveUnlocks(ids: number[]): void {
+	if (!browser) return;
+	localStorage.setItem(UNLOCKED_INGREDIENTS_KEY, JSON.stringify(ids));
 }
 
 /**
- * 메모리에 저장된 오픈 재료 목록 (새로고침 시 초기화)
+ * 초기 해금 재료 (G등급 + localStorage 저장분)
+ */
+function getInitialUnlocks(): number[] {
+	const gGrade = INITIAL_INGREDIENTS.map((i) => i.id);
+	const stored = getStoredUnlocks();
+	return [...new Set([...gGrade, ...stored])];
+}
+
+/**
+ * 오픈 재료 목록 (메모리 캐시)
  */
 let unlockedIngredients: number[] = getInitialUnlocks();
 
 /**
- * 재료를 오픈하여 메모리에 저장
+ * 재료를 오픈하여 localStorage에 저장
  *
  * @param ingredientId - 오픈할 재료 ID (number)
  */
@@ -45,6 +53,7 @@ export function unlockIngredient(ingredientId: number): void {
 	// 중복 방지
 	if (!unlockedIngredients.includes(ingredientId)) {
 		unlockedIngredients.push(ingredientId);
+		saveUnlocks(unlockedIngredients);
 	}
 }
 
@@ -68,9 +77,12 @@ export function isIngredientUnlocked(ingredientId: number): boolean {
 }
 
 /**
- * 오픈 재료 초기화 (G등급 + 영구 해금으로 리셋)
+ * 오픈 재료 초기화 (G등급만 남기고 리셋)
  */
 export function resetUnlockedIngredients(): void {
+	if (browser) {
+		localStorage.removeItem(UNLOCKED_INGREDIENTS_KEY);
+	}
 	unlockedIngredients = getInitialUnlocks();
 }
 
