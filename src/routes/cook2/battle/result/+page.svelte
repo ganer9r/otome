@@ -20,7 +20,7 @@
 		id: 301,
 		name: '김치찌개',
 		grade: 'D',
-		imageUrl: '/imgs/ingredients2/301.webp'
+		imageUrl: '/imgs/ingredients2/203.webp'
 	};
 
 	onMount(() => {
@@ -52,7 +52,7 @@
 	}
 </script>
 
-<div class="result-container" class:win={isWin} class:lose={!isWin}>
+<div class="result-container">
 	<!-- 결과 텍스트 -->
 	<div class="result-header">
 		{#if isWin}
@@ -87,17 +87,19 @@
 	{#if isWin}
 		<div class="reward-area">
 			<h2 class="reward-title">특별 레시피 획득!</h2>
-			<div class="reward-recipe">
-				<div class="recipe-image">
-					{#if rewardRecipe.imageUrl}
-						<img src={rewardRecipe.imageUrl} alt={rewardRecipe.name} />
-					{:else}
-						<span class="recipe-emoji">🍲</span>
-					{/if}
-				</div>
-				<div class="recipe-info">
-					<span class="recipe-name">{rewardRecipe.name}</span>
-					<span class="recipe-grade">{rewardRecipe.grade}급 레시피</span>
+			<div class="reward-recipe-wrapper">
+				<div class="reward-recipe">
+					<div class="recipe-image">
+						{#if rewardRecipe.imageUrl}
+							<img src={rewardRecipe.imageUrl} alt={rewardRecipe.name} />
+						{:else}
+							<span class="recipe-emoji">🍲</span>
+						{/if}
+					</div>
+					<div class="recipe-info">
+						<span class="recipe-name">{rewardRecipe.name}</span>
+						<span class="recipe-grade">{rewardRecipe.grade}급 레시피</span>
+					</div>
 				</div>
 			</div>
 			<p class="reward-desc">이제 이 요리를 만들 수 있습니다!</p>
@@ -121,26 +123,20 @@
 
 	.result-container {
 		@apply flex flex-col;
-		@apply h-full min-h-screen;
-		@apply px-6 py-8;
-	}
-
-	.result-container.win {
-		background: linear-gradient(180deg, #1b4332 0%, #2d6a4f 50%, #40916c 100%);
-	}
-
-	.result-container.lose {
-		background: linear-gradient(180deg, #3d1f1f 0%, #5c2e2e 50%, #7a3e3e 100%);
+		@apply h-screen;
+		@apply px-4 py-4;
+		@apply overflow-hidden;
+		background: linear-gradient(180deg, #e8956c 0%, #f0b08a 40%, #f5c9a8 70%, #fae4d4 100%);
 	}
 
 	/* ===== 결과 헤더 ===== */
 	.result-header {
 		@apply flex flex-col items-center;
-		@apply py-8;
+		@apply py-4;
 	}
 
 	.result-icon {
-		font-size: 64px;
+		font-size: 48px;
 		animation: bounce 1s ease-in-out;
 	}
 
@@ -150,94 +146,124 @@
 			transform: translateY(0);
 		}
 		50% {
-			transform: translateY(-20px);
+			transform: translateY(-10px);
 		}
 	}
 
 	.result-title {
 		@apply font-black;
-		font-size: 48px;
-		text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+		font-size: 36px;
+		-webkit-text-stroke: 2px #5c2e0a;
+		paint-order: stroke fill;
 	}
 
 	.result-title.win {
 		color: #ffd700;
+		text-shadow:
+			0 3px 0 #8b6914,
+			0 6px 0 #5c4a0a;
 	}
 
 	.result-title.lose {
-		color: #9ca3af;
+		color: #8b7355;
+		text-shadow:
+			0 3px 0 #5c4a38,
+			0 6px 0 #3d3028;
 	}
 
 	/* ===== 점수 비교 ===== */
 	.score-comparison {
 		@apply flex items-center justify-center;
-		@apply gap-4;
-		@apply py-6;
+		@apply gap-3;
+		@apply py-3;
 	}
 
 	.score-card {
 		@apply flex flex-col items-center;
-		@apply px-4 py-4;
+		@apply px-4 py-3;
 		@apply rounded-xl;
 		@apply min-w-24;
-		background: rgba(255, 255, 255, 0.1);
+		background: rgba(255, 255, 255, 0.9);
+		border: 3px solid #e0c4a8;
 	}
 
 	.score-label {
-		font-size: 12px;
-		color: #9ca3af;
+		font-size: 11px;
+		color: #8b7355;
 	}
 
 	.dish-name {
-		@apply font-bold text-white;
-		font-size: 14px;
-		@apply my-1;
+		@apply font-bold;
+		font-size: 13px;
+		color: #4a3728;
 	}
 
 	.score-value {
 		@apply font-black;
-		font-size: 24px;
+		font-size: 20px;
 	}
 
 	.my-score .score-value {
-		color: #4caf50;
+		color: #1a1a1a;
 	}
 
 	.opponent-score .score-value {
-		color: #f44336;
+		color: #d84315;
 	}
 
 	.vs {
 		@apply font-black;
-		font-size: 20px;
-		color: #ffd700;
+		font-size: 18px;
+		color: #fff;
+		background: linear-gradient(180deg, #ff7043 0%, #d84315 100%);
+		@apply px-2 py-1;
+		@apply rounded-lg;
+		border: 2px solid #bf360c;
 	}
 
 	/* ===== 보상 영역 ===== */
 	.reward-area {
 		@apply flex flex-col items-center;
-		@apply py-6;
+		@apply py-3;
 	}
 
 	.reward-title {
-		@apply font-bold text-white;
-		font-size: 18px;
-		@apply mb-3;
+		@apply font-black;
+		font-size: 16px;
+		color: #4a3728;
+		@apply mb-2;
+	}
+
+	.reward-recipe-wrapper {
+		@apply relative;
+		@apply rounded-xl;
+		padding: 3px;
+		background: linear-gradient(90deg, #c9a227, #ffd700, #fff5cc, #ffd700, #c9a227);
+		background-size: 200% 100%;
+		animation: shimmer 2s linear infinite;
 	}
 
 	.reward-recipe {
-		@apply flex items-center gap-4;
-		@apply px-5 py-4;
-		@apply rounded-xl;
-		background: rgba(255, 215, 0, 0.15);
-		border: 2px solid rgba(255, 215, 0, 0.5);
+		@apply flex items-center gap-3;
+		@apply px-4 py-3;
+		@apply rounded-lg;
+		background: #fff;
+	}
+
+	@keyframes shimmer {
+		0% {
+			background-position: 200% 0;
+		}
+		100% {
+			background-position: -200% 0;
+		}
 	}
 
 	.recipe-image {
-		@apply h-16 w-16;
+		@apply h-12 w-12;
 		@apply rounded-lg;
 		@apply overflow-hidden;
-		background: rgba(255, 255, 255, 0.1);
+		background: #f5f5f5;
 	}
 
 	.recipe-image img {
@@ -247,7 +273,7 @@
 	.recipe-emoji {
 		@apply flex items-center justify-center;
 		@apply h-full w-full;
-		font-size: 40px;
+		font-size: 32px;
 	}
 
 	.recipe-info {
@@ -256,28 +282,28 @@
 
 	.recipe-name {
 		@apply font-black;
-		font-size: 18px;
-		color: #ffd700;
+		font-size: 15px;
+		color: #4a3728;
 	}
 
 	.recipe-grade {
 		@apply font-bold;
-		font-size: 14px;
-		color: #9ca3af;
+		font-size: 12px;
+		color: #8b7355;
 	}
 
 	.reward-desc {
-		@apply mt-3;
-		font-size: 14px;
-		color: #9ca3af;
+		@apply mt-2;
+		font-size: 12px;
+		color: #5c3d15;
 	}
 
 	/* ===== 버튼 영역 ===== */
 	.action-area {
 		@apply flex-1;
 		@apply flex flex-col items-center justify-end;
-		@apply gap-3;
-		@apply pb-6;
+		@apply gap-2;
+		@apply pb-4;
 	}
 
 	.action-btn {
@@ -291,7 +317,7 @@
 	}
 
 	.action-btn:active {
-		transform: scale(0.98);
+		transform: translateY(2px);
 	}
 
 	.action-btn.primary {
@@ -299,11 +325,16 @@
 		background: linear-gradient(180deg, #ff7043 0%, #f4511e 50%, #d84315 100%);
 		border: none;
 		border-bottom: 4px solid #bf360c;
+		text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+	}
+
+	.action-btn.primary:active {
+		border-bottom-width: 2px;
 	}
 
 	.action-btn.secondary {
-		color: #fff;
-		background: rgba(255, 255, 255, 0.1);
-		border: 1px solid rgba(255, 255, 255, 0.3);
+		color: #4a3728;
+		background: rgba(255, 255, 255, 0.9);
+		border: 3px solid #8b7355;
 	}
 </style>

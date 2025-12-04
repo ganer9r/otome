@@ -393,7 +393,6 @@
 		@apply rounded-full;
 		background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 100%);
 		border: 3px solid rgba(255, 255, 255, 0.3);
-		box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
 	}
 
 	.step-label {
@@ -455,7 +454,6 @@
 		@apply flex items-center justify-center;
 		background: rgba(255, 255, 255, 0.9);
 		border: 3px solid #8b5a20;
-		box-shadow: 0 3px 0 #5c3d15;
 		animation: formulaPop 0.3s ease-out backwards;
 	}
 
@@ -481,7 +479,6 @@
 		@apply flex items-center justify-center;
 		background: linear-gradient(180deg, #ffd700 0%, #ff9800 100%);
 		border: 3px solid #8b5a20;
-		box-shadow: 0 3px 0 #5c3d15;
 	}
 
 	.result-question {
@@ -603,9 +600,6 @@
 		@apply overflow-visible;
 		background: linear-gradient(180deg, #1a1a1a 0%, #333 100%);
 		border: 3px solid #555;
-		box-shadow:
-			0 4px 0 #111,
-			inset 0 2px 4px rgba(0, 0, 0, 0.8);
 	}
 
 	.progress-fill {

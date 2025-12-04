@@ -95,7 +95,7 @@
 	.battle-container {
 		@apply flex flex-col;
 		@apply h-full min-h-screen;
-		background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+		background: linear-gradient(180deg, #e8956c 0%, #f0b08a 40%, #f5c9a8 70%, #fae4d4 100%);
 	}
 
 	/* ===== 헤더 ===== */
@@ -108,14 +108,22 @@
 		@apply flex items-center justify-center;
 		@apply h-10 w-10;
 		@apply rounded-full;
-		background: rgba(255, 255, 255, 0.1);
+		background: linear-gradient(180deg, #3d3d3d 0%, #1a1a1a 100%);
+		border: 3px solid #5a5a5a;
 		color: #fff;
 		font-size: 20px;
+		box-shadow: 0 4px 0 #0d0d0d;
 	}
 
 	.title {
-		@apply font-black text-white;
-		font-size: 24px;
+		@apply font-black;
+		font-size: 28px;
+		color: #fff;
+		text-shadow:
+			0 3px 0 #8b4513,
+			0 6px 0 #5c2e0a;
+		-webkit-text-stroke: 2px #5c2e0a;
+		paint-order: stroke fill;
 	}
 
 	.spacer {
@@ -126,7 +134,7 @@
 	.vs-area {
 		@apply flex items-center justify-center;
 		@apply gap-6;
-		@apply py-12;
+		@apply py-10;
 	}
 
 	.fighter {
@@ -137,24 +145,23 @@
 		@apply flex items-center justify-center;
 		@apply h-24 w-24;
 		@apply rounded-full;
-		background: rgba(255, 255, 255, 0.1);
-		border: 3px solid rgba(255, 255, 255, 0.3);
 		font-size: 48px;
 	}
 
 	.my-fighter .fighter-avatar {
-		border-color: #4caf50;
-		box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+		background: #1a1a1a;
+		border: 4px solid #333;
 	}
 
 	.opponent-fighter .fighter-avatar {
-		border-color: #f44336;
-		box-shadow: 0 0 20px rgba(244, 67, 54, 0.3);
+		background: #fff;
+		border: 4px solid #e0e0e0;
 	}
 
 	.fighter-name {
-		@apply font-bold text-white;
+		@apply font-bold;
 		font-size: 16px;
+		color: #5c3d15;
 	}
 
 	.vs-badge {
@@ -162,10 +169,9 @@
 		@apply rounded-lg;
 		@apply font-black;
 		font-size: 24px;
-		color: #ffd700;
-		background: linear-gradient(180deg, #b8860b 0%, #8b6914 100%);
-		border: 2px solid #ffd700;
-		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+		color: #fff;
+		background: linear-gradient(180deg, #ff7043 0%, #d84315 100%);
+		border: 3px solid #bf360c;
 	}
 
 	/* ===== 상대 정보 ===== */
@@ -179,8 +185,8 @@
 		@apply px-6 py-4;
 		@apply rounded-2xl;
 		@apply flex flex-col gap-3;
-		background: rgba(255, 255, 255, 0.1);
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		background: rgba(255, 255, 255, 0.9);
+		border: 3px solid #e0c4a8;
 	}
 
 	.info-row {
@@ -188,13 +194,14 @@
 	}
 
 	.info-label {
-		@apply text-gray-400;
+		color: #8b7355;
 		font-size: 14px;
 	}
 
 	.info-value {
-		@apply font-bold text-white;
+		@apply font-bold;
 		font-size: 16px;
+		color: #5c3d15;
 	}
 
 	/* ===== 대결 시작 버튼 ===== */
@@ -206,29 +213,30 @@
 
 	.start-btn {
 		@apply w-full max-w-sm;
-		@apply py-4;
+		@apply py-5;
 		@apply rounded-2xl;
 		@apply font-black;
-		font-size: 20px;
+		font-size: clamp(22px, 6vw, 28px);
 		color: #fff;
 		background: linear-gradient(180deg, #ff7043 0%, #f4511e 50%, #d84315 100%);
 		border: none;
-		border-bottom: 4px solid #bf360c;
+		border-bottom: 6px solid #bf360c;
 		box-shadow:
-			0 4px 0 #8d2608,
-			0 6px 12px rgba(0, 0, 0, 0.3);
+			0 6px 0 #8b2500,
+			0 10px 20px rgba(0, 0, 0, 0.3);
 		cursor: pointer;
+		text-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
 		transition:
 			transform 0.1s,
 			box-shadow 0.1s;
 	}
 
 	.start-btn:active {
-		transform: translateY(2px);
+		transform: translateY(4px);
 		border-bottom-width: 2px;
 		box-shadow:
-			0 2px 0 #8d2608,
-			0 3px 6px rgba(0, 0, 0, 0.3);
+			0 2px 0 #8b2500,
+			0 4px 10px rgba(0, 0, 0, 0.3);
 	}
 
 	/* ===== 완료 화면 ===== */
@@ -244,24 +252,27 @@
 	}
 
 	.complete-title {
-		@apply font-black text-white;
+		@apply font-black;
 		font-size: 28px;
+		color: #5c3d15;
 	}
 
 	.complete-desc {
-		@apply text-gray-400;
+		color: #8b7355;
 		font-size: 16px;
 	}
 
 	.home-btn {
 		@apply mt-4;
-		@apply px-8 py-3;
+		@apply px-8 py-4;
 		@apply rounded-xl;
-		@apply font-bold;
-		font-size: 16px;
+		@apply font-black;
+		font-size: 18px;
 		color: #fff;
-		background: linear-gradient(180deg, #4caf50 0%, #388e3c 100%);
+		background: linear-gradient(180deg, #ff7043 0%, #f4511e 50%, #d84315 100%);
 		border: none;
-		border-bottom: 3px solid #2e7d32;
+		border-bottom: 6px solid #bf360c;
+		box-shadow: 0 6px 0 #8b2500;
+		text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
 	}
 </style>

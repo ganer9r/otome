@@ -89,7 +89,6 @@
 			</div>
 		{:else}
 			{#each unlockedDishes as dish}
-				{@const stepCount = getStepCount(dish.id)}
 				<button class="dish-card" onclick={() => selectRecipe(dish)}>
 					<div class="dish-image">
 						{#if dish.imageUrl}
@@ -104,9 +103,8 @@
 							<span class="dish-grade" style="color: {getGradeColor(dish.grade)}">
 								{dish.grade}급
 							</span>
-							<span class="dish-price">{dish.sellPrice ?? 0}원</span>
+							<span class="dish-price">{dish.sellPrice ?? 0}점</span>
 						</div>
-						<span class="dish-steps">{stepCount}단계</span>
 					</div>
 				</button>
 			{/each}
@@ -120,7 +118,7 @@
 	.select-container {
 		@apply flex flex-col;
 		@apply h-full min-h-screen;
-		background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+		background: linear-gradient(180deg, #e8956c 0%, #f0b08a 40%, #f5c9a8 70%, #fae4d4 100%);
 	}
 
 	/* ===== 헤더 ===== */
@@ -133,14 +131,22 @@
 		@apply flex items-center justify-center;
 		@apply h-10 w-10;
 		@apply rounded-full;
-		background: rgba(255, 255, 255, 0.1);
+		background: linear-gradient(180deg, #3d3d3d 0%, #1a1a1a 100%);
+		border: 3px solid #5a5a5a;
+		box-shadow: 0 4px 0 #0d0d0d;
 		color: #fff;
 		font-size: 20px;
 	}
 
 	.title {
-		@apply font-black text-white;
-		font-size: 24px;
+		@apply font-black;
+		font-size: 28px;
+		color: #fff;
+		text-shadow:
+			0 3px 0 #8b4513,
+			0 6px 0 #5c2e0a;
+		-webkit-text-stroke: 2px #5c2e0a;
+		paint-order: stroke fill;
 	}
 
 	.spacer {
@@ -151,14 +157,21 @@
 	.guide {
 		@apply text-center;
 		@apply px-4 py-4;
-		color: #9ca3af;
-		font-size: 14px;
+		color: #5c3d15;
+		font-size: 15px;
+		font-weight: 500;
 	}
 
 	.opponent-power {
-		@apply mt-1;
+		@apply mt-2;
+		@apply inline-block;
+		@apply px-4 py-2;
+		@apply rounded-full;
 		@apply font-bold;
-		color: #f44336;
+		background: linear-gradient(180deg, #3d3d3d 0%, #1a1a1a 100%);
+		border: 3px solid #5a5a5a;
+		color: #ffd700;
+		font-size: 14px;
 	}
 
 	/* ===== 요리 목록 ===== */
@@ -185,28 +198,28 @@
 	.dish-card {
 		@apply flex flex-col;
 		@apply p-3;
-		@apply rounded-xl;
-		background: rgba(255, 255, 255, 0.1);
-		border: 1px solid rgba(255, 255, 255, 0.1);
+		@apply rounded-2xl;
+		background: linear-gradient(180deg, #fff 0%, #f0f0f0 100%);
+		border: 4px solid #8b7355;
+		border-bottom-width: 6px;
+		box-shadow: 0 4px 0 #5c4a38;
 		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.dish-card:hover {
-		background: rgba(255, 255, 255, 0.15);
-		border-color: rgba(255, 255, 255, 0.3);
+		transition: transform 0.1s;
 	}
 
 	.dish-card:active {
-		transform: scale(0.98);
+		transform: translateY(3px);
+		border-bottom-width: 3px;
+		box-shadow: 0 1px 0 #5c4a38;
 	}
 
 	.dish-image {
 		@apply flex items-center justify-center;
 		@apply aspect-square w-full;
-		@apply rounded-lg;
+		@apply rounded-xl;
 		@apply mb-2;
-		background: rgba(255, 255, 255, 0.05);
+		background: #f5f5f5;
+		border: 2px solid #e0c4a8;
 		overflow: hidden;
 	}
 
@@ -223,12 +236,13 @@
 	}
 
 	.dish-name {
-		@apply font-bold text-white;
+		@apply font-bold;
 		font-size: 14px;
+		color: #4a3728;
 	}
 
 	.dish-meta {
-		@apply flex items-center gap-2;
+		@apply flex items-center justify-between;
 	}
 
 	.dish-grade {
@@ -237,13 +251,8 @@
 	}
 
 	.dish-price {
-		@apply font-bold;
-		font-size: 12px;
-		color: #ffd700;
-	}
-
-	.dish-steps {
-		font-size: 11px;
-		color: #9ca3af;
+		@apply font-black;
+		font-size: 13px;
+		color: #d84315;
 	}
 </style>
