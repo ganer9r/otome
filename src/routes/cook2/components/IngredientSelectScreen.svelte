@@ -26,9 +26,6 @@
 		turnsUntilTax = 0
 	}: Props = $props();
 
-	// 런 상태
-	let runState = $derived($runStore);
-
 	// 업그레이드 효과
 	let upgradeEffects = $derived(upgradeStore.getEffects());
 

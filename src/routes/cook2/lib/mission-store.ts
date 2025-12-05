@@ -3,6 +3,7 @@ import { browser } from '$app/environment';
 import type { MissionProgress, MissionType, IngredientGrade } from './types';
 import { DAILY_MISSIONS, ACHIEVEMENTS, getMissionById } from './data/missions';
 import { starStore } from './store';
+import { toastStore } from './toast-store';
 
 const MISSION_PROGRESS_KEY = 'cook2_mission_progress';
 const DAILY_RESET_KEY = 'cook2_daily_reset_date';
@@ -183,6 +184,7 @@ function createMissionStore() {
 				}
 
 				const completed = current >= mission.target;
+				const wasCompleted = progress[mission.id]?.completed || false;
 
 				progress[mission.id] = {
 					missionId: mission.id,
@@ -190,6 +192,11 @@ function createMissionStore() {
 					completed,
 					claimed: progress[mission.id]?.claimed || false
 				};
+
+				// 새로 완료된 미션이면 토스트 표시
+				if (completed && !wasCompleted) {
+					toastStore.success(`미션 완료: ${mission.title}`);
+				}
 			});
 
 		saveProgress(progress);

@@ -12,11 +12,20 @@
 		recipe: Recipe;
 		/** 재료비 (이미 차감됨) */
 		ingredientCost?: number;
+		/** 손님 주문 보너스 */
+		orderBonus?: number;
 		onComplete?: () => void;
 		onUseNow?: (ingredientId: number) => void;
 	}
 
-	let { resultIngredient, recipe, ingredientCost = 0, onComplete, onUseNow }: Props = $props();
+	let {
+		resultIngredient,
+		recipe,
+		ingredientCost = 0,
+		orderBonus = 0,
+		onComplete,
+		onUseNow
+	}: Props = $props();
 
 	// 런 상태
 	let runState = $derived($runStore);
@@ -27,8 +36,8 @@
 	// 판매 금액 (업그레이드 보너스 적용)
 	let baseSellPrice = $derived(resultIngredient.sellPrice ?? 0);
 	let sellPrice = $derived(Math.round(baseSellPrice * (1 + upgradeEffects.sellBonusRate)));
-	// 순이익 (판매가 - 재료비)
-	let profit = $derived(sellPrice - ingredientCost);
+	// 순이익 (판매가 - 재료비 + 보너스)
+	let profit = $derived(sellPrice - ingredientCost + orderBonus);
 	let sold = $state(false);
 
 	// 런 진행 중이면 자동 판매 (1회만)
@@ -224,6 +233,11 @@
 								>
 									{profit >= 0 ? '+' : ''}{profit.toLocaleString()}원
 								</span>
+								{#if orderBonus > 0}
+									<div class="bonus-badge">
+										주문 보너스 +{orderBonus}원
+									</div>
+								{/if}
 							</div>
 						{/if}
 
@@ -766,6 +780,32 @@
 
 	.profit-amount.negative {
 		color: #d32f2f;
+	}
+
+	.bonus-badge {
+		@apply mt-2 px-4 py-1.5;
+		@apply rounded-full;
+		@apply font-bold;
+		font-size: clamp(12px, 3vw, 16px);
+		background: linear-gradient(180deg, #ffd54f 0%, #ffb300 100%);
+		color: #5d4037;
+		border: 2px solid #ff8f00;
+		box-shadow: 0 2px 4px rgba(255, 143, 0, 0.3);
+		animation: bonusPop 0.5s ease-out;
+	}
+
+	@keyframes bonusPop {
+		0% {
+			transform: scale(0);
+			opacity: 0;
+		}
+		50% {
+			transform: scale(1.2);
+		}
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
 	}
 
 	.progress-display {

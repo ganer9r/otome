@@ -632,8 +632,8 @@ export const upgradeStore = createUpgradeStore();
 export const RUN_CONFIG = {
 	/** 초기 자본 */
 	INITIAL_CAPITAL: 500,
-	/** 세금 징수 주기 (턴) */
-	TAX_INTERVAL: 3,
+	/** 세금 징수 주기 (턴) - 손님 주문 마감 주기이기도 함 */
+	TAX_INTERVAL: 10,
 	/** 세금률 (0.2 = 20%) */
 	TAX_RATE: 0.2
 } as const;

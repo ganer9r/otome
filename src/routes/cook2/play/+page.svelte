@@ -19,7 +19,8 @@
 		upgradeStore
 	} from '../lib/store';
 	import { missionStore } from '../lib/mission-store';
-	import { toastStore } from '../lib/toast-store';
+	import { customerStore } from '../lib/customer-store';
+	import CustomerOrderBadge from '../components/CustomerOrderBadge.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { modalStore } from '$lib/stores/modal';
 	import type { Recipe, Ingredient } from '../lib/types';
@@ -53,6 +54,15 @@
 	let showTaxModal = $state(false);
 	let showRunEndModal = $state(false);
 	let lastTaxResult = $state<TaxResult | null>(null);
+
+	// 손님 상태
+	let customerState = $derived($customerStore);
+
+	// 보너스 획득 상태 (결과 화면에서 표시용)
+	let earnedBonus = $state(0);
+
+	// 테스트용 긴급도 오버라이드
+	let testUrgency = $state<number | undefined>(undefined);
 
 	// 조리 시작 (조리기구 선택 없이 바로)
 	function handleCookRequest() {
@@ -118,23 +128,37 @@
 			// 4. 재료인 경우 NEW 뱃지 추가
 			if (result.isIngredient) {
 				newIngredientsStore.add(currentRecipe.resultIngredientId);
-				// 새 재료 발견 미션
+			}
+
+			// 5. 손님 주문 체크 → 보너스 지급
+			earnedBonus = customerStore.checkOrder(currentRecipe.resultIngredientId);
+			if (earnedBonus > 0) {
+				// 보너스 금액 추가
+				runStore.earn(earnedBonus);
+			}
+
+			// 6. 결과 화면 먼저 표시
+			step = 'result';
+
+			// 7. 결과 화면 뜬 후 미션 업데이트 (토스트가 결과 화면에서 보이도록)
+			setTimeout(() => {
+				missionStore.onCook(result.grade, result.sellPrice ?? 0);
+			}, 500);
+
+			setTimeout(() => {
 				if (!alreadyDiscovered) {
+					missionStore.onDiscoverRecipe();
+				}
+			}, 700);
+
+			setTimeout(() => {
+				if (result.isIngredient && !alreadyDiscovered) {
 					missionStore.onDiscoverIngredient();
 				}
-			}
-
-			// 5. 미션 업데이트
-			missionStore.onCook(result.grade, result.sellPrice ?? 0);
-
-			// 6. 새 레시피 발견 미션
-			if (!alreadyDiscovered) {
-				missionStore.onDiscoverRecipe();
-			}
+			}, 900);
+		} else {
+			step = 'result';
 		}
-
-		// 7. 결과 화면 표시
-		step = 'result';
 	}
 
 	// 결과 확인 완료
@@ -169,6 +193,8 @@
 	// 세금 모달 확인
 	function handleTaxConfirm() {
 		showTaxModal = false;
+		// 세금 주기 종료 → 새 주문 생성
+		customerStore.onTaxPeriodEnd(true, runState.turn);
 		continueAfterTax();
 	}
 
@@ -200,6 +226,7 @@
 		currentRecipe = null;
 		resultIngredient = null;
 		currentIngredientCost = 0;
+		earnedBonus = 0;
 	}
 
 	// 바로 써보기 (새 재료를 첫 번째 슬롯에 넣고 시작)
@@ -214,6 +241,8 @@
 	onMount(() => {
 		if (!runState.isRunning) {
 			runStore.startRun();
+			// 손님 시스템 초기화 및 첫 주문 생성
+			customerStore.startRun(0);
 		}
 	});
 </script>
@@ -246,6 +275,20 @@
 		/>
 	{/if}
 
+	<!-- 손님 주문 뱃지 (플로팅) -->
+	<CustomerOrderBadge {turnsUntilTax} {testUrgency} />
+
+	<!-- 테스트 버튼 -->
+	<div class="test-controls">
+		<div class="test-label">긴급도 테스트</div>
+		<div class="test-buttons">
+			<button class="test-btn" onclick={() => (testUrgency = 10)}>여유</button>
+			<button class="test-btn" onclick={() => (testUrgency = 5)}>보통</button>
+			<button class="test-btn" onclick={() => (testUrgency = 2)}>긴급</button>
+			<button class="test-btn" onclick={() => (testUrgency = undefined)}>리셋</button>
+		</div>
+	</div>
+
 	<!-- 게임 화면 -->
 	<div class="game-area">
 		{#if step === 'ingredient'}
@@ -266,6 +309,7 @@
 				{resultIngredient}
 				recipe={currentRecipe}
 				ingredientCost={currentIngredientCost}
+				orderBonus={earnedBonus}
 				onComplete={handleResultComplete}
 				onUseNow={resultIngredient.isIngredient ? handleUseNow : undefined}
 			/>
@@ -302,5 +346,38 @@
 	.game-area {
 		@apply flex-1;
 		@apply overflow-hidden;
+	}
+
+	/* 테스트 컨트롤 */
+	.test-controls {
+		@apply fixed z-50;
+		left: 12px;
+		bottom: 100px;
+		@apply flex flex-col gap-1;
+		@apply rounded-xl bg-black/70 p-2;
+	}
+
+	.test-label {
+		@apply text-xs text-white/70;
+		@apply text-center;
+	}
+
+	.test-buttons {
+		@apply flex gap-1;
+	}
+
+	.test-btn {
+		@apply rounded px-2 py-1;
+		@apply text-xs font-bold text-white;
+		@apply bg-white/20;
+		@apply transition-colors;
+	}
+
+	.test-btn:hover {
+		@apply bg-white/30;
+	}
+
+	.test-btn:active {
+		@apply bg-white/40;
 	}
 </style>
