@@ -1,4 +1,6 @@
 <script lang="ts">
+	import GameToast from './components/GameToast.svelte';
+
 	interface Props {
 		children: import('svelte').Snippet;
 	}
@@ -9,6 +11,8 @@
 <div class="app-container">
 	{@render children()}
 </div>
+
+<GameToast />
 
 <style lang="postcss">
 	@reference '$styles/app.css';
