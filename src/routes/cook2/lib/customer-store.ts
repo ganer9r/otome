@@ -1,12 +1,14 @@
 import { writable, get } from 'svelte/store';
 import { RECIPES } from './data/recipes';
 import { findIngredientById } from './data/ingredients';
+import { getUnlockedIngredients } from './usecase/unlockIngredient';
 import type { Recipe, Ingredient, IngredientGrade } from './types';
 
 /**
  * 손님 주문 시스템
+ * - 내 재료 1개 + 모르는 재료 1개 조합인 레시피를 주문
+ * - 가진 재료만 힌트로 보여주고, 없는 건 "???"
  * - 세금 주기(10턴) 안에 주문한 요리를 만들면 보너스
- * - 못 만들어도 다른 요리 팔 수 있음 (기본 수익)
  */
 
 export interface CustomerOrder {
@@ -22,6 +24,22 @@ export interface CustomerOrder {
 	createdAtTurn: number;
 	/** 완료 여부 */
 	completed: boolean;
+	/** 힌트 공개 여부 (RV 시청 시 true) */
+	hintRevealed: boolean;
+}
+
+/**
+ * 힌트 정보 (재료별 공개 여부)
+ */
+export interface OrderHint {
+	/** 재료 ID */
+	ingredientId: number;
+	/** 재료 이름 */
+	name: string;
+	/** 공개 여부 (내가 가진 재료 or RV 시청) */
+	revealed: boolean;
+	/** 내가 가진 재료인지 */
+	owned: boolean;
 }
 
 /**
@@ -31,16 +49,6 @@ function getDishRecipes(): Recipe[] {
 	return RECIPES.filter((recipe) => {
 		const result = findIngredientById(recipe.resultIngredientId);
 		return result && !result.isIngredient;
-	});
-}
-
-/**
- * 등급별 요리 레시피 필터링
- */
-function getDishRecipesByGrade(grade: IngredientGrade): Recipe[] {
-	return getDishRecipes().filter((recipe) => {
-		const result = findIngredientById(recipe.resultIngredientId);
-		return result?.grade === grade;
 	});
 }
 
@@ -62,72 +70,89 @@ function calculateBonus(grade: IngredientGrade): number {
 }
 
 /**
- * 랜덤 주문 생성
- * 난이도에 따라 등급 조절
+ * 주문 가능한 레시피 필터링
+ * - 재료 2개 레시피만
+ * - 내 재료 1개 + 모르는 재료 1개
  */
-function generateRandomOrder(currentTurn: number, difficulty: number = 1): CustomerOrder | null {
-	// 난이도에 따른 등급 가중치
-	// difficulty 1: F~E 위주
-	// difficulty 2: E~D 위주
-	// difficulty 3+: D~C 위주
-	const gradeWeights: Record<IngredientGrade, number>[] = [
-		// difficulty 1
-		{ G: 0, F: 50, E: 40, D: 10, C: 0, B: 0, A: 0, R: 0 },
-		// difficulty 2
-		{ G: 0, F: 20, E: 50, D: 25, C: 5, B: 0, A: 0, R: 0 },
-		// difficulty 3+
-		{ G: 0, F: 10, E: 30, D: 40, C: 15, B: 5, A: 0, R: 0 }
-	];
+function getOrderableRecipes(unlockedIds: number[]): Recipe[] {
+	const dishRecipes = getDishRecipes();
+	const unlockedSet = new Set(unlockedIds);
 
-	const weights = gradeWeights[Math.min(difficulty - 1, 2)];
-	const grades: IngredientGrade[] = ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'R'];
+	return dishRecipes.filter((recipe) => {
+		// 2개 재료 레시피만
+		if (recipe.ingredientIds.length !== 2) return false;
 
-	// 가중치 기반 등급 선택
-	const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
-	let random = Math.random() * totalWeight;
-	let selectedGrade: IngredientGrade = 'F';
+		const [id1, id2] = recipe.ingredientIds;
+		const has1 = unlockedSet.has(id1);
+		const has2 = unlockedSet.has(id2);
 
-	for (const grade of grades) {
-		random -= weights[grade];
-		if (random <= 0) {
-			selectedGrade = grade;
-			break;
+		// 하나만 가지고 있어야 함 (XOR)
+		return (has1 && !has2) || (!has1 && has2);
+	});
+}
+
+/**
+ * 등급별 필터링
+ */
+function filterByGrade(recipes: Recipe[], grade: IngredientGrade): Recipe[] {
+	return recipes.filter((recipe) => {
+		const result = findIngredientById(recipe.resultIngredientId);
+		return result?.grade === grade;
+	});
+}
+
+/**
+ * 랜덤 주문 생성
+ * - 내 재료 기반으로 주문 가능한 레시피 선택
+ *
+ * TODO: 테스트 끝나면 원복 필요
+ */
+function generateRandomOrder(currentTurn: number, _difficulty: number = 1): CustomerOrder | null {
+	// ===== 테스트용: R급 신선로 고정 =====
+	// 레시피 601: 궁중요리(609) + 타라바가니(607) = 신선로(701)
+	const testRecipe = RECIPES.find((r) => r.id === 601);
+	if (testRecipe) {
+		const dish = findIngredientById(testRecipe.resultIngredientId);
+		if (dish) {
+			return {
+				id: `order-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+				recipe: testRecipe,
+				dish,
+				bonusAmount: calculateBonus(dish.grade),
+				createdAtTurn: currentTurn,
+				completed: false,
+				hintRevealed: false
+			};
 		}
 	}
+	// ===== 테스트 끝 =====
 
-	// 해당 등급의 요리 레시피 가져오기
-	const recipes = getDishRecipesByGrade(selectedGrade);
-	if (recipes.length === 0) {
-		// 해당 등급에 요리가 없으면 F등급으로 폴백
-		const fallbackRecipes = getDishRecipesByGrade('F');
-		if (fallbackRecipes.length === 0) return null;
-		const recipe = fallbackRecipes[Math.floor(Math.random() * fallbackRecipes.length)];
-		const dish = findIngredientById(recipe.resultIngredientId);
-		if (!dish) return null;
+	return null;
+}
+
+/**
+ * 주문의 힌트 정보 가져오기
+ * - 내가 가진 재료는 이름 표시
+ * - 없는 재료는 "???"
+ */
+export function getOrderHints(order: CustomerOrder | null): OrderHint[] {
+	if (!order) return [];
+
+	const unlockedIds = getUnlockedIngredients();
+	const unlockedSet = new Set(unlockedIds);
+
+	return order.recipe.ingredientIds.map((id) => {
+		const ingredient = findIngredientById(id);
+		const owned = unlockedSet.has(id);
+		const revealed = owned || order.hintRevealed;
 
 		return {
-			id: `order-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-			recipe,
-			dish,
-			bonusAmount: calculateBonus('F'),
-			createdAtTurn: currentTurn,
-			completed: false
+			ingredientId: id,
+			name: ingredient?.name ?? '???',
+			revealed,
+			owned
 		};
-	}
-
-	// 랜덤 레시피 선택
-	const recipe = recipes[Math.floor(Math.random() * recipes.length)];
-	const dish = findIngredientById(recipe.resultIngredientId);
-	if (!dish) return null;
-
-	return {
-		id: `order-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-		recipe,
-		dish,
-		bonusAmount: calculateBonus(selectedGrade),
-		createdAtTurn: currentTurn,
-		completed: false
-	};
+	});
 }
 
 interface CustomerState {
@@ -193,6 +218,19 @@ function createCustomerStore() {
 		},
 
 		/**
+		 * 힌트 공개 (RV 시청 후)
+		 */
+		revealHint: () => {
+			update((state) => {
+				if (!state.currentOrder) return state;
+				return {
+					...state,
+					currentOrder: { ...state.currentOrder, hintRevealed: true }
+				};
+			});
+		},
+
+		/**
 		 * 세금 주기 종료 시 호출 (주문 리셋 + 난이도 조절)
 		 */
 		onTaxPeriodEnd: (survived: boolean, currentTurn: number) => {
@@ -232,6 +270,32 @@ function createCustomerStore() {
 		 */
 		reset: () => {
 			set(initialState);
+		},
+
+		/**
+		 * 테스트용: 특정 레시피로 주문 생성
+		 */
+		setTestOrder: (recipeId: number, currentTurn: number = 0) => {
+			const recipe = RECIPES.find((r) => r.id === recipeId);
+			if (!recipe) return;
+
+			const dish = findIngredientById(recipe.resultIngredientId);
+			if (!dish) return;
+
+			const order: CustomerOrder = {
+				id: `test-order-${Date.now()}`,
+				recipe,
+				dish,
+				bonusAmount: calculateBonus(dish.grade),
+				createdAtTurn: currentTurn,
+				completed: false,
+				hintRevealed: false
+			};
+
+			update((state) => ({
+				...state,
+				currentOrder: order
+			}));
 		}
 	};
 }

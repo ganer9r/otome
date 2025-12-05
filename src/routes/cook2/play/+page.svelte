@@ -287,6 +287,13 @@
 			<button class="test-btn" onclick={() => (testUrgency = 2)}>긴급</button>
 			<button class="test-btn" onclick={() => (testUrgency = undefined)}>리셋</button>
 		</div>
+		<div class="test-label">주문 테스트</div>
+		<div class="test-buttons">
+			<!-- B급 요리: 와규스테이크 (한우 + 코스요리) -->
+			<button class="test-btn" onclick={() => customerStore.setTestOrder(412, runState.turn)}>
+				B급 주문
+			</button>
+		</div>
 	</div>
 
 	<!-- 게임 화면 -->
