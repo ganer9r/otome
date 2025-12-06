@@ -27,6 +27,23 @@
 	// 펼침 상태
 	let expanded = $state(false);
 
+	// 새 주문 알림 상태
+	let isNewOrder = $state(false);
+	let lastOrderId = $state<string | null>(null);
+
+	// 새 주문 감지
+	$effect(() => {
+		if (order && order.id !== lastOrderId) {
+			lastOrderId = order.id;
+			isNewOrder = true;
+
+			// 3초 후 알림 숨기기
+			setTimeout(() => {
+				isNewOrder = false;
+			}, 3000);
+		}
+	});
+
 	// 조합 트리 노드 타입
 	interface RecipeNode {
 		id: number;
@@ -159,12 +176,20 @@
 
 <div class="badge-container">
 	{#if order}
+		<!-- 새 주문 말풍선 -->
+		{#if isNewOrder}
+			<div class="speech-bubble">
+				<span>새 주문이요~!</span>
+			</div>
+		{/if}
+
 		<!-- 접힌 상태: 뱃지 -->
 		<button
 			class="order-badge"
 			class:completed={order.completed}
 			class:urgent={urgencyLevel() === 3 && !order.completed}
 			class:warning={urgencyLevel() === 2 && !order.completed}
+			class:new-order={isNewOrder}
 			style="--border-color: {borderColor()}"
 			onclick={toggleExpand}
 		>
@@ -321,6 +346,66 @@
 		top: 48px;
 	}
 
+	/* 새 주문 말풍선 */
+	.speech-bubble {
+		@apply absolute;
+		@apply rounded-xl px-3 py-1.5;
+		@apply text-sm font-bold;
+		right: 90px;
+		top: 30px;
+		background: white;
+		color: #78350f;
+		border: 2px solid #f59e0b;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		white-space: nowrap;
+		animation:
+			bubbleIn 0.3s ease-out,
+			bubbleBounce 0.5s ease-in-out 0.3s infinite;
+		z-index: 10;
+	}
+
+	/* 말풍선 꼬리 */
+	.speech-bubble::after {
+		content: '';
+		@apply absolute;
+		right: -8px;
+		top: 50%;
+		transform: translateY(-50%);
+		border: 6px solid transparent;
+		border-left-color: white;
+	}
+
+	.speech-bubble::before {
+		content: '';
+		@apply absolute;
+		right: -11px;
+		top: 50%;
+		transform: translateY(-50%);
+		border: 7px solid transparent;
+		border-left-color: #f59e0b;
+	}
+
+	@keyframes bubbleIn {
+		from {
+			opacity: 0;
+			transform: scale(0.5) translateX(20px);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1) translateX(0);
+		}
+	}
+
+	@keyframes bubbleBounce {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(-3px);
+		}
+	}
+
 	/* 뱃지 (접힌 상태) */
 	.order-badge {
 		@apply relative flex flex-col items-center;
@@ -337,6 +422,30 @@
 
 	.order-badge:active {
 		transform: scale(0.98);
+	}
+
+	/* 새 주문 흔들림 */
+	.order-badge.new-order {
+		animation: newOrderShake 0.4s ease-in-out infinite;
+	}
+
+	@keyframes newOrderShake {
+		0%,
+		100% {
+			transform: rotate(0deg) scale(1);
+		}
+		20% {
+			transform: rotate(-8deg) scale(1.05);
+		}
+		40% {
+			transform: rotate(8deg) scale(1.05);
+		}
+		60% {
+			transform: rotate(-5deg) scale(1.02);
+		}
+		80% {
+			transform: rotate(5deg) scale(1.02);
+		}
 	}
 
 	.order-badge.warning {

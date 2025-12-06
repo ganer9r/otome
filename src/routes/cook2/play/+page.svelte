@@ -289,9 +289,17 @@
 		</div>
 		<div class="test-label">주문 테스트</div>
 		<div class="test-buttons">
-			<!-- B급 요리: 와규스테이크 (한우 + 코스요리) -->
-			<button class="test-btn" onclick={() => customerStore.setTestOrder(412, runState.turn)}>
-				B급 주문
+			<!-- F급: 해물무침 (해물 + 채소) -->
+			<button class="test-btn" onclick={() => customerStore.setTestOrder(13, runState.turn)}>
+				F급
+			</button>
+			<!-- C급: 한우구이 (갈비 + 갈비) -->
+			<button class="test-btn" onclick={() => customerStore.setTestOrder(313, runState.turn)}>
+				C급
+			</button>
+			<!-- R급: 신선로 (궁중요리 + 타라바가니) -->
+			<button class="test-btn" onclick={() => customerStore.setTestOrder(601, runState.turn)}>
+				R급
 			</button>
 		</div>
 	</div>
@@ -359,7 +367,7 @@
 	.test-controls {
 		@apply fixed z-50;
 		left: 12px;
-		bottom: 100px;
+		top: 12px;
 		@apply flex flex-col gap-1;
 		@apply rounded-xl bg-black/70 p-2;
 	}
