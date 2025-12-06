@@ -5,11 +5,21 @@
  */
 
 // 타입 정의
+interface AdResult {
+	success: boolean;
+	type?: string;
+	amount?: number;
+	error?: string;
+}
+
 declare global {
 	interface Window {
 		NativeBridge?: {
-			haptic: (style?: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error') => void;
-			showRewardedAd: () => void;
+			haptic: (
+				style?: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error'
+			) => Promise<{ success: boolean }>;
+			showRewardedAd: () => Promise<AdResult>;
+			showInterstitialAd: () => Promise<AdResult>;
 		};
 		ReactNativeWebView?: {
 			postMessage: (message: string) => void;
@@ -41,11 +51,11 @@ export function isBridgeReady(): boolean {
  *   - warning: 경고 알림
  *   - error: 에러 알림
  */
-export function haptic(
+export async function haptic(
 	style: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' = 'medium'
-): void {
+): Promise<void> {
 	if (isBridgeReady()) {
-		window.NativeBridge!.haptic(style);
+		await window.NativeBridge!.haptic(style);
 	} else if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
 		// 웹 fallback (Vibration API)
 		const duration = style === 'light' ? 10 : style === 'heavy' ? 50 : 25;
@@ -55,65 +65,29 @@ export function haptic(
 
 /**
  * 리워드 광고 표시
- * @returns Promise<boolean> - 광고 시청 완료 여부
+ * @returns Promise<AdResult> - 광고 결과
  */
-export function showRewardedAd(): Promise<boolean> {
-	return new Promise((resolve) => {
-		if (!isBridgeReady()) {
-			console.log('NativeBridge not available, skipping ad');
-			// 개발/웹 환경에서는 바로 보상 지급
-			resolve(true);
-			return;
-		}
+export async function showRewardedAd(): Promise<AdResult> {
+	if (!isBridgeReady()) {
+		console.log('NativeBridge not available, skipping ad');
+		// 개발/웹 환경에서는 바로 보상 지급
+		return { success: true, type: 'dev', amount: 1 };
+	}
 
-		// 광고 보상 이벤트 리스너
-		const handleReward = () => {
-			cleanup();
-			resolve(true);
-		};
+	return await window.NativeBridge!.showRewardedAd();
+}
 
-		// 광고 종료 이벤트 리스너 (보상 없이 종료)
-		const handleClosed = () => {
-			cleanup();
-			// 이미 resolve되지 않았다면 false 반환
-		};
+/**
+ * 전면 광고 표시
+ * @returns Promise<AdResult> - 광고 결과
+ */
+export async function showInterstitialAd(): Promise<AdResult> {
+	if (!isBridgeReady()) {
+		console.log('NativeBridge not available, skipping interstitial ad');
+		return { success: true };
+	}
 
-		// 광고 에러 이벤트 리스너
-		const handleError = (e: CustomEvent) => {
-			console.error('Ad error:', e.detail?.message);
-			cleanup();
-			resolve(false);
-		};
-
-		// 광고 미준비 이벤트 리스너
-		const handleNotReady = () => {
-			console.log('Ad not ready');
-			cleanup();
-			resolve(false);
-		};
-
-		const cleanup = () => {
-			window.removeEventListener('adRewardEarned', handleReward);
-			window.removeEventListener('adClosed', handleClosed);
-			window.removeEventListener('adError', handleError as EventListener);
-			window.removeEventListener('adNotReady', handleNotReady);
-		};
-
-		// 이벤트 리스너 등록
-		window.addEventListener('adRewardEarned', handleReward);
-		window.addEventListener('adClosed', handleClosed);
-		window.addEventListener('adError', handleError as EventListener);
-		window.addEventListener('adNotReady', handleNotReady);
-
-		// 광고 표시 요청
-		window.NativeBridge!.showRewardedAd();
-
-		// 30초 타임아웃
-		setTimeout(() => {
-			cleanup();
-			resolve(false);
-		}, 30000);
-	});
+	return await window.NativeBridge!.showInterstitialAd();
 }
 
 /**
@@ -140,87 +114,5 @@ export function waitForBridge(timeout: number = 5000): Promise<boolean> {
 	});
 }
 
-/**
- * 리워드 광고 콜백 인터페이스
- */
-export interface RewardedAdCallbacks {
-	/** 광고 시청 완료 및 보상 획득 */
-	onRewarded?: (reward: { type: string; amount: number }) => void;
-	/** 광고 종료 (보상 없이) */
-	onClosed?: () => void;
-	/** 광고 에러 */
-	onError?: (error: string) => void;
-	/** 광고 미준비 */
-	onNotReady?: () => void;
-}
-
-/**
- * 리워드 광고 표시 (콜백 버전)
- * @param callbacks - 광고 이벤트 콜백
- */
-export function showRewardedAdWithCallback(callbacks: RewardedAdCallbacks): void {
-	if (!isBridgeReady()) {
-		console.log('NativeBridge not available, simulating reward');
-		// 개발/웹 환경에서는 바로 보상 지급
-		callbacks.onRewarded?.({ type: 'reward', amount: 1 });
-		return;
-	}
-
-	let rewarded = false;
-
-	// 광고 보상 이벤트 리스너
-	const handleReward = (e: CustomEvent) => {
-		rewarded = true;
-		cleanup();
-		haptic('success');
-		callbacks.onRewarded?.({
-			type: e.detail?.type || 'reward',
-			amount: e.detail?.amount || 1
-		});
-	};
-
-	// 광고 종료 이벤트 리스너
-	const handleClosed = () => {
-		cleanup();
-		if (!rewarded) {
-			callbacks.onClosed?.();
-		}
-	};
-
-	// 광고 에러 이벤트 리스너
-	const handleError = (e: CustomEvent) => {
-		cleanup();
-		haptic('error');
-		callbacks.onError?.(e.detail?.message || 'Unknown error');
-	};
-
-	// 광고 미준비 이벤트 리스너
-	const handleNotReady = () => {
-		cleanup();
-		callbacks.onNotReady?.();
-	};
-
-	const cleanup = () => {
-		window.removeEventListener('adRewardEarned', handleReward as EventListener);
-		window.removeEventListener('adClosed', handleClosed);
-		window.removeEventListener('adError', handleError as EventListener);
-		window.removeEventListener('adNotReady', handleNotReady);
-	};
-
-	// 이벤트 리스너 등록
-	window.addEventListener('adRewardEarned', handleReward as EventListener);
-	window.addEventListener('adClosed', handleClosed);
-	window.addEventListener('adError', handleError as EventListener);
-	window.addEventListener('adNotReady', handleNotReady);
-
-	// 광고 표시 요청
-	window.NativeBridge!.showRewardedAd();
-
-	// 60초 타임아웃 (광고가 길 수 있음)
-	setTimeout(() => {
-		cleanup();
-		if (!rewarded) {
-			callbacks.onError?.('Timeout');
-		}
-	}, 60000);
-}
+// AdResult 타입 export
+export type { AdResult };

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Settings, RotateCcw, Info } from 'lucide-svelte';
+	import { dev } from '$app/environment';
+	import { Settings, RotateCcw, Info, Play, Film } from 'lucide-svelte';
 	import {
 		unlockedIngredientsStore,
 		unlockedDishesStore,
@@ -15,12 +16,39 @@
 
 	let showResetConfirm = $state(false);
 
+	// 광고 테스트
+	let showAdResult = $state(false);
+	let adResult = $state<unknown>(null);
+	let adType = $state('');
+
 	function resetProgress() {
 		unlockedIngredientsStore.reset();
 		unlockedDishesStore.reset();
 		triedCombinationsStore.reset();
 		successCombinationsStore.reset();
 		showResetConfirm = false;
+	}
+
+	async function testRewardedAd() {
+		adType = 'Rewarded Ad';
+		if (!window.NativeBridge) {
+			adResult = { error: 'NativeBridge not available (웹 환경)' };
+			showAdResult = true;
+			return;
+		}
+		adResult = await window.NativeBridge.showRewardedAd();
+		showAdResult = true;
+	}
+
+	async function testInterstitialAd() {
+		adType = 'Interstitial Ad';
+		if (!window.NativeBridge) {
+			adResult = { error: 'NativeBridge not available (웹 환경)' };
+			showAdResult = true;
+			return;
+		}
+		adResult = await window.NativeBridge.showInterstitialAd();
+		showAdResult = true;
 	}
 </script>
 
@@ -69,7 +97,41 @@
 			</button>
 		</div>
 	</section>
+
+	{#if dev}
+		<!-- 광고 테스트 섹션 (개발 환경에서만) -->
+		<section class="settings-section">
+			<h2 class="section-title">
+				<Play size={18} />
+				광고 테스트
+			</h2>
+
+			<div class="settings-list">
+				<button class="setting-item" onclick={testRewardedAd}>
+					<Film size={20} />
+					<span>리워드 광고 (RV)</span>
+				</button>
+				<button class="setting-item" onclick={testInterstitialAd}>
+					<Play size={20} />
+					<span>전면 광고 (Interstitial)</span>
+				</button>
+			</div>
+		</section>
+	{/if}
 </div>
+
+<!-- 광고 결과 모달 -->
+{#if showAdResult}
+	<div class="modal-overlay" onclick={() => (showAdResult = false)} role="presentation">
+		<div class="modal-content" onclick={(e) => e.stopPropagation()} role="dialog">
+			<h3 class="modal-title">{adType} 결과</h3>
+			<pre class="result-json">{JSON.stringify(adResult, null, 2)}</pre>
+			<div class="modal-actions">
+				<button class="btn-cancel" onclick={() => (showAdResult = false)}>닫기</button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 <!-- 초기화 확인 모달 -->
 {#if showResetConfirm}
@@ -212,5 +274,16 @@
 		@apply text-error-content;
 		@apply rounded-xl;
 		@apply font-medium;
+	}
+
+	/* 광고 결과 */
+	.result-json {
+		@apply bg-base-200;
+		@apply rounded-lg;
+		@apply p-3;
+		@apply text-xs;
+		@apply overflow-auto;
+		@apply max-h-48;
+		@apply mb-4;
 	}
 </style>

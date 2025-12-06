@@ -25,7 +25,8 @@ export default {
 			},
 			package: IS_DEV ? 'com.ganer.cooking.dev' : 'com.ganer.cooking',
 			edgeToEdgeEnabled: true,
-			predictiveBackGestureEnabled: false
+			predictiveBackGestureEnabled: false,
+			googleServicesFile: './google-services.json'
 		},
 		web: {
 			favicon: './assets/favicon.png'
@@ -40,12 +41,31 @@ export default {
 						// 미사용 리소스 제거 비활성화
 						enableShrinkResourcesInReleaseBuilds: false,
 						// PNG Crunch 비활성화 (아이콘 품질 유지)
-						enablePngCrunchInReleaseBuilds: false
+						enablePngCrunchInReleaseBuilds: false,
+						// 개발 환경에서 HTTP 허용
+						usesCleartextTraffic: IS_DEV
 					}
 				}
 			],
-			// Adaptive Icon inset 0% (원본 100% 표시)
-			'./plugins/withAdaptiveIconInset.js'
+			// Adaptive Icon inset 적용
+			'./plugins/withAdaptiveIconInset.js',
+			// FCM 푸시 알림
+			[
+				'expo-notifications',
+				{
+					icon: './assets/icon.png',
+					color: '#ffffff'
+				}
+			],
+			// AdMob 광고
+			[
+				'react-native-google-mobile-ads',
+				{
+					androidAppId: IS_DEV
+						? 'ca-app-pub-3940256099942544~3347511713'
+						: 'ca-app-pub-6415089322279122~7564837233'
+				}
+			]
 		],
 		extra: {
 			isDev: IS_DEV
