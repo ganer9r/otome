@@ -50,6 +50,14 @@
 		adResult = await window.NativeBridge.showInterstitialAd();
 		showAdResult = true;
 	}
+
+	function testCrash() {
+		if (!window.NativeBridge) {
+			alert('NativeBridge not available (웹 환경)');
+			return;
+		}
+		window.NativeBridge.testCrash();
+	}
 </script>
 
 <div class="my-container">
@@ -114,6 +122,10 @@
 				<button class="setting-item" onclick={testInterstitialAd}>
 					<Play size={20} />
 					<span>전면 광고 (Interstitial)</span>
+				</button>
+				<button class="setting-item danger" onclick={testCrash}>
+					<RotateCcw size={20} />
+					<span>크래시 테스트 (앱 강제종료)</span>
 				</button>
 			</div>
 		</section>

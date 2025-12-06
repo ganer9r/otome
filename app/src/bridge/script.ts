@@ -61,6 +61,11 @@ export const bridgeScript = `
     // 전면 광고 표시
     showInterstitialAd: function() {
       return this._call('showInterstitialAd', {});
+    },
+
+    // 크래시 테스트 (개발용)
+    testCrash: function() {
+      return this._call('testCrash', {});
     }
   };
 

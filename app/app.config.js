@@ -32,6 +32,9 @@ export default {
 			favicon: './assets/favicon.png'
 		},
 		plugins: [
+			// Firebase (app만 플러그인 등록, analytics/crashlytics는 자동 연동)
+			'@react-native-firebase/app',
+			'@react-native-firebase/crashlytics',
 			[
 				'expo-build-properties',
 				{

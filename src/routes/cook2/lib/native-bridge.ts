@@ -20,6 +20,7 @@ declare global {
 			) => Promise<{ success: boolean }>;
 			showRewardedAd: () => Promise<AdResult>;
 			showInterstitialAd: () => Promise<AdResult>;
+			testCrash: () => void;
 		};
 		ReactNativeWebView?: {
 			postMessage: (message: string) => void;

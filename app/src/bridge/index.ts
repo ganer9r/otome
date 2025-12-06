@@ -6,6 +6,7 @@
  */
 import { useCallback } from 'react';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
+import { getCrashlytics, crash, log, recordError } from '@react-native-firebase/crashlytics';
 import { handleHaptic, HapticStyle } from './handlers/haptics';
 import { useAdsHandler } from './handlers/ads';
 
@@ -19,7 +20,7 @@ export type { HapticStyle } from './handlers/haptics';
  * 웹 → 앱 메시지 타입
  */
 interface BridgeMessage {
-	type: 'haptic' | 'showRewardedAd' | 'showInterstitialAd';
+	type: 'haptic' | 'showRewardedAd' | 'showInterstitialAd' | 'testCrash';
 	callId: number;
 	payload?: {
 		style?: HapticStyle;
@@ -76,6 +77,26 @@ export function useBridge(webViewRef: React.RefObject<WebView | null>) {
 					case 'showInterstitialAd': {
 						const result = await showInterstitialAd();
 						sendResult(webViewRef, callId, result);
+						break;
+					}
+
+					case 'testCrash': {
+						// Crashlytics 테스트
+						const crashlyticsInstance = getCrashlytics();
+						if (__DEV__) {
+							// 개발 모드: 에러 기록만 (크래시 X)
+							log(crashlyticsInstance, 'Test error triggered by user (dev mode)');
+							recordError(crashlyticsInstance, new Error('Test error from dev mode'));
+							sendResult(webViewRef, callId, {
+								success: true,
+								mode: 'dev',
+								message: 'Error recorded (no crash in dev)'
+							});
+						} else {
+							// 프로덕션: 실제 크래시
+							log(crashlyticsInstance, 'Test crash triggered by user');
+							crash(crashlyticsInstance);
+						}
 						break;
 					}
 

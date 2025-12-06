@@ -1,8 +1,14 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
+import { getAnalytics, logEvent } from '@react-native-firebase/analytics';
+import {
+	getCrashlytics,
+	setCrashlyticsCollectionEnabled,
+	crash
+} from '@react-native-firebase/crashlytics';
 import { useNotifications } from './src/hooks/useNotifications';
 import { useBridge, bridgeScript } from './src/bridge';
 
@@ -10,6 +16,18 @@ const GAME_URL = __DEV__ ? 'http://192.168.0.53:5174/cook2' : 'https://otome.pag
 
 export default function App() {
 	const webViewRef = useRef<WebView>(null);
+
+	// Firebase 초기화
+	useEffect(() => {
+		const crashlyticsInstance = getCrashlytics();
+		const analyticsInstance = getAnalytics();
+
+		// Crashlytics 활성화
+		setCrashlyticsCollectionEnabled(crashlyticsInstance, true);
+
+		// Analytics: 앱 시작 이벤트
+		logEvent(analyticsInstance, 'app_open');
+	}, []);
 
 	useNotifications();
 	const { handleMessage } = useBridge(webViewRef);
