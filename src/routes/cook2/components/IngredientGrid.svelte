@@ -11,6 +11,7 @@
 	import { getPossiblePairsFor } from '../lib/data/recipes';
 	import { GRADE_COLORS, GRADE_NAMES, GRADE_ORDER } from '../lib/types';
 	import type { IngredientGrade, Ingredient } from '../lib/types';
+	import { haptic } from '../lib/native-bridge';
 
 	interface Props {
 		/** 선택된 재료 ID 배열 (양방향 바인딩) */
@@ -121,6 +122,9 @@
 			selectedIds = [...selectedIds, ingredient.id];
 			// NEW 뱃지 제거
 			newIngredientsStore.markSeen(ingredient.id);
+
+			// 재료 선택 진동
+			haptic('light');
 		}
 	}
 </script>

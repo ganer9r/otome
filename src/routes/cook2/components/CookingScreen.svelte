@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
+	import { haptic } from '../lib/native-bridge';
 
 	interface Props {
 		/** 조리 완료 시 콜백 */
@@ -22,8 +23,8 @@
 	const ingredient2 = selectedIngredients[1] ? findIngredientById(selectedIngredients[1]) : null;
 
 	// 완료 시 터지는 파티클
-	const burstParticles = Array.from({ length: 12 }, (_, i) => ({
-		angle: i * 30 * (Math.PI / 180),
+	const burstParticles = Array.from({ length: 12 }, (_, _i) => ({
+		angle: _i * 30 * (Math.PI / 180),
 		delay: Math.random() * 0.2,
 		distance: 80 + Math.random() * 40
 	}));
@@ -32,6 +33,7 @@
 		// Stage 1: 재료 떨어지기 (0-1.5초)
 		setTimeout(() => {
 			stage = 'cooking';
+			haptic('medium'); // 재료 투입 진동
 		}, 1500);
 
 		// Stage 2: 조리 중
@@ -39,9 +41,13 @@
 			remainingTime -= 1;
 			progress = ((cookingTime - remainingTime) / cookingTime) * 100;
 
+			// 조리 중 가벼운 진동
+			haptic('light');
+
 			if (remainingTime <= 0) {
 				clearInterval(interval);
 				stage = 'complete';
+				haptic('success'); // 조리 완료 진동
 				// 터지는 효과 후 결과 화면으로
 				setTimeout(() => {
 					onComplete?.();

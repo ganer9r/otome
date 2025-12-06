@@ -111,9 +111,29 @@
 	}
 
 	// RV 보기 (힌트 공개)
-	function handleWatchAd() {
-		// TODO: 실제 RV 연동
-		customerStore.revealHint();
+	async function handleWatchAd() {
+		const { showRewardedAdWithCallback } = await import('../lib/native-bridge');
+
+		showRewardedAdWithCallback({
+			onRewarded: () => {
+				// 보상 획득 → 힌트 공개
+				customerStore.revealHint();
+			},
+			onClosed: () => {
+				// 광고 닫힘 (보상 없음)
+				console.log('Ad closed without reward');
+			},
+			onError: (error) => {
+				// 에러 발생
+				console.error('Ad error:', error);
+				alert('광고를 불러올 수 없습니다.');
+			},
+			onNotReady: () => {
+				// 광고 미준비
+				console.log('Ad not ready');
+				alert('광고가 준비되지 않았습니다. 잠시 후 다시 시도해주세요.');
+			}
+		});
 	}
 
 	/**

@@ -3,3 +3,6 @@
 
 # assets 폴더
 assets/
+
+# React Native 앱 폴더
+app/
