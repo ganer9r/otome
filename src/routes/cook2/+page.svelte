@@ -218,7 +218,7 @@
 
 	.home-container {
 		@apply flex flex-col;
-		@apply h-full min-h-screen;
+		@apply h-full w-full;
 		@apply relative;
 		background: linear-gradient(180deg, #4a90c2 0%, #7bb8d9 40%, #a8d4ea 70%, #d4eaf5 100%);
 	}
@@ -234,7 +234,7 @@
 	.game-title {
 		@apply font-black;
 		@apply text-center;
-		font-size: clamp(32px, 8vw, 48px);
+		font-size: 48px;
 		color: #fff;
 		text-shadow:
 			0 3px 0 #c17a30,
@@ -246,7 +246,7 @@
 
 	.settings-btn {
 		@apply absolute left-4;
-		@apply h-10 w-10;
+		@apply h-11 w-11;
 		@apply flex items-center justify-center;
 		@apply rounded-full;
 		font-size: 24px;
@@ -302,7 +302,7 @@
 		@apply px-6 py-3;
 		@apply rounded-3xl;
 		@apply font-bold;
-		font-size: clamp(16px, 4.5vw, 22px);
+		font-size: 22px;
 		color: #4a3728;
 		background: #fff;
 		border: 4px solid #4a3728;
@@ -334,7 +334,7 @@
 	}
 
 	.character-img {
-		width: clamp(200px, 55vw, 300px);
+		width: 280px;
 		height: auto;
 		filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.15));
 	}
@@ -375,11 +375,12 @@
 
 	.play-button {
 		@apply flex items-center justify-center gap-3;
-		@apply w-full max-w-xs;
+		@apply w-full;
+		max-width: 320px;
 		@apply py-5;
 		@apply rounded-2xl;
 		@apply font-black;
-		font-size: clamp(22px, 6vw, 28px);
+		font-size: 28px;
 		color: #fff;
 		background: linear-gradient(180deg, #7cc576 0%, #4caf50 50%, #3d9140 100%);
 		border: none;
