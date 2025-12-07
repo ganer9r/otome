@@ -288,7 +288,7 @@
 
 	.cook-screen {
 		@apply relative;
-		@apply h-full min-h-screen;
+		@apply h-full;
 		@apply overflow-hidden;
 	}
 
@@ -378,7 +378,7 @@
 	.content {
 		@apply relative z-10;
 		@apply flex flex-col items-center;
-		@apply h-full min-h-screen;
+		@apply h-full;
 		@apply px-4 py-4;
 	}
 

@@ -96,7 +96,7 @@
 
 	.battle-container {
 		@apply flex flex-col;
-		@apply h-full min-h-screen;
+		@apply h-full;
 		background: linear-gradient(180deg, #e8956c 0%, #f0b08a 40%, #f5c9a8 70%, #fae4d4 100%);
 	}
 
@@ -215,9 +215,10 @@
 
 	/* ===== 대결 시작 버튼 ===== */
 	.action-area {
-		@apply flex-1;
-		@apply flex items-end justify-center;
-		@apply px-6 pb-12;
+		@apply flex justify-center;
+		@apply px-6 py-6 pb-12;
+		@apply mt-auto;
+		@apply flex-shrink-0;
 	}
 
 	.start-btn {

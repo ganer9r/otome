@@ -117,7 +117,7 @@
 
 	.select-container {
 		@apply flex flex-col;
-		@apply h-full min-h-screen;
+		@apply h-full overflow-hidden;
 		background: linear-gradient(180deg, #e8956c 0%, #f0b08a 40%, #f5c9a8 70%, #fae4d4 100%);
 	}
 
@@ -176,10 +176,11 @@
 
 	/* ===== 요리 목록 ===== */
 	.dish-grid {
-		@apply flex-1;
+		@apply min-h-0 flex-1;
 		@apply grid grid-cols-2 gap-3;
 		@apply px-4 pb-6;
-		@apply overflow-auto;
+		@apply overflow-y-auto;
+		align-content: start;
 	}
 
 	.empty-state {

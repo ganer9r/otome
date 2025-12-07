@@ -401,7 +401,7 @@
 
 	.versus-screen {
 		@apply relative;
-		@apply h-full min-h-screen;
+		@apply h-full;
 		@apply overflow-hidden;
 		will-change: transform;
 	}
@@ -457,7 +457,7 @@
 	.content {
 		@apply relative z-10;
 		@apply flex flex-col items-center;
-		@apply h-full min-h-screen;
+		@apply h-full;
 		@apply px-3 py-4;
 	}
 
