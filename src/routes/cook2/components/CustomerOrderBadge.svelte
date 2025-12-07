@@ -361,9 +361,7 @@
 	}
 
 	.badge-container {
-		@apply absolute z-50;
-		right: 12px;
-		top: 48px;
+		@apply relative z-50;
 	}
 
 	/* 새 주문 말풍선 */
@@ -371,8 +369,8 @@
 		@apply absolute;
 		@apply rounded-xl px-3 py-1.5;
 		@apply text-sm font-bold;
-		right: 90px;
-		top: 30px;
+		left: 90px;
+		bottom: 30px;
 		background: white;
 		color: #78350f;
 		border: 2px solid #f59e0b;
@@ -388,21 +386,21 @@
 	.speech-bubble::after {
 		content: '';
 		@apply absolute;
-		right: -8px;
+		left: -8px;
 		top: 50%;
 		transform: translateY(-50%);
 		border: 6px solid transparent;
-		border-left-color: white;
+		border-right-color: white;
 	}
 
 	.speech-bubble::before {
 		content: '';
 		@apply absolute;
-		right: -11px;
+		left: -11px;
 		top: 50%;
 		transform: translateY(-50%);
 		border: 7px solid transparent;
-		border-left-color: #f59e0b;
+		border-right-color: #f59e0b;
 	}
 
 	@keyframes bubbleIn {
@@ -565,7 +563,7 @@
 
 	/* 펼친 패널 */
 	.expanded-panel {
-		@apply absolute top-full right-0 mt-2;
+		@apply absolute bottom-full left-0 mb-2;
 		@apply rounded-2xl;
 		@apply overflow-hidden;
 		width: 180px;

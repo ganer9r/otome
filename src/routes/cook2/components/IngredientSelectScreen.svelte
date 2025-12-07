@@ -4,6 +4,7 @@
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { runStore, upgradeStore } from '../lib/store';
 	import type { Ingredient } from '../lib/types';
+	import type { Snippet } from 'svelte';
 
 	interface Props {
 		/** 선택된 재료 ID 배열 (양방향 바인딩) */
@@ -16,6 +17,8 @@
 		earnedStars?: number;
 		/** 세금까지 남은 턴 */
 		turnsUntilTax?: number;
+		/** 손님 뱃지 슬롯 */
+		customerBadge?: Snippet;
 	}
 
 	let {
@@ -23,7 +26,8 @@
 		onCook,
 		capital = 0,
 		earnedStars = 0,
-		turnsUntilTax = 0
+		turnsUntilTax = 0,
+		customerBadge
 	}: Props = $props();
 
 	// 업그레이드 효과
@@ -60,6 +64,19 @@
 	let totalCost = $derived(
 		ingredients.reduce((sum, ing) => sum + getDiscountedPrice(ing?.buyPrice ?? 0), 0)
 	);
+
+	// 재료비 변경 애니메이션
+	let costBounce = $state(false);
+	let prevCost = $state(0);
+	$effect(() => {
+		if (totalCost !== prevCost) {
+			prevCost = totalCost;
+			if (totalCost > 0) {
+				costBounce = true;
+				setTimeout(() => (costBounce = false), 300);
+			}
+		}
+	});
 
 	// 요리하기 버튼 핸들러
 	function handleCook() {
@@ -121,6 +138,11 @@
 	{/if}
 	<!-- 주방 영역 (100vw height) -->
 	<div class="kitchen-section">
+		<!-- 손님 주문 뱃지 슬롯 -->
+		<div class="customer-slot">
+			{@render customerBadge?.()}
+		</div>
+
 		<!-- 상단 정보 바 -->
 		<div class="info-bar">
 			<div class="left-info">
@@ -193,9 +215,9 @@
 
 		<!-- 요리하기 버튼 -->
 		<div class="button-section">
-			{#if totalCost > 0}
-				<div class="cost-display">재료비: {totalCost}원</div>
-			{/if}
+			<div class="cost-display" class:bounce={costBounce}>
+				재료비: {totalCost > 0 ? `${totalCost}원` : '-'}
+			</div>
 			<button type="button" class="cook-button" disabled={!canCook} onclick={handleCook}>
 				<Flame size={20} class="flame-icon" />
 				<span class="button-text">요리하기</span>
@@ -218,11 +240,12 @@
 		@apply overflow-hidden;
 	}
 
-	/* 주방 영역 (100vw height) */
+	/* 주방 영역 */
 	.kitchen-section {
+		@apply relative;
 		@apply flex flex-col;
 		@apply w-full;
-		height: 100vw;
+		height: 70vw;
 		flex-shrink: 0;
 		background-image: url('/imgs/cook_bg.webp');
 		background-size: cover;
@@ -230,26 +253,34 @@
 		background-repeat: no-repeat;
 	}
 
+	/* 손님 주문 뱃지 슬롯 */
+	.customer-slot {
+		@apply absolute;
+		left: 8px;
+		bottom: 8px;
+		z-index: 10;
+	}
+
 	/* 상단 정보 바 */
 	.info-bar {
 		@apply flex items-center justify-between;
-		@apply px-3 py-2;
+		@apply px-2 py-1;
 	}
 
 	.left-info {
-		@apply flex items-center gap-2;
+		@apply flex items-center gap-1;
 	}
 
 	.capital-badge {
-		@apply flex items-center gap-1.5;
-		@apply px-3 py-1.5;
-		@apply rounded-xl;
+		@apply flex items-center gap-1;
+		@apply px-2 py-1;
+		@apply rounded-lg;
 		@apply font-bold;
 		background: rgba(255, 255, 255, 0.9);
-		border: 2px solid #e8d4a8;
+		border: 1px solid #e8d4a8;
 		color: #e65100;
-		font-size: var(--font-sm);
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+		font-size: 11px;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 	}
 
 	.capital-badge span.negative {
@@ -257,37 +288,37 @@
 	}
 
 	.star-badge {
-		@apply flex items-center gap-1;
-		@apply px-2.5 py-1.5;
-		@apply rounded-xl;
+		@apply flex items-center gap-0.5;
+		@apply px-1.5 py-1;
+		@apply rounded-lg;
 		@apply font-bold;
 		background: rgba(255, 255, 255, 0.9);
-		border: 2px solid #ffc107;
+		border: 1px solid #ffc107;
 		color: #e65100;
-		font-size: var(--font-sm);
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+		font-size: 11px;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 	}
 
 	.star-icon {
-		width: 16px;
-		height: 16px;
+		width: 12px;
+		height: 12px;
 	}
 
 	.tax-badge {
-		@apply flex items-center gap-1.5;
-		@apply px-3 py-1.5;
-		@apply rounded-xl;
+		@apply flex items-center gap-1;
+		@apply px-2 py-1;
+		@apply rounded-lg;
 		@apply font-bold;
 		background: linear-gradient(to bottom, rgba(255, 204, 128, 0.95), rgba(255, 183, 77, 0.95));
-		border: 2px solid #f57c00;
+		border: 1px solid #f57c00;
 		color: #5d4037;
-		font-size: var(--font-sm);
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+		font-size: 11px;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 	}
 
 	.tax-label {
 		color: #795548;
-		font-size: var(--font-xs);
+		font-size: 9px;
 	}
 
 	.tax-count {
@@ -321,8 +352,8 @@
 		@apply rounded-2xl;
 		@apply transition-all duration-300;
 		backdrop-filter: blur(4px);
-		width: clamp(120px, 40vw, 160px);
-		height: clamp(80px, 20vw, 100px);
+		width: 100px;
+		height: 70px;
 		background: rgba(255, 255, 255, 0.75);
 		border: 3px dashed rgba(139, 119, 101, 0.5);
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -356,7 +387,8 @@
 	}
 
 	.plus-icon {
-		@apply text-4xl font-light;
+		@apply font-light;
+		font-size: 28px;
 		color: #a1887f;
 	}
 
@@ -371,7 +403,8 @@
 	}
 
 	.slot-image {
-		@apply h-10 w-10;
+		width: 40px;
+		height: 40px;
 		@apply object-contain;
 		@apply rounded-lg;
 		filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.15));
@@ -386,27 +419,37 @@
 	/* 버튼 섹션 */
 	.button-section {
 		@apply flex flex-col items-center gap-2;
-		@apply px-4 pb-6;
+		@apply px-4 pb-3;
 	}
 
 	.cost-display {
 		@apply font-bold;
-		@apply px-4 py-1.5;
-		@apply rounded-xl;
+		@apply px-3 py-1;
+		@apply rounded-lg;
 		background: rgba(255, 255, 255, 0.85);
 		color: #5d4037;
 		border: 2px solid #e8d4a8;
-		font-size: var(--font-sm);
+		font-size: 11px;
+		transition:
+			transform 0.15s ease-out,
+			background 0.15s ease-out;
+	}
+
+	.cost-display.bounce {
+		transform: scale(1.15);
+		background: #fff3e0;
+		border-color: #ffb74d;
 	}
 
 	.cook-button {
-		@apply w-full max-w-xs;
-		@apply px-6 py-3;
+		@apply w-full;
+		max-width: 180px;
+		@apply px-5 py-2.5;
 		@apply rounded-xl;
 		@apply flex items-center justify-center gap-2;
 		@apply transition-all duration-300;
 		@apply font-bold;
-		font-size: var(--font-md);
+		font-size: 14px;
 		background: linear-gradient(to bottom, #ff7043, #f4511e);
 		color: white;
 		border: 3px solid #e64a19;

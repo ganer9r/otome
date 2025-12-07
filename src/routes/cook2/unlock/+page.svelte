@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { ArrowLeft, Sparkles } from 'lucide-svelte';
+	import { Sparkles } from 'lucide-svelte';
 	import { starStore, permanentUnlockStore, unlockedIngredientsStore } from '../lib/store';
 	import { INGREDIENTS } from '../lib/data/ingredients';
 	import { GRADE_COLORS, GRADE_ORDER, type IngredientGrade, type Ingredient } from '../lib/types';
 	import UnlockDialog from '../components/UnlockDialog.svelte';
+	import GameHeader from '../components/GameHeader.svelte';
 
 	// 다이얼로그 상태
 	let selectedIngredient = $state<Ingredient | null>(null);
@@ -63,24 +64,10 @@
 	function handleUnlockComplete() {
 		// 해금 완료 후 처리
 	}
-
-	function goBack() {
-		history.back();
-	}
 </script>
 
 <div class="unlock-container">
-	<!-- 헤더 -->
-	<header class="header">
-		<button class="back-button" onclick={goBack}>
-			<ArrowLeft size={24} />
-		</button>
-		<h1 class="title">재료 해금</h1>
-		<div class="star-badge">
-			<img src="/imgs/ui/star.png" alt="star" class="star-icon" />
-			<span class="star-count">{totalStars}</span>
-		</div>
-	</header>
+	<GameHeader title="재료 해금" backHref="/cook2" showStar stars={totalStars} />
 
 	<!-- 통계 카드 -->
 	<div class="stats-card">
@@ -182,53 +169,8 @@
 
 	.unlock-container {
 		@apply flex flex-col;
-		@apply min-h-screen;
+		@apply h-full w-full;
 		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
-	}
-
-	.header {
-		@apply flex items-center justify-between;
-		@apply px-4 py-3;
-		background: rgba(255, 255, 255, 0.7);
-		border-bottom: 3px solid #e8d4a8;
-	}
-
-	.back-button {
-		@apply p-2;
-		@apply rounded-xl;
-		color: #5d4037;
-		background: rgba(255, 255, 255, 0.6);
-		border: 2px solid #d7ccc8;
-		@apply transition-all;
-	}
-
-	.back-button:hover {
-		background: rgba(255, 255, 255, 0.9);
-	}
-
-	.title {
-		@apply text-xl font-bold;
-		color: #5d4037;
-		text-shadow: 1px 1px 0 #fff;
-	}
-
-	.star-badge {
-		@apply flex items-center gap-1;
-		@apply px-3 py-1.5;
-		@apply rounded-full;
-		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
-		border: 2px solid #ffc107;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	}
-
-	.star-icon {
-		width: 20px;
-		height: 20px;
-	}
-
-	.star-count {
-		@apply text-sm font-bold;
-		color: #e65100;
 	}
 
 	/* 통계 카드 */

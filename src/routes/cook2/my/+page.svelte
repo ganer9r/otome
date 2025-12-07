@@ -7,6 +7,7 @@
 		triedCombinationsStore,
 		successCombinationsStore
 	} from '../lib/store';
+	import GameHeader from '../components/GameHeader.svelte';
 
 	// 통계
 	let unlockedIngredients = $derived($unlockedIngredientsStore.length);
@@ -61,9 +62,7 @@
 </script>
 
 <div class="my-container">
-	<header class="my-header">
-		<h1 class="title">My</h1>
-	</header>
+	<GameHeader title="My" backHref="/cook2" />
 
 	<!-- 통계 섹션 -->
 	<section class="stats-section">
@@ -164,18 +163,8 @@
 
 	.my-container {
 		@apply flex flex-col;
-		@apply h-full;
+		@apply h-full w-full;
 		@apply bg-base-100;
-	}
-
-	.my-header {
-		@apply p-4;
-		@apply border-base-300 border-b;
-	}
-
-	.title {
-		@apply text-xl font-bold;
-		@apply text-center;
 	}
 
 	.section-title {

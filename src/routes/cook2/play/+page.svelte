@@ -275,9 +275,6 @@
 		/>
 	{/if}
 
-	<!-- 손님 주문 뱃지 (플로팅) -->
-	<CustomerOrderBadge {turnsUntilTax} {testUrgency} />
-
 	<!-- 테스트 버튼 -->
 	<div class="test-controls">
 		<div class="test-label">긴급도 테스트</div>
@@ -314,7 +311,11 @@
 				capital={runState.capital}
 				earnedStars={runState.earnedStars}
 				{turnsUntilTax}
-			/>
+			>
+				{#snippet customerBadge()}
+					<CustomerOrderBadge {turnsUntilTax} {testUrgency} />
+				{/snippet}
+			</IngredientSelectScreen>
 		{:else if step === 'cooking'}
 			<!-- 조리 화면 -->
 			<CookingScreen onComplete={handleCookingComplete} {selectedIngredients} />

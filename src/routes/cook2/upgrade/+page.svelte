@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowLeft, Coins, Percent, TrendingUp } from 'lucide-svelte';
+	import { Coins, Percent, TrendingUp } from 'lucide-svelte';
 	import {
 		starStore,
 		upgradeStore,
@@ -7,6 +7,7 @@
 		UPGRADE_CONFIG,
 		type UpgradeType
 	} from '../lib/store';
+	import GameHeader from '../components/GameHeader.svelte';
 
 	// 보유 스타
 	let totalStars = $derived($starStore);
@@ -50,24 +51,10 @@
 	function handleUpgradePurchase(type: UpgradeType) {
 		upgradeStore.purchase(type);
 	}
-
-	function goBack() {
-		history.back();
-	}
 </script>
 
 <div class="upgrade-container">
-	<!-- 헤더 -->
-	<header class="header">
-		<button class="back-button" onclick={goBack}>
-			<ArrowLeft size={24} />
-		</button>
-		<h1 class="title">강화</h1>
-		<div class="star-badge">
-			<img src="/imgs/ui/star.png" alt="star" class="star-icon" />
-			<span class="star-count">{totalStars}</span>
-		</div>
-	</header>
+	<GameHeader title="강화" backHref="/cook2" showStar stars={totalStars} />
 
 	<div class="content-area">
 		<section class="upgrade-list">
@@ -127,53 +114,8 @@
 
 	.upgrade-container {
 		@apply flex flex-col;
-		@apply min-h-screen;
+		@apply h-full w-full;
 		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
-	}
-
-	.header {
-		@apply flex items-center justify-between;
-		@apply px-4 py-3;
-		background: rgba(255, 255, 255, 0.7);
-		border-bottom: 3px solid #e8d4a8;
-	}
-
-	.back-button {
-		@apply p-2;
-		@apply rounded-xl;
-		color: #5d4037;
-		background: rgba(255, 255, 255, 0.6);
-		border: 2px solid #d7ccc8;
-		@apply transition-all;
-	}
-
-	.back-button:hover {
-		background: rgba(255, 255, 255, 0.9);
-	}
-
-	.title {
-		@apply text-xl font-bold;
-		color: #5d4037;
-		text-shadow: 1px 1px 0 #fff;
-	}
-
-	.star-badge {
-		@apply flex items-center gap-1;
-		@apply px-3 py-1.5;
-		@apply rounded-full;
-		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
-		border: 2px solid #ffc107;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	}
-
-	.star-icon {
-		width: 20px;
-		height: 20px;
-	}
-
-	.star-count {
-		@apply text-sm font-bold;
-		color: #e65100;
 	}
 
 	/* 콘텐츠 영역 */

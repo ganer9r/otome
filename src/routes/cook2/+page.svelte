@@ -223,332 +223,278 @@
 		background: linear-gradient(180deg, #4a90c2 0%, #7bb8d9 40%, #a8d4ea 70%, #d4eaf5 100%);
 	}
 
-	/* ===== 헤더: 타이틀 + 리소스 ===== */
+	/* ===== 헤더 ===== */
 	.top-bar {
 		@apply relative;
 		@apply flex items-center justify-center;
-		@apply px-4 py-3;
+		@apply px-3 py-2;
 		@apply z-20;
 	}
 
 	.game-title {
-		@apply font-black;
-		@apply text-center;
-		font-size: 48px;
+		@apply text-center font-black;
+		font-size: 24px;
 		color: #fff;
 		text-shadow:
-			0 3px 0 #c17a30,
-			0 6px 0 #8b5a20;
-		letter-spacing: 2px;
-		-webkit-text-stroke: 2px #8b5a20;
+			0 2px 0 #c17a30,
+			0 3px 0 #8b5a20;
+		letter-spacing: 1px;
+		-webkit-text-stroke: 1px #8b5a20;
 		paint-order: stroke fill;
 	}
 
 	.settings-btn {
-		@apply absolute left-4;
-		@apply h-11 w-11;
+		@apply absolute left-3;
+		@apply h-8 w-8;
 		@apply flex items-center justify-center;
 		@apply rounded-full;
-		font-size: 24px;
+		font-size: 14px;
 		background: rgba(255, 255, 255, 0.9);
-		border: 3px solid #8b7355;
-		box-shadow: 0 3px 0 #5c4a38;
-		cursor: pointer;
-	}
-
-	.settings-btn:active {
-		box-shadow: 0 1px 0 #5c4a38;
-		transform: translateY(2px);
+		border: 2px solid #8b7355;
+		box-shadow: 0 2px 0 #5c4a38;
 	}
 
 	.resource-group {
-		@apply absolute right-4;
-		@apply flex gap-2;
+		@apply absolute right-3;
+		@apply flex gap-1;
 	}
 
 	.resource-badge {
 		@apply flex items-center gap-1;
-		@apply px-3 py-1.5;
+		@apply px-2 py-1;
 		@apply rounded-full;
 		background: linear-gradient(180deg, #3d3d3d 0%, #1a1a1a 100%);
-		border: 3px solid #5a5a5a;
-		box-shadow:
-			0 4px 0 #0d0d0d,
-			inset 0 2px 0 rgba(255, 255, 255, 0.1);
+		border: 2px solid #5a5a5a;
+		box-shadow: 0 2px 0 #0d0d0d;
 	}
 
 	.resource-icon {
-		width: 24px;
-		height: 24px;
+		width: 16px;
+		height: 16px;
 	}
 
 	.resource-value {
 		@apply font-bold text-white;
-		font-size: 16px;
-		text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+		font-size: 12px;
 	}
 
 	/* ===== 캐릭터 영역 ===== */
 	.character-area {
 		@apply flex-1;
 		@apply flex flex-col items-center justify-center;
-		@apply relative;
-		@apply px-4;
-		margin-top: -20px;
+		@apply relative px-3;
+		margin-top: -10px;
 	}
 
 	.speech-bubble {
 		@apply relative;
-		@apply px-6 py-3;
-		@apply rounded-3xl;
+		@apply px-3 py-1.5;
+		@apply rounded-xl;
 		@apply font-bold;
-		font-size: 22px;
+		font-size: 13px;
 		color: #4a3728;
 		background: #fff;
-		border: 4px solid #4a3728;
-		box-shadow: 0 4px 0 #2d2218;
-		margin-bottom: 16px;
+		border: 2px solid #4a3728;
+		box-shadow: 0 2px 0 #2d2218;
+		margin-bottom: 8px;
 	}
 
 	.speech-bubble::after {
 		content: '';
 		@apply absolute;
-		bottom: -16px;
+		bottom: -8px;
 		left: 50%;
 		transform: translateX(-50%);
-		border-left: 12px solid transparent;
-		border-right: 12px solid transparent;
-		border-top: 16px solid #4a3728;
+		border-left: 6px solid transparent;
+		border-right: 6px solid transparent;
+		border-top: 8px solid #4a3728;
 	}
 
 	.speech-bubble::before {
 		content: '';
 		@apply absolute;
-		bottom: -10px;
+		bottom: -5px;
 		left: 50%;
 		transform: translateX(-50%);
-		border-left: 10px solid transparent;
-		border-right: 10px solid transparent;
-		border-top: 14px solid #fff;
+		border-left: 5px solid transparent;
+		border-right: 5px solid transparent;
+		border-top: 7px solid #fff;
 		z-index: 1;
 	}
 
 	.character-img {
-		width: 280px;
+		width: 180px;
 		height: auto;
-		filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.15));
+		filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.15));
 	}
 
 	/* ===== 런 상태 ===== */
 	.run-status {
 		@apply flex justify-center;
-		@apply px-4 py-2;
+		@apply px-3 py-1;
 	}
 
 	.run-info {
-		@apply flex items-center gap-3;
-		@apply px-5 py-2;
+		@apply flex items-center gap-2;
+		@apply px-3 py-1;
 		@apply rounded-full;
 		background: linear-gradient(180deg, #3d3d3d 0%, #1a1a1a 100%);
-		border: 3px solid #5a5a5a;
-		box-shadow: 0 4px 0 #0d0d0d;
+		border: 2px solid #5a5a5a;
+		box-shadow: 0 2px 0 #0d0d0d;
 	}
 
 	.run-badge {
-		@apply px-2 py-0.5;
-		@apply rounded;
-		@apply text-xs font-black;
+		@apply rounded px-1.5 py-0.5;
+		@apply font-black;
+		font-size: 10px;
 		background: #4caf50;
 		color: white;
 	}
 
 	.run-capital {
 		@apply font-bold text-white;
-		font-size: 18px;
+		font-size: 12px;
 	}
 
-	/* ===== 메인 플레이 버튼 ===== */
+	/* ===== 플레이 버튼 ===== */
 	.main-action {
 		@apply flex justify-center;
-		@apply px-6 py-4;
+		@apply px-4 py-2;
 	}
 
 	.play-button {
-		@apply flex items-center justify-center gap-3;
-		@apply w-full;
-		max-width: 320px;
-		@apply py-5;
-		@apply rounded-2xl;
+		@apply flex items-center justify-center gap-2;
+		@apply w-full py-3;
+		@apply rounded-xl;
 		@apply font-black;
-		font-size: 28px;
+		max-width: 200px;
+		font-size: 16px;
 		color: #fff;
 		background: linear-gradient(180deg, #7cc576 0%, #4caf50 50%, #3d9140 100%);
 		border: none;
-		border-bottom: 6px solid #2d6b2f;
+		border-bottom: 3px solid #2d6b2f;
 		box-shadow:
-			0 6px 0 #1e4620,
-			0 10px 20px rgba(0, 0, 0, 0.3);
-		cursor: pointer;
-		text-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
-		transition:
-			transform 0.1s,
-			box-shadow 0.1s;
-	}
-
-	.play-button:active {
-		transform: translateY(4px);
-		border-bottom-width: 2px;
-		box-shadow:
-			0 2px 0 #1e4620,
-			0 4px 10px rgba(0, 0, 0, 0.3);
+			0 3px 0 #1e4620,
+			0 5px 10px rgba(0, 0, 0, 0.3);
+		text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
 	}
 
 	.play-icon {
-		font-size: 24px;
+		font-size: 14px;
 	}
 
 	/* ===== 플로팅 대결 버튼 ===== */
 	.floating-battle {
 		@apply absolute;
 		@apply flex flex-col items-center justify-center;
-		right: 16px;
-		top: 180px;
-		width: 56px;
-		height: 56px;
 		@apply rounded-full;
+		right: 8px;
+		top: 90px;
+		width: 36px;
+		height: 36px;
 		background: #fff;
-		border: 3px solid #d84315;
-		cursor: pointer;
+		border: 2px solid #d84315;
 		z-index: 50;
-		transition: transform 0.1s;
-	}
-
-	.floating-battle:active {
-		transform: scale(0.95);
 	}
 
 	.floating-icon {
-		font-size: 28px;
+		font-size: 16px;
 	}
 
 	.floating-vs {
 		@apply absolute;
-		@apply px-1.5 py-0.5;
+		@apply px-1 py-0.5;
 		@apply rounded;
 		@apply font-black;
-		bottom: -10px;
+		bottom: -6px;
 		background: #fff;
 		color: #d84315;
-		border: 2px solid #d84315;
-		font-size: 10px;
-		z-index: 10;
+		border: 1px solid #d84315;
+		font-size: 8px;
 	}
 
 	.floating-badge {
 		@apply absolute;
-		bottom: -38px;
-		@apply text-xs font-bold;
-		@apply whitespace-nowrap;
+		@apply font-bold whitespace-nowrap;
+		bottom: -22px;
+		font-size: 10px;
 		color: #4a3728;
-		text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 	}
 
 	/* ===== 하단 메뉴 ===== */
 	.bottom-menu {
-		@apply flex gap-3;
-		@apply px-4 py-6;
-		@apply pb-8;
+		@apply flex gap-2;
+		@apply px-3 py-3 pb-4;
 		background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
 	}
 
 	.menu-btn {
 		@apply flex flex-col items-center gap-0.5;
-		@apply px-1 py-2;
-		@apply rounded-xl;
-		@apply relative;
-		@apply flex-1;
+		@apply px-1 py-1.5;
+		@apply rounded-lg;
+		@apply relative flex-1;
 		background: linear-gradient(180deg, #fff 0%, #e8e8e8 100%);
-		border: 3px solid #8b7355;
-		border-bottom-width: 4px;
-		box-shadow: 0 3px 0 #5c4a38;
-		cursor: pointer;
-		transition: transform 0.1s;
-	}
-
-	.menu-btn:active {
-		transform: translateY(2px);
-		border-bottom-width: 2px;
-		box-shadow: 0 1px 0 #5c4a38;
+		border: 2px solid #8b7355;
+		border-bottom-width: 3px;
+		box-shadow: 0 2px 0 #5c4a38;
 	}
 
 	.menu-icon-wrap {
 		@apply flex items-center justify-center;
-		width: 28px;
-		height: 28px;
+		width: 18px;
+		height: 18px;
 	}
 
 	.menu-icon {
-		font-size: 24px;
+		font-size: 14px;
 	}
 
 	.menu-label {
 		@apply font-bold;
-		font-size: 13px;
+		font-size: 10px;
 		color: #4a3728;
 	}
 
 	.menu-badge {
-		@apply absolute -top-2 -right-2;
-		@apply px-2 py-0.5;
+		@apply absolute -top-2 -right-1;
+		@apply px-1.5 py-1;
 		@apply rounded-full;
-		@apply text-xs font-bold;
+		@apply font-bold;
+		font-size: 9px;
 		background: #ff5722;
 		color: white;
-		border: 2px solid #fff;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+		border: 1px solid #fff;
 	}
 
 	.menu-badge.alert {
-		background: #f44336;
-		animation: pulse 1s ease-in-out infinite;
-	}
-
-	@keyframes pulse {
-		0%,
-		100% {
-			transform: scale(1);
-		}
-		50% {
-			transform: scale(1.1);
-		}
+		background: #ff5722;
 	}
 
 	/* ===== 일일 미션 ===== */
 	.daily-missions {
-		@apply mx-4 mb-2;
-		@apply rounded-2xl;
-		@apply overflow-hidden;
+		@apply mx-3 mb-1;
+		@apply overflow-hidden rounded-xl;
 		background: rgba(255, 255, 255, 0.9);
-		border: 3px solid #8b7355;
-		box-shadow: 0 4px 0 #5c4a38;
+		border: 2px solid #8b7355;
+		box-shadow: 0 2px 0 #5c4a38;
 	}
 
 	.mission-header {
 		@apply flex items-center justify-between;
-		@apply px-4 py-2;
+		@apply px-3 py-1;
 		background: linear-gradient(180deg, #8b7355 0%, #6d5a45 100%);
 	}
 
 	.mission-title {
 		@apply font-bold;
+		font-size: 11px;
 		color: #fff;
-		font-size: 14px;
 	}
 
 	.mission-more {
 		@apply font-bold;
+		font-size: 10px;
 		color: #ffd54f;
-		font-size: 12px;
 	}
 
 	.mission-list {
@@ -557,7 +503,7 @@
 
 	.mission-item {
 		@apply flex items-center justify-between;
-		@apply px-4 py-2;
+		@apply px-3 py-1;
 		border-bottom: 1px solid #e8d4a8;
 	}
 
@@ -574,40 +520,50 @@
 	}
 
 	.mission-info {
-		@apply flex items-center gap-2;
+		@apply flex items-center gap-1;
 	}
 
 	.mission-name {
 		@apply font-bold;
-		font-size: 13px;
+		font-size: 10px;
 		color: #4a3728;
 	}
 
 	.mission-progress {
-		font-size: 12px;
+		font-size: 9px;
 		color: #8b7355;
 	}
 
 	.mission-reward {
-		font-size: 12px;
+		@apply font-bold;
+		font-size: 9px;
 		color: #ffc107;
-		font-weight: bold;
 	}
 
 	.mission-claim {
-		@apply px-2 py-1;
-		@apply rounded-lg;
+		@apply px-1.5 py-0.5;
+		@apply rounded;
 		@apply font-bold;
-		font-size: 12px;
+		font-size: 9px;
 		background: linear-gradient(180deg, #ffd54f 0%, #ffb300 100%);
 		color: #5d4037;
-		border: 2px solid #ff8f00;
+		border: 1px solid #ff8f00;
 		animation: pulse 1s ease-in-out infinite;
 	}
 
 	.mission-done {
 		@apply font-bold;
-		font-size: 16px;
+		font-size: 12px;
 		color: #4caf50;
+	}
+
+	@keyframes pulse {
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.1);
+		}
 	}
 </style>

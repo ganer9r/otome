@@ -386,7 +386,7 @@
 	}
 
 	.ingredient-grid {
-		@apply grid grid-cols-3 gap-2;
+		@apply grid grid-cols-4 gap-2;
 		@apply content-start;
 	}
 

@@ -4,6 +4,7 @@
 	import { RECIPES } from '../lib/data/recipes';
 	import { GRADE_COLORS, GRADE_NAMES, GRADE_ORDER } from '../lib/types';
 	import type { IngredientGrade, Ingredient } from '../lib/types';
+	import GameHeader from '../components/GameHeader.svelte';
 
 	// 등급 필터 탭
 	const grades: IngredientGrade[] = GRADE_ORDER;
@@ -40,9 +41,7 @@
 </script>
 
 <div class="collection-container">
-	<header class="collection-header">
-		<h1 class="title">도감</h1>
-	</header>
+	<GameHeader title="도감" backHref="/cook2" />
 
 	<!-- 탭 선택 -->
 	<div class="tab-bar">
@@ -175,17 +174,8 @@
 
 	.collection-container {
 		@apply flex flex-col;
-		@apply h-full;
+		@apply h-full w-full;
 		@apply bg-base-100;
-	}
-
-	.collection-header {
-		@apply p-4 pb-2;
-	}
-
-	.title {
-		@apply text-xl font-bold;
-		@apply text-center;
 	}
 
 	/* 메인 탭 */

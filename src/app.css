@@ -7,7 +7,7 @@
 html,
 body {
 	font-family: 'Jua', sans-serif;
-	font-size: 18px; /* 기본 16px → 18px */
+	font-size: 14px; /* 360 기준 */
 }
 
 /* Jua 폰트 baseline 보정 */

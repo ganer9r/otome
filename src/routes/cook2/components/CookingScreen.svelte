@@ -143,7 +143,7 @@
 	@reference '$styles/app.css';
 
 	.cooking-screen {
-		@apply fixed inset-0 z-50;
+		@apply absolute inset-0 z-50;
 		@apply flex flex-col;
 		@apply overflow-hidden;
 		@apply bg-gradient-to-br from-orange-100 via-amber-100 to-orange-200;
@@ -152,78 +152,79 @@
 	/* ===== 상단 영역 ===== */
 	.top-area {
 		@apply flex flex-col items-center;
-		@apply px-4 pt-8;
-		@apply gap-4;
+		@apply px-3 pt-4;
+		@apply gap-2;
 		z-index: 20;
 	}
 
 	/* 조합 공식 */
 	.recipe-formula {
-		@apply flex items-center justify-center gap-2;
+		@apply flex items-center justify-center gap-1;
 	}
 
 	.formula-item {
-		@apply h-14 w-14;
-		@apply rounded-xl;
+		@apply h-10 w-10;
+		@apply rounded-lg;
 		@apply flex items-center justify-center;
 		background: rgba(255, 255, 255, 0.9);
-		border: 3px solid #8b5a20;
+		border: 2px solid #8b5a20;
 	}
 
 	.formula-item img {
-		@apply h-10 w-10 object-contain;
+		@apply h-7 w-7 object-contain;
 	}
 
 	.formula-plus,
 	.formula-arrow {
 		@apply font-black;
-		font-size: 24px;
+		font-size: 16px;
 		color: #8b5a20;
 		text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 	}
 
 	.formula-result {
-		@apply h-14 w-14;
-		@apply rounded-xl;
+		@apply h-10 w-10;
+		@apply rounded-lg;
 		@apply flex items-center justify-center;
 		background: linear-gradient(180deg, #ffd700 0%, #ff9800 100%);
-		border: 3px solid #8b5a20;
+		border: 2px solid #8b5a20;
 	}
 
 	.result-question {
 		@apply font-black;
-		font-size: 28px;
+		font-size: 18px;
 		color: #fff;
-		text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+		text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
 	}
 
 	/* 프로그레스 섹션 (항상 공간 확보) */
 	.progress-section {
-		@apply w-full max-w-xs;
-		@apply flex flex-col items-center justify-center gap-2;
-		min-height: 60px;
+		@apply w-full;
+		max-width: 200px;
+		@apply flex flex-col items-center justify-center gap-1;
+		min-height: 40px;
 	}
 
 	.progress-container {
-		@apply h-6 w-full;
+		@apply h-4 w-full;
 		@apply rounded-full;
 		@apply overflow-hidden;
 		@apply relative;
 		background: linear-gradient(180deg, #1a1a1a 0%, #333 100%);
-		border: 3px solid #555;
+		border: 2px solid #555;
 	}
 
 	.progress-bar {
 		@apply absolute top-0 bottom-0 left-0;
 		@apply rounded-full;
 		background: linear-gradient(180deg, #7dff7d 0%, #4caf50 50%, #2e7d32 100%);
-		box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4);
+		box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4);
 		@apply transition-all duration-1000 ease-linear;
 	}
 
 	.progress-label {
 		@apply font-bold;
-		font-size: 16px;
+		font-size: 12px;
 		color: #8b5a20;
 		text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 		animation: pulse 1s ease-in-out infinite;
@@ -247,9 +248,9 @@
 	}
 
 	.chef-img {
-		width: clamp(200px, 60vw, 320px);
+		width: 180px;
 		height: auto;
-		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
 	}
 
 	.chef-img.cooking {
@@ -285,12 +286,12 @@
 	/* 완성 텍스트 */
 	.complete-text {
 		@apply font-black;
-		font-size: 32px;
+		font-size: 20px;
 		color: #ffd700;
 		text-shadow:
-			0 3px 0 #8b6914,
-			0 6px 0 #5c4a0a;
-		-webkit-text-stroke: 2px #5c2e0a;
+			0 2px 0 #8b6914,
+			0 3px 0 #5c4a0a;
+		-webkit-text-stroke: 1px #5c2e0a;
 		paint-order: stroke fill;
 		animation: completePop 0.5s ease-out;
 	}
@@ -312,14 +313,14 @@
 	/* 재료 떨어지기 */
 	.dropping-ingredients {
 		@apply absolute;
-		top: -100px;
+		top: -60px;
 		left: 50%;
 		transform: translateX(-50%);
 	}
 
 	.drop-item {
 		@apply absolute;
-		@apply h-16 w-16;
+		@apply h-10 w-10;
 		left: var(--x);
 		animation: dropIn 1s ease-in forwards;
 		animation-delay: var(--delay);
@@ -332,14 +333,14 @@
 
 	@keyframes dropIn {
 		0% {
-			transform: translateY(-50px) rotate(0deg);
+			transform: translateY(-30px) rotate(0deg);
 			opacity: 1;
 		}
 		80% {
 			opacity: 1;
 		}
 		100% {
-			transform: translateY(200px) rotate(360deg);
+			transform: translateY(120px) rotate(360deg);
 			opacity: 0;
 		}
 	}
@@ -355,7 +356,7 @@
 
 	.burst-particle {
 		@apply absolute;
-		font-size: 32px;
+		font-size: 20px;
 		animation: burst 0.8s ease-out forwards;
 		animation-delay: var(--delay);
 	}
