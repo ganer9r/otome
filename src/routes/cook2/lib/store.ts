@@ -628,6 +628,8 @@ export const upgradeStore = createUpgradeStore();
 // 런 상태 관리 (로그라이트)
 // ============================================
 
+const RUN_STORAGE_KEY = 'cook2_run_state';
+
 /** 게임 밸런스 상수 (테스트용 조절 가능) */
 export const RUN_CONFIG = {
 	/** 초기 자본 */
@@ -664,17 +666,42 @@ export interface TaxResult {
 	starEarned: boolean;
 }
 
-function createRunStore() {
-	const initialState: RunState = {
-		capital: RUN_CONFIG.INITIAL_CAPITAL,
-		turn: 0,
-		isRunning: false,
-		totalEarned: 0,
-		isBankrupt: false,
-		earnedStars: 0
-	};
+const initialRunState: RunState = {
+	capital: RUN_CONFIG.INITIAL_CAPITAL,
+	turn: 0,
+	isRunning: false,
+	totalEarned: 0,
+	isBankrupt: false,
+	earnedStars: 0
+};
 
-	const { subscribe, set, update } = writable<RunState>(initialState);
+function getStoredRunState(): RunState {
+	if (!browser) return initialRunState;
+	const stored = localStorage.getItem(RUN_STORAGE_KEY);
+	if (!stored) return initialRunState;
+	try {
+		return JSON.parse(stored);
+	} catch {
+		return initialRunState;
+	}
+}
+
+function saveRunState(state: RunState) {
+	if (!browser) return;
+	localStorage.setItem(RUN_STORAGE_KEY, JSON.stringify(state));
+}
+
+function createRunStore() {
+	const { subscribe, set, update } = writable<RunState>(getStoredRunState());
+
+	// 상태 변경 시 자동 저장
+	const updateAndSave = (updater: (state: RunState) => RunState) => {
+		update((state) => {
+			const newState = updater(state);
+			saveRunState(newState);
+			return newState;
+		});
+	};
 
 	return {
 		subscribe,
@@ -685,20 +712,22 @@ function createRunStore() {
 			const effects = getUpgradeEffects(getStoredUpgrades());
 			const initialCapital = RUN_CONFIG.INITIAL_CAPITAL + effects.bonusInitialCapital;
 
-			set({
+			const newState: RunState = {
 				capital: initialCapital,
 				turn: 0,
 				isRunning: true,
 				totalEarned: 0,
 				isBankrupt: false,
 				earnedStars: 0
-			});
+			};
+			saveRunState(newState);
+			set(newState);
 		},
 		/**
 		 * 런 종료
 		 */
 		endRun: () => {
-			update((state) => ({
+			updateAndSave((state) => ({
 				...state,
 				isRunning: false
 			}));
@@ -707,7 +736,7 @@ function createRunStore() {
 		 * 자본 차감 (재료 구매) - 마이너스 허용
 		 */
 		spend: (amount: number) => {
-			update((state) => ({
+			updateAndSave((state) => ({
 				...state,
 				capital: state.capital - amount
 			}));
@@ -716,7 +745,7 @@ function createRunStore() {
 		 * 자본 추가 (요리 판매)
 		 */
 		earn: (amount: number) => {
-			update((state) => ({
+			updateAndSave((state) => ({
 				...state,
 				capital: state.capital + amount,
 				totalEarned: state.totalEarned + amount
@@ -734,7 +763,7 @@ function createRunStore() {
 				starEarned: false
 			};
 
-			update((state) => {
+			updateAndSave((state) => {
 				const newTurn = state.turn + 1;
 
 				// 세금 징수 턴인지 확인
@@ -768,10 +797,19 @@ function createRunStore() {
 			return RUN_CONFIG.TAX_INTERVAL - (currentTurn % RUN_CONFIG.TAX_INTERVAL);
 		},
 		/**
+		 * Store 새로고침
+		 */
+		refresh: () => {
+			set(getStoredRunState());
+		},
+		/**
 		 * 초기화
 		 */
 		reset: () => {
-			set(initialState);
+			if (browser) {
+				localStorage.removeItem(RUN_STORAGE_KEY);
+			}
+			set(initialRunState);
 		}
 	};
 }
