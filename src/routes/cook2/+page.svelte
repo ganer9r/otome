@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { unlockedIngredientsStore, unlockedDishesStore, runStore, starStore } from './lib/store';
+	import { customerStore } from './lib/customer-store';
 	import { missionStore } from './lib/mission-store';
 	import { DAILY_MISSIONS } from './lib/data/missions';
 	import type { MissionProgress } from './lib/types';
@@ -13,6 +14,40 @@
 
 	// 런 상태
 	let runState = $derived($runStore);
+
+	// 손님 주문 상태
+	let customerState = $derived($customerStore);
+	let currentOrder = $derived(customerState.currentOrder);
+
+	// 긴급도 계산
+	let turnsUntilTax = $derived(runStore.getTurnsUntilTax(runState.turn));
+	let urgencyLevel = $derived((): 1 | 2 | 3 => {
+		if (turnsUntilTax <= 2) return 3; // 긴급
+		if (turnsUntilTax <= 5) return 2; // 보통
+		return 1; // 여유
+	});
+	let customerEmoji = $derived(() => {
+		if (currentOrder?.completed) return '😄';
+		switch (urgencyLevel()) {
+			case 3:
+				return '😰';
+			case 2:
+				return '😐';
+			default:
+				return '😊';
+		}
+	});
+	let orderBorderColor = $derived(() => {
+		if (currentOrder?.completed) return '#22c55e';
+		switch (urgencyLevel()) {
+			case 3:
+				return '#ef4444'; // 빨강
+			case 2:
+				return '#f59e0b'; // 노랑
+			default:
+				return '#22c55e'; // 초록
+		}
+	});
 
 	// 보유 스타
 	let totalStars = $derived($starStore);
@@ -29,6 +64,11 @@
 
 	onMount(() => {
 		greeting = getRandomDialogue('default');
+
+		// 런 중인데 오더가 없으면 생성
+		if (runState.isRunning && !currentOrder) {
+			customerStore.generateOrder(runState.turn);
+		}
 	});
 
 	function startGame() {
@@ -150,6 +190,17 @@
 	<!-- 메인 플레이 버튼 -->
 	<div class="main-action">
 		{#if runState.isRunning}
+			<!-- 손님 오더 뱃지 (버튼 왼쪽 레이어) -->
+			{#if currentOrder && !currentOrder.completed}
+				<div
+					class="order-preview"
+					class:urgent={urgencyLevel() === 3}
+					style="--border-color: {orderBorderColor()}"
+				>
+					<span class="order-emoji">{customerEmoji()}</span>
+					<span class="order-dish">{currentOrder.dish.name}</span>
+				</div>
+			{/if}
 			<button class="play-button" onclick={continueGame}>
 				<span class="play-icon">▶</span>
 				<span class="play-text">계속하기</span>
@@ -358,8 +409,89 @@
 
 	/* ===== 플레이 버튼 ===== */
 	.main-action {
-		@apply flex justify-center;
+		@apply relative flex justify-center;
 		@apply px-4 py-2;
+	}
+
+	/* 손님 오더 미리보기 (버튼 왼쪽 레이어) */
+	.order-preview {
+		@apply absolute;
+		@apply flex items-center gap-1;
+		@apply px-2 py-1;
+		@apply rounded-lg;
+		right: calc(50% + 105px);
+		background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+		border: 2px solid var(--border-color);
+		box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+		animation: orderWobble 2s ease-in-out infinite;
+	}
+
+	.order-preview.urgent {
+		animation: orderShake 0.3s ease-in-out infinite;
+	}
+
+	/* 기본 흔들흔들 (멈춤 → 흔들 → 멈춤 → 흔들) */
+	@keyframes orderWobble {
+		0%,
+		15% {
+			transform: rotate(0deg);
+		}
+		18% {
+			transform: rotate(-3deg);
+		}
+		21% {
+			transform: rotate(3deg);
+		}
+		24% {
+			transform: rotate(-2deg);
+		}
+		27% {
+			transform: rotate(2deg);
+		}
+		30% {
+			transform: rotate(0deg);
+		}
+		30%,
+		100% {
+			transform: rotate(0deg);
+		}
+	}
+
+	/* 긴급 흔들림 */
+	@keyframes orderShake {
+		0%,
+		100% {
+			transform: translateX(0) rotate(0deg);
+		}
+		20% {
+			transform: translateX(-2px) rotate(-2deg);
+		}
+		40% {
+			transform: translateX(2px) rotate(2deg);
+		}
+		60% {
+			transform: translateX(-2px) rotate(-1deg);
+		}
+		80% {
+			transform: translateX(2px) rotate(1deg);
+		}
+	}
+
+	.order-emoji {
+		font-size: 18px;
+	}
+
+	.order-dish {
+		@apply font-bold;
+		font-size: 10px;
+		color: #78350f;
+		max-width: 50px;
+		line-height: 1.2;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		word-break: break-all;
 	}
 
 	.play-button {

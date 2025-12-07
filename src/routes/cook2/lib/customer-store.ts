@@ -1,8 +1,11 @@
 import { writable, get } from 'svelte/store';
+import { browser } from '$app/environment';
 import { RECIPES } from './data/recipes';
 import { findIngredientById } from './data/ingredients';
 import { getUnlockedIngredients } from './usecase/unlockIngredient';
 import type { Recipe, Ingredient, IngredientGrade } from './types';
+
+const CUSTOMER_STORAGE_KEY = 'cook2_customer_state';
 
 /**
  * 손님 주문 시스템
@@ -108,26 +111,55 @@ function filterByGrade(recipes: Recipe[], grade: IngredientGrade): Recipe[] {
  * TODO: 테스트 끝나면 원복 필요
  */
 function generateRandomOrder(currentTurn: number, _difficulty: number = 1): CustomerOrder | null {
-	// ===== 테스트용: R급 신선로 고정 =====
-	// 레시피 601: 궁중요리(609) + 타라바가니(607) = 신선로(701)
-	const testRecipe = RECIPES.find((r) => r.id === 601);
-	if (testRecipe) {
-		const dish = findIngredientById(testRecipe.resultIngredientId);
-		if (dish) {
-			return {
-				id: `order-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-				recipe: testRecipe,
-				dish,
-				bonusAmount: calculateBonus(dish.grade),
-				createdAtTurn: currentTurn,
-				completed: false,
-				hintRevealed: false
-			};
+	const unlockedIds = getUnlockedIngredients();
+
+	// 난이도에 따라 등급 선택
+	const gradesByDifficulty: IngredientGrade[][] = [
+		['F', 'E'], // 난이도 1
+		['E', 'D'], // 난이도 2
+		['D', 'C'], // 난이도 3
+		['C', 'B'], // 난이도 4
+		['B', 'A'], // 난이도 5+
+		['A', 'R'] // 난이도 6+
+	];
+
+	const gradeIndex = Math.min(_difficulty - 1, gradesByDifficulty.length - 1);
+	const targetGrades = gradesByDifficulty[gradeIndex];
+
+	// 주문 가능한 레시피 찾기
+	let orderableRecipes = getOrderableRecipes(unlockedIds);
+
+	// 등급 필터링
+	for (const grade of targetGrades) {
+		const filtered = filterByGrade(orderableRecipes, grade);
+		if (filtered.length > 0) {
+			orderableRecipes = filtered;
+			break;
 		}
 	}
-	// ===== 테스트 끝 =====
 
-	return null;
+	// 주문 가능한 레시피가 없으면 모든 요리 레시피에서 선택
+	if (orderableRecipes.length === 0) {
+		const allDishRecipes = getDishRecipes();
+		if (allDishRecipes.length === 0) return null;
+		orderableRecipes = allDishRecipes;
+	}
+
+	// 랜덤 선택
+	const recipe = orderableRecipes[Math.floor(Math.random() * orderableRecipes.length)];
+	const dish = findIngredientById(recipe.resultIngredientId);
+
+	if (!dish) return null;
+
+	return {
+		id: `order-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+		recipe,
+		dish,
+		bonusAmount: calculateBonus(dish.grade),
+		createdAtTurn: currentTurn,
+		completed: false,
+		hintRevealed: false
+	};
 }
 
 /**
@@ -166,15 +198,71 @@ interface CustomerState {
 	totalBonus: number;
 }
 
-function createCustomerStore() {
-	const initialState: CustomerState = {
-		currentOrder: null,
-		difficulty: 1,
-		completedOrders: 0,
-		totalBonus: 0
-	};
+const initialState: CustomerState = {
+	currentOrder: null,
+	difficulty: 1,
+	completedOrders: 0,
+	totalBonus: 0
+};
 
-	const { subscribe, set, update } = writable<CustomerState>(initialState);
+/**
+ * localStorage에서 상태 복원
+ */
+function getStoredCustomerState(): CustomerState {
+	if (!browser) return initialState;
+	const stored = localStorage.getItem(CUSTOMER_STORAGE_KEY);
+	if (!stored) return initialState;
+	try {
+		const parsed = JSON.parse(stored);
+		// recipe, dish 객체 복원 (ID만 저장되어 있으므로)
+		if (parsed.currentOrder) {
+			const recipe = RECIPES.find((r) => r.id === parsed.currentOrder.recipeId);
+			const dish = findIngredientById(parsed.currentOrder.dishId);
+			if (recipe && dish) {
+				parsed.currentOrder.recipe = recipe;
+				parsed.currentOrder.dish = dish;
+			} else {
+				parsed.currentOrder = null;
+			}
+		}
+		return parsed;
+	} catch {
+		return initialState;
+	}
+}
+
+/**
+ * localStorage에 상태 저장
+ */
+function saveCustomerState(state: CustomerState) {
+	if (!browser) return;
+	// recipe, dish는 ID만 저장 (객체 전체 저장하면 너무 큼)
+	const toSave = {
+		...state,
+		currentOrder: state.currentOrder
+			? {
+					...state.currentOrder,
+					recipeId: state.currentOrder.recipe.id,
+					dishId: state.currentOrder.dish.id,
+					recipe: undefined,
+					dish: undefined
+				}
+			: null
+	};
+	localStorage.setItem(CUSTOMER_STORAGE_KEY, JSON.stringify(toSave));
+}
+
+function createCustomerStore() {
+	const { subscribe, set, update } = writable<CustomerState>(getStoredCustomerState());
+
+	// 상태 변경 시 자동 저장
+	const updateAndSave = (updater: (state: CustomerState) => CustomerState) => {
+		update((state) => {
+			const newState = updater(state);
+			saveCustomerState(newState);
+			return newState;
+		});
+	};
 
 	return {
 		subscribe,
@@ -183,7 +271,7 @@ function createCustomerStore() {
 		 * 새 주문 생성
 		 */
 		generateOrder: (currentTurn: number) => {
-			update((state) => {
+			updateAndSave((state) => {
 				const order = generateRandomOrder(currentTurn, state.difficulty);
 				return {
 					...state,
@@ -198,7 +286,7 @@ function createCustomerStore() {
 		 */
 		checkOrder: (resultIngredientId: number): number => {
 			let bonus = 0;
-			update((state) => {
+			updateAndSave((state) => {
 				if (!state.currentOrder) return state;
 
 				if (state.currentOrder.recipe.resultIngredientId === resultIngredientId) {
@@ -221,7 +309,7 @@ function createCustomerStore() {
 		 * 힌트 공개 (RV 시청 후)
 		 */
 		revealHint: () => {
-			update((state) => {
+			updateAndSave((state) => {
 				if (!state.currentOrder) return state;
 				return {
 					...state,
@@ -234,7 +322,7 @@ function createCustomerStore() {
 		 * 세금 주기 종료 시 호출 (주문 리셋 + 난이도 조절)
 		 */
 		onTaxPeriodEnd: (survived: boolean, currentTurn: number) => {
-			update((state) => {
+			updateAndSave((state) => {
 				const newDifficulty = survived ? state.difficulty + 1 : state.difficulty;
 				const order = generateRandomOrder(currentTurn, newDifficulty);
 				return {
@@ -257,18 +345,23 @@ function createCustomerStore() {
 		 */
 		startRun: (currentTurn: number = 0) => {
 			const order = generateRandomOrder(currentTurn, 1);
-			set({
+			const newState = {
 				currentOrder: order,
 				difficulty: 1,
 				completedOrders: 0,
 				totalBonus: 0
-			});
+			};
+			saveCustomerState(newState);
+			set(newState);
 		},
 
 		/**
 		 * 초기화
 		 */
 		reset: () => {
+			if (browser) {
+				localStorage.removeItem(CUSTOMER_STORAGE_KEY);
+			}
 			set(initialState);
 		},
 
@@ -292,7 +385,7 @@ function createCustomerStore() {
 				hintRevealed: false
 			};
 
-			update((state) => ({
+			updateAndSave((state) => ({
 				...state,
 				currentOrder: order
 			}));
