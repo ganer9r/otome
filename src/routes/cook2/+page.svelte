@@ -243,9 +243,6 @@
 				<span class="menu-icon">🎯</span>
 			</div>
 			<span class="menu-label">미션</span>
-			{#if unclaimedMissions > 0}
-				<span class="menu-badge alert">{unclaimedMissions}</span>
-			{/if}
 		</button>
 	</nav>
 
