@@ -163,36 +163,36 @@
 	}
 
 	.formula-item {
-		@apply h-10 w-10;
-		@apply rounded-lg;
+		@apply h-14 w-14;
+		@apply rounded-xl;
 		@apply flex items-center justify-center;
 		background: rgba(255, 255, 255, 0.9);
-		border: 2px solid #8b5a20;
+		border: 3px solid #8b5a20;
 	}
 
 	.formula-item img {
-		@apply h-7 w-7 object-contain;
+		@apply h-10 w-10 object-contain;
 	}
 
 	.formula-plus,
 	.formula-arrow {
 		@apply font-black;
-		font-size: 16px;
+		font-size: 20px;
 		color: #8b5a20;
 		text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 	}
 
 	.formula-result {
-		@apply h-10 w-10;
-		@apply rounded-lg;
+		@apply h-14 w-14;
+		@apply rounded-xl;
 		@apply flex items-center justify-center;
 		background: linear-gradient(180deg, #ffd700 0%, #ff9800 100%);
-		border: 2px solid #8b5a20;
+		border: 3px solid #8b5a20;
 	}
 
 	.result-question {
 		@apply font-black;
-		font-size: 18px;
+		font-size: 24px;
 		color: #fff;
 		text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
 	}
@@ -200,13 +200,13 @@
 	/* 프로그레스 섹션 (항상 공간 확보) */
 	.progress-section {
 		@apply w-full;
-		max-width: 200px;
-		@apply flex flex-col items-center justify-center gap-1;
-		min-height: 40px;
+		max-width: 240px;
+		@apply flex flex-col items-center justify-center gap-2;
+		min-height: 50px;
 	}
 
 	.progress-container {
-		@apply h-4 w-full;
+		@apply h-5 w-full;
 		@apply rounded-full;
 		@apply overflow-hidden;
 		@apply relative;
@@ -224,7 +224,7 @@
 
 	.progress-label {
 		@apply font-bold;
-		font-size: 12px;
+		font-size: 14px;
 		color: #8b5a20;
 		text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 		animation: pulse 1s ease-in-out infinite;
@@ -248,7 +248,7 @@
 	}
 
 	.chef-img {
-		width: 180px;
+		width: 220px;
 		height: auto;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
 	}
@@ -286,7 +286,7 @@
 	/* 완성 텍스트 */
 	.complete-text {
 		@apply font-black;
-		font-size: 20px;
+		font-size: 28px;
 		color: #ffd700;
 		text-shadow:
 			0 2px 0 #8b6914,
@@ -320,7 +320,7 @@
 
 	.drop-item {
 		@apply absolute;
-		@apply h-10 w-10;
+		@apply h-12 w-12;
 		left: var(--x);
 		animation: dropIn 1s ease-in forwards;
 		animation-delay: var(--delay);
@@ -356,7 +356,7 @@
 
 	.burst-particle {
 		@apply absolute;
-		font-size: 20px;
+		font-size: 28px;
 		animation: burst 0.8s ease-out forwards;
 		animation-delay: var(--delay);
 	}

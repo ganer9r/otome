@@ -233,9 +233,9 @@
 		phase = 'result';
 		battleStore.setResult(myScore, opponentPower);
 
-		// 결과 화면으로 자동 이동 제거
-		// await new Promise((r) => setTimeout(r, 2500));
-		// goto('/cook2/battle/result');
+		// 결과 화면으로 자동 이동
+		await new Promise((r) => setTimeout(r, 2500));
+		goto('/cook2/battle/result');
 	}
 </script>
 
@@ -272,8 +272,8 @@
 				class:hit={showHitEffect && hitSide === 'my'}
 				style="transform: scale({myScale.current})"
 			>
-				<div class="card-glow my"></div>
 				<div class="card-inner">
+					<div class="card-glow my"></div>
 					<div class="fighter-visual">
 						{#if myDish?.imageUrl}
 							<img src={myDish.imageUrl} alt={myDish.name} class="dish-img" />
@@ -310,8 +310,8 @@
 				class:hit={showHitEffect && hitSide === 'opponent'}
 				style="transform: scale({opponentScale.current})"
 			>
-				<div class="card-glow opponent"></div>
 				<div class="card-inner">
+					<div class="card-glow opponent"></div>
 					<div class="fighter-visual">
 						<span class="chef-emoji">{battleState.currentChef?.emoji ?? '🧑‍🍳'}</span>
 					</div>
@@ -514,11 +514,12 @@
 	}
 
 	.card-glow {
-		@apply absolute inset-0;
+		@apply absolute;
+		@apply inset-0;
 		@apply rounded-2xl;
 		@apply opacity-0;
 		transition: opacity 0.3s;
-		z-index: -1;
+		z-index: 0;
 	}
 
 	.fighter-card.winner .card-glow {
@@ -536,6 +537,7 @@
 	}
 
 	.card-inner {
+		@apply relative;
 		@apply flex flex-col items-center gap-2;
 		@apply p-3;
 		@apply rounded-2xl;
@@ -781,7 +783,10 @@
 
 	/* 상태 표시 */
 	.status-area {
-		@apply py-6;
+		@apply flex justify-center;
+		@apply px-4 pt-6 pb-12;
+		@apply mt-auto;
+		@apply flex-shrink-0;
 		min-height: 100px;
 	}
 

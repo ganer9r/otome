@@ -198,7 +198,7 @@
 	{:else}
 		<div class="stage-card">
 			<div class="card-result-container">
-				<!-- 카드 + 캐릭터 레이어드 영역 -->
+				<!-- 카드 영역 -->
 				<div class="card-chef-area">
 					<!-- 카드 -->
 					<div class="card-wrapper" class:card-entered={stage === 'card' || stage === 'result'}>
@@ -210,14 +210,6 @@
 						</div>
 						<ResultCard ingredient={resultIngredient} flipped={cardFlipped} />
 					</div>
-
-					<!-- 캐릭터 (카드 우측 하단 레이어드) -->
-					{#if stage === 'result'}
-						<div class="chef-overlay">
-							<div class="chef-bubble">{chefDialogue}</div>
-							<img src={chefImage} alt="셰프" class="chef-img" />
-						</div>
-					{/if}
 				</div>
 
 				<!-- 하단 정보 (심플) -->
@@ -247,19 +239,29 @@
 								{resultIngredient.grade}등급 {gradeProgress.discovered}/{gradeProgress.total}
 							</span>
 						</div>
-
-						<!-- 버튼 -->
-						<div class="button-row">
-							{#if resultIngredient.isIngredient && onUseNow}
-								<button type="button" class="btn-secondary" onclick={handleUseNow}
-									>바로 써보기</button
-								>
-							{/if}
-							<button type="button" class="btn-primary" onclick={handleConfirm}>확인</button>
-						</div>
 					</div>
 				{/if}
 			</div>
+
+			<!-- 하단 영역: 캐릭터 + 버튼 -->
+			{#if stage === 'result'}
+				<div class="bottom-area">
+					<!-- 캐릭터 -->
+					<div class="chef-section">
+						<div class="chef-bubble">{chefDialogue}</div>
+						<img src={chefImage} alt="셰프" class="chef-img" />
+					</div>
+
+					<!-- 버튼 -->
+					<div class="button-row">
+						{#if resultIngredient.isIngredient && onUseNow}
+							<button type="button" class="btn-secondary" onclick={handleUseNow}>바로 써보기</button
+							>
+						{/if}
+						<button type="button" class="btn-primary" onclick={handleConfirm}>확인</button>
+					</div>
+				</div>
+			{/if}
 		</div>
 	{/if}
 
@@ -485,11 +487,12 @@
 
 	/* 3-4단계: 카드 */
 	.stage-card {
-		@apply relative z-10 flex h-full w-full items-center justify-center overflow-hidden;
+		@apply relative z-10 flex h-full w-full flex-col items-center justify-between overflow-hidden;
 	}
 
 	.card-result-container {
-		@apply relative z-20 flex h-full w-full flex-col items-center overflow-x-hidden overflow-y-auto py-4;
+		@apply relative z-20 flex h-full w-full flex-col items-center py-4;
+		overflow: hidden;
 	}
 
 	/* 후광 효과 (카드 중앙 기준) */
@@ -716,43 +719,40 @@
 		@apply flex justify-center;
 	}
 
-	.chef-overlay {
-		@apply absolute;
-		right: -25%;
-		bottom: 5%;
-		z-index: 20;
+	/* 하단 영역: 캐릭터 + 버튼 */
+	.bottom-area {
+		@apply relative;
 		@apply flex flex-col items-center;
-		animation: chefSlideIn 0.4s ease-out;
+		@apply w-full;
+		@apply px-4 pb-4;
+		animation: resultFadeIn 0.4s ease-out;
 	}
 
-	@keyframes chefSlideIn {
-		from {
-			opacity: 0;
-			transform: translateX(40px) scale(0.8);
-		}
-		to {
-			opacity: 1;
-			transform: translateX(0) scale(1);
-		}
+	.chef-section {
+		@apply absolute;
+		@apply flex flex-col items-center;
+		right: 16px;
+		bottom: 70px;
+		z-index: 10;
 	}
 
 	.chef-img {
-		width: clamp(100px, 28vw, 140px);
+		width: clamp(120px, 35vw, 180px);
 		height: auto;
-		filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
+		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 	}
 
 	.chef-bubble {
-		@apply px-4 py-2;
-		@apply rounded-2xl;
+		@apply px-3 py-1.5;
+		@apply rounded-xl;
 		@apply font-bold;
-		font-size: clamp(12px, 3vw, 16px);
+		font-size: clamp(11px, 3vw, 14px);
 		background: white;
-		border: 3px solid #5d4037;
+		border: 2px solid #5d4037;
 		color: #5d4037;
-		box-shadow: 0 4px 0 #3e2723;
-		margin-bottom: 8px;
-		max-width: 160px;
+		box-shadow: 0 2px 0 #3e2723;
+		margin-bottom: 4px;
+		max-width: 140px;
 		text-align: center;
 	}
 
@@ -820,6 +820,7 @@
 	.button-row {
 		@apply flex gap-3;
 		@apply w-full;
+		max-width: 24rem;
 	}
 
 	.btn-primary {

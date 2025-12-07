@@ -87,9 +87,9 @@
 <style lang="postcss">
 	@reference '$styles/app.css';
 
-	/* 카드 컨테이너 - vh 기준 (화면 높이의 55%) */
+	/* 카드 컨테이너 - vh 기준 (화면 높이의 45%) */
 	.card-container {
-		--card-height: min(55vh, 420px);
+		--card-height: min(45vh, 340px);
 		--card-width: calc(var(--card-height) * 0.68);
 		--card-radius: calc(var(--card-height) * 0.04);
 		--card-padding: calc(var(--card-height) * 0.04);

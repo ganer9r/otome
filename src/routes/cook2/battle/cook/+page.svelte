@@ -423,7 +423,7 @@
 	/* 상단 영역 (결과가 캐릭터 위로) */
 	.top-area {
 		@apply absolute;
-		@apply top-16 right-0 left-0;
+		@apply top-24 right-0 left-0;
 		@apply flex flex-col items-center justify-start;
 		@apply gap-4;
 		@apply pt-4;
@@ -502,7 +502,7 @@
 	/* 요리 영역 (캐릭터) */
 	.cooking-area {
 		@apply absolute;
-		@apply top-1/4;
+		top: 40%;
 		@apply right-0 left-0;
 		@apply flex flex-col items-center;
 		z-index: 10;
