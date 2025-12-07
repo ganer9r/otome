@@ -32,6 +32,14 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
+
+# keystore
+*.keystore
+
+# build outputs
+*.aab
+*.apk
 
 # typescript
 *.tsbuildinfo

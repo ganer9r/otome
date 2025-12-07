@@ -454,40 +454,40 @@
 
 	/* ===== 하단 메뉴 ===== */
 	.bottom-menu {
-		@apply flex justify-center gap-4;
+		@apply flex gap-3;
 		@apply px-4 py-6;
 		@apply pb-8;
 		background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
 	}
 
 	.menu-btn {
-		@apply flex flex-col items-center gap-1;
-		@apply px-4 py-3;
-		@apply rounded-2xl;
+		@apply flex flex-col items-center gap-0.5;
+		@apply px-1 py-2;
+		@apply rounded-xl;
 		@apply relative;
-		min-width: 80px;
+		@apply flex-1;
 		background: linear-gradient(180deg, #fff 0%, #e8e8e8 100%);
-		border: 4px solid #8b7355;
-		border-bottom-width: 6px;
-		box-shadow: 0 4px 0 #5c4a38;
+		border: 3px solid #8b7355;
+		border-bottom-width: 4px;
+		box-shadow: 0 3px 0 #5c4a38;
 		cursor: pointer;
 		transition: transform 0.1s;
 	}
 
 	.menu-btn:active {
-		transform: translateY(3px);
-		border-bottom-width: 3px;
+		transform: translateY(2px);
+		border-bottom-width: 2px;
 		box-shadow: 0 1px 0 #5c4a38;
 	}
 
 	.menu-icon-wrap {
 		@apply flex items-center justify-center;
-		width: 40px;
-		height: 40px;
+		width: 28px;
+		height: 28px;
 	}
 
 	.menu-icon {
-		font-size: 28px;
+		font-size: 24px;
 	}
 
 	.menu-label {

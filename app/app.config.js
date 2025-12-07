@@ -52,6 +52,8 @@ export default {
 			],
 			// Adaptive Icon inset 적용
 			'./plugins/withAdaptiveIconInset.js',
+			// Release 서명 설정
+			'./plugins/withReleaseSigningConfig.js',
 			// FCM 푸시 알림
 			[
 				'expo-notifications',
