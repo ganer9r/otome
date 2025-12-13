@@ -18,7 +18,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 50,
 		sellPrice: 110,
-		imageUrl: '/imgs/ingredients2/28.webp'
+		imageUrl: '/imgs/ingredients2/1.webp'
 	},
 	{
 		id: 2,
@@ -27,7 +27,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 40,
 		sellPrice: 90,
-		imageUrl: '/imgs/ingredients2/29.webp'
+		imageUrl: '/imgs/ingredients2/2.webp'
 	},
 	{
 		id: 3,
@@ -36,7 +36,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 60,
 		sellPrice: 140,
-		imageUrl: '/imgs/ingredients2/16.webp'
+		imageUrl: '/imgs/ingredients2/3.webp'
 	},
 	{
 		id: 4,
@@ -45,7 +45,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 50,
 		sellPrice: 120,
-		imageUrl: '/imgs/ingredients2/22.webp'
+		imageUrl: '/imgs/ingredients2/4.webp'
 	},
 	{
 		id: 5,
@@ -54,7 +54,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 40,
 		sellPrice: 100,
-		imageUrl: '/imgs/ingredients2/6.webp'
+		imageUrl: '/imgs/ingredients2/5.webp'
 	},
 	{
 		id: 6,
@@ -63,7 +63,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 50,
 		sellPrice: 110,
-		imageUrl: '/imgs/ingredients2/34.webp'
+		imageUrl: '/imgs/ingredients2/6.webp'
 	},
 	{
 		id: 7,
@@ -72,7 +72,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 40,
 		sellPrice: 90,
-		imageUrl: '/imgs/ingredients2/32.webp'
+		imageUrl: '/imgs/ingredients2/7.webp'
 	},
 	{
 		id: 8,
@@ -81,7 +81,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 60,
 		sellPrice: 150,
-		imageUrl: '/imgs/ingredients2/15.webp'
+		imageUrl: '/imgs/ingredients2/8.webp'
 	},
 	// G등급 요리
 	{
@@ -90,7 +90,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 230,
-		imageUrl: '/imgs/ingredients2/341.webp'
+		imageUrl: '/imgs/ingredients2/9.webp'
 	},
 	{
 		id: 10,
@@ -98,7 +98,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 280,
-		imageUrl: '/imgs/ingredients2/314.webp'
+		imageUrl: '/imgs/ingredients2/10.webp'
 	},
 	{
 		id: 11,
@@ -114,7 +114,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 250,
-		imageUrl: '/imgs/ingredients2/302.webp'
+		imageUrl: '/imgs/ingredients2/12.webp'
 	},
 	{
 		id: 13,
@@ -122,7 +122,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 220,
-		imageUrl: '/imgs/ingredients2/121.webp'
+		imageUrl: '/imgs/ingredients2/13.webp'
 	},
 	{
 		id: 14,
@@ -130,7 +130,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 210,
-		imageUrl: '/imgs/ingredients2/37.webp'
+		imageUrl: '/imgs/ingredients2/14.webp'
 	},
 	{
 		id: 15,
@@ -138,7 +138,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 270,
-		imageUrl: '/imgs/ingredients2/109.webp'
+		imageUrl: '/imgs/ingredients2/15.webp'
 	},
 	{
 		id: 16,
@@ -146,7 +146,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 220,
-		imageUrl: '/imgs/ingredients2/11.webp'
+		imageUrl: '/imgs/ingredients2/16.webp'
 	},
 	{
 		id: 17,
@@ -154,7 +154,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 250,
-		imageUrl: '/imgs/ingredients2/24.webp'
+		imageUrl: '/imgs/ingredients2/17.webp'
 	},
 	{
 		id: 18,
@@ -162,7 +162,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 230,
-		imageUrl: '/imgs/ingredients2/105.webp'
+		imageUrl: '/imgs/ingredients2/18.webp'
 	},
 	{
 		id: 19,
@@ -170,7 +170,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 200,
-		imageUrl: '/imgs/ingredients2/110.webp'
+		imageUrl: '/imgs/ingredients2/19.webp'
 	},
 	{
 		id: 20,
@@ -178,7 +178,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 210,
-		imageUrl: '/imgs/ingredients2/110.webp'
+		imageUrl: '/imgs/ingredients2/20.webp'
 	},
 	{
 		id: 21,
@@ -186,7 +186,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 280,
-		imageUrl: '/imgs/ingredients2/114.webp'
+		imageUrl: '/imgs/ingredients2/21.webp'
 	},
 	{
 		id: 22,
@@ -194,7 +194,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 240,
-		imageUrl: '/imgs/ingredients2/106.webp'
+		imageUrl: '/imgs/ingredients2/22.webp'
 	},
 	{
 		id: 23,
@@ -202,7 +202,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 200,
-		imageUrl: '/imgs/ingredients2/32.webp'
+		imageUrl: '/imgs/ingredients2/23.webp'
 	},
 
 	// ========== F등급 - 재료 12개 + 요리 49개 ==========
@@ -214,7 +214,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 80,
 		sellPrice: 180,
-		imageUrl: '/imgs/ingredients2/109.webp'
+		imageUrl: '/imgs/ingredients2/101.webp'
 	},
 	{
 		id: 102,
@@ -223,7 +223,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 70,
 		sellPrice: 160,
-		imageUrl: '/imgs/ingredients2/110.webp'
+		imageUrl: '/imgs/ingredients2/102.webp'
 	},
 	{
 		id: 103,
@@ -232,7 +232,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 90,
 		sellPrice: 200,
-		imageUrl: '/imgs/ingredients2/110.webp'
+		imageUrl: '/imgs/ingredients2/103.webp'
 	},
 	{
 		id: 104,
@@ -241,7 +241,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 100,
 		sellPrice: 230,
-		imageUrl: '/imgs/ingredients2/17.webp'
+		imageUrl: '/imgs/ingredients2/104.webp'
 	},
 	{
 		id: 105,
@@ -250,7 +250,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 90,
 		sellPrice: 210,
-		imageUrl: '/imgs/ingredients2/300.webp'
+		imageUrl: '/imgs/ingredients2/105.webp'
 	},
 	{
 		id: 106,
@@ -259,7 +259,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 80,
 		sellPrice: 180,
-		imageUrl: '/imgs/ingredients2/204.webp'
+		imageUrl: '/imgs/ingredients2/106.webp'
 	},
 	{
 		id: 107,
@@ -268,7 +268,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 70,
 		sellPrice: 160,
-		imageUrl: '/imgs/ingredients2/103.webp'
+		imageUrl: '/imgs/ingredients2/107.webp'
 	},
 	{
 		id: 108,
@@ -277,7 +277,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 100,
 		sellPrice: 240,
-		imageUrl: '/imgs/ingredients2/22.webp'
+		imageUrl: '/imgs/ingredients2/108.webp'
 	},
 	{
 		id: 109,
@@ -286,7 +286,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 70,
 		sellPrice: 150,
-		imageUrl: '/imgs/ingredients2/115.webp'
+		imageUrl: '/imgs/ingredients2/109.webp'
 	},
 	{
 		id: 111,
@@ -295,7 +295,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		isIngredient: true,
 		buyPrice: 90,
 		sellPrice: 200,
-		imageUrl: '/imgs/ingredients2/36.webp'
+		imageUrl: '/imgs/ingredients2/111.webp'
 	},
 	{
 		id: 112,
@@ -303,7 +303,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 60,
-		imageUrl: '/imgs/ingredients2/32.webp'
+		imageUrl: '/imgs/ingredients2/112.webp'
 	},
 	{
 		id: 123,
@@ -311,7 +311,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 80,
-		imageUrl: '/imgs/ingredients2/28.webp'
+		imageUrl: '/imgs/ingredients2/123.webp'
 	},
 	// F등급 요리
 	{
@@ -320,7 +320,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 350,
-		imageUrl: '/imgs/ingredients2/109.webp'
+		imageUrl: '/imgs/ingredients2/124.webp'
 	},
 	{
 		id: 125,
@@ -328,7 +328,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 380,
-		imageUrl: '/imgs/ingredients2/109.webp'
+		imageUrl: '/imgs/ingredients2/125.webp'
 	},
 	{
 		id: 126,
@@ -336,7 +336,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 430,
-		imageUrl: '/imgs/ingredients2/503.webp'
+		imageUrl: '/imgs/ingredients2/126.webp'
 	},
 	{
 		id: 127,
@@ -344,7 +344,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 450,
-		imageUrl: '/imgs/ingredients2/315.webp'
+		imageUrl: '/imgs/ingredients2/127.webp'
 	},
 	{
 		id: 128,
@@ -352,7 +352,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 400,
-		imageUrl: '/imgs/ingredients2/332.webp'
+		imageUrl: '/imgs/ingredients2/128.webp'
 	},
 	{
 		id: 129,
@@ -360,7 +360,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 420,
-		imageUrl: '/imgs/ingredients2/102.webp'
+		imageUrl: '/imgs/ingredients2/129.webp'
 	},
 	{
 		id: 130,
@@ -368,7 +368,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 400,
-		imageUrl: '/imgs/ingredients2/221.webp'
+		imageUrl: '/imgs/ingredients2/130.webp'
 	},
 	{
 		id: 131,
@@ -376,7 +376,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 380,
-		imageUrl: '/imgs/ingredients2/424.webp'
+		imageUrl: '/imgs/ingredients2/131.webp'
 	},
 	{
 		id: 132,
@@ -384,7 +384,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 420,
-		imageUrl: '/imgs/ingredients2/226.webp'
+		imageUrl: '/imgs/ingredients2/132.webp'
 	},
 	{
 		id: 133,
@@ -392,7 +392,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 400,
-		imageUrl: '/imgs/ingredients2/207.webp'
+		imageUrl: '/imgs/ingredients2/133.webp'
 	},
 	{
 		id: 134,
@@ -400,7 +400,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 380,
-		imageUrl: '/imgs/ingredients2/110.webp'
+		imageUrl: '/imgs/ingredients2/134.webp'
 	},
 	{
 		id: 135,
@@ -408,7 +408,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 480,
-		imageUrl: '/imgs/ingredients2/114.webp'
+		imageUrl: '/imgs/ingredients2/135.webp'
 	},
 	{
 		id: 136,
@@ -416,7 +416,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 400,
-		imageUrl: '/imgs/ingredients2/110.webp'
+		imageUrl: '/imgs/ingredients2/136.webp'
 	},
 	{
 		id: 137,
@@ -424,7 +424,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 450,
-		imageUrl: '/imgs/ingredients2/110.webp'
+		imageUrl: '/imgs/ingredients2/137.webp'
 	},
 	{
 		id: 138,
@@ -432,7 +432,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 350,
-		imageUrl: '/imgs/ingredients2/40.webp'
+		imageUrl: '/imgs/ingredients2/138.webp'
 	},
 	{
 		id: 139,
@@ -440,7 +440,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 420,
-		imageUrl: '/imgs/ingredients2/345.webp'
+		imageUrl: '/imgs/ingredients2/139.webp'
 	},
 	{
 		id: 140,
@@ -448,7 +448,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 450,
-		imageUrl: '/imgs/ingredients2/110.webp'
+		imageUrl: '/imgs/ingredients2/140.webp'
 	},
 	{
 		id: 141,
@@ -456,7 +456,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 400,
-		imageUrl: '/imgs/ingredients2/103.webp'
+		imageUrl: '/imgs/ingredients2/141.webp'
 	},
 	{
 		id: 142,
@@ -464,7 +464,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 450,
-		imageUrl: '/imgs/ingredients2/300.webp'
+		imageUrl: '/imgs/ingredients2/142.webp'
 	},
 	{
 		id: 143,
@@ -472,7 +472,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 380,
-		imageUrl: '/imgs/ingredients2/309.webp'
+		imageUrl: '/imgs/ingredients2/143.webp'
 	},
 	{
 		id: 144,
@@ -480,7 +480,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 470,
-		imageUrl: '/imgs/ingredients2/416.webp'
+		imageUrl: '/imgs/ingredients2/144.webp'
 	},
 	{
 		id: 145,
@@ -488,7 +488,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 460,
-		imageUrl: '/imgs/ingredients2/505.webp'
+		imageUrl: '/imgs/ingredients2/145.webp'
 	},
 	{
 		id: 146,
@@ -496,7 +496,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 400,
-		imageUrl: '/imgs/ingredients2/341.webp'
+		imageUrl: '/imgs/ingredients2/146.webp'
 	},
 	{
 		id: 147,
@@ -504,7 +504,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 480,
-		imageUrl: '/imgs/ingredients2/16.webp'
+		imageUrl: '/imgs/ingredients2/147.webp'
 	},
 	{
 		id: 148,
@@ -512,7 +512,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 470,
-		imageUrl: '/imgs/ingredients2/307.webp'
+		imageUrl: '/imgs/ingredients2/148.webp'
 	},
 	{
 		id: 149,
@@ -520,7 +520,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 450,
-		imageUrl: '/imgs/ingredients2/17.webp'
+		imageUrl: '/imgs/ingredients2/149.webp'
 	},
 	{
 		id: 150,
@@ -528,7 +528,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 430,
-		imageUrl: '/imgs/ingredients2/323.webp'
+		imageUrl: '/imgs/ingredients2/150.webp'
 	},
 	{
 		id: 151,
@@ -536,7 +536,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 400,
-		imageUrl: '/imgs/ingredients2/102.webp'
+		imageUrl: '/imgs/ingredients2/151.webp'
 	},
 	{
 		id: 152,
@@ -544,7 +544,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 420,
-		imageUrl: '/imgs/ingredients2/331.webp'
+		imageUrl: '/imgs/ingredients2/152.webp'
 	},
 	{
 		id: 153,
@@ -552,7 +552,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 350,
-		imageUrl: '/imgs/ingredients2/204.webp'
+		imageUrl: '/imgs/ingredients2/153.webp'
 	},
 	{
 		id: 154,
@@ -560,7 +560,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 360,
-		imageUrl: '/imgs/ingredients2/115.webp'
+		imageUrl: '/imgs/ingredients2/154.webp'
 	},
 	{
 		id: 155,
@@ -568,7 +568,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 400,
-		imageUrl: '/imgs/ingredients2/102.webp'
+		imageUrl: '/imgs/ingredients2/155.webp'
 	},
 	{
 		id: 156,
@@ -576,7 +576,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 420,
-		imageUrl: '/imgs/ingredients2/204.webp'
+		imageUrl: '/imgs/ingredients2/156.webp'
 	},
 	{
 		id: 157,
@@ -584,7 +584,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 380,
-		imageUrl: '/imgs/ingredients2/204.webp'
+		imageUrl: '/imgs/ingredients2/157.webp'
 	},
 	{
 		id: 158,
@@ -592,7 +592,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 380,
-		imageUrl: '/imgs/ingredients2/219.webp'
+		imageUrl: '/imgs/ingredients2/158.webp'
 	},
 	{
 		id: 159,
@@ -600,7 +600,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 400,
-		imageUrl: '/imgs/ingredients2/109.webp'
+		imageUrl: '/imgs/ingredients2/159.webp'
 	},
 	{
 		id: 160,
@@ -608,7 +608,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 370,
-		imageUrl: '/imgs/ingredients2/324.webp'
+		imageUrl: '/imgs/ingredients2/160.webp'
 	},
 	{
 		id: 161,
@@ -616,7 +616,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 380,
-		imageUrl: '/imgs/ingredients2/24.webp'
+		imageUrl: '/imgs/ingredients2/161.webp'
 	},
 	{
 		id: 162,
@@ -624,7 +624,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 450,
-		imageUrl: '/imgs/ingredients2/334.webp'
+		imageUrl: '/imgs/ingredients2/162.webp'
 	},
 	{
 		id: 163,
@@ -632,7 +632,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 400,
-		imageUrl: '/imgs/ingredients2/24.webp'
+		imageUrl: '/imgs/ingredients2/163.webp'
 	},
 	{
 		id: 164,
@@ -640,7 +640,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 350,
-		imageUrl: '/imgs/ingredients2/115.webp'
+		imageUrl: '/imgs/ingredients2/164.webp'
 	},
 	{
 		id: 165,
@@ -648,7 +648,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 380,
-		imageUrl: '/imgs/ingredients2/121.webp'
+		imageUrl: '/imgs/ingredients2/165.webp'
 	},
 	{
 		id: 166,
@@ -656,7 +656,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 360,
-		imageUrl: '/imgs/ingredients2/115.webp'
+		imageUrl: '/imgs/ingredients2/166.webp'
 	},
 	{
 		id: 167,
@@ -664,7 +664,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 430,
-		imageUrl: '/imgs/ingredients2/345.webp'
+		imageUrl: '/imgs/ingredients2/167.webp'
 	},
 	{
 		id: 168,
@@ -672,7 +672,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 400,
-		imageUrl: '/imgs/ingredients2/40.webp'
+		imageUrl: '/imgs/ingredients2/168.webp'
 	},
 	{
 		id: 169,
@@ -680,7 +680,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 420,
-		imageUrl: '/imgs/ingredients2/348.webp'
+		imageUrl: '/imgs/ingredients2/169.webp'
 	},
 	{
 		id: 170,
@@ -688,7 +688,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 400,
-		imageUrl: '/imgs/ingredients2/348.webp'
+		imageUrl: '/imgs/ingredients2/170.webp'
 	},
 	{
 		id: 171,
@@ -696,7 +696,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 450,
-		imageUrl: '/imgs/ingredients2/348.webp'
+		imageUrl: '/imgs/ingredients2/171.webp'
 	},
 	{
 		id: 172,
@@ -704,7 +704,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 380,
-		imageUrl: '/imgs/ingredients2/102.webp'
+		imageUrl: '/imgs/ingredients2/172.webp'
 	},
 
 	// ========== E등급 - 재료 14개 + 요리 34개 ==========
@@ -715,7 +715,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 120,
-		imageUrl: '/imgs/ingredients2/207.webp'
+		imageUrl: '/imgs/ingredients2/201.webp'
 	},
 	{
 		id: 202,
@@ -723,7 +723,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 130,
-		imageUrl: '/imgs/ingredients2/323.webp'
+		imageUrl: '/imgs/ingredients2/202.webp'
 	},
 	{
 		id: 203,
@@ -731,7 +731,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 150,
-		imageUrl: '/imgs/ingredients2/312.webp'
+		imageUrl: '/imgs/ingredients2/203.webp'
 	},
 	{
 		id: 204,
@@ -739,7 +739,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 100,
-		imageUrl: '/imgs/ingredients2/324.webp'
+		imageUrl: '/imgs/ingredients2/204.webp'
 	},
 	{
 		id: 205,
@@ -747,7 +747,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 140,
-		imageUrl: '/imgs/ingredients2/334.webp'
+		imageUrl: '/imgs/ingredients2/205.webp'
 	},
 	{
 		id: 206,
@@ -755,7 +755,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 100,
-		imageUrl: '/imgs/ingredients2/102.webp'
+		imageUrl: '/imgs/ingredients2/206.webp'
 	},
 	{
 		id: 207,
@@ -763,7 +763,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 140,
-		imageUrl: '/imgs/ingredients2/505.webp'
+		imageUrl: '/imgs/ingredients2/207.webp'
 	},
 	{
 		id: 208,
@@ -771,7 +771,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 110,
-		imageUrl: '/imgs/ingredients2/6.webp'
+		imageUrl: '/imgs/ingredients2/208.webp'
 	},
 	{
 		id: 209,
@@ -779,7 +779,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 140,
-		imageUrl: '/imgs/ingredients2/329.webp'
+		imageUrl: '/imgs/ingredients2/209.webp'
 	},
 	{
 		id: 210,
@@ -787,7 +787,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 130,
-		imageUrl: '/imgs/ingredients2/219.webp'
+		imageUrl: '/imgs/ingredients2/210.webp'
 	},
 	{
 		id: 211,
@@ -795,7 +795,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 130,
-		imageUrl: '/imgs/ingredients2/332.webp'
+		imageUrl: '/imgs/ingredients2/211.webp'
 	},
 	{
 		id: 212,
@@ -803,7 +803,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 140,
-		imageUrl: '/imgs/ingredients2/227.webp'
+		imageUrl: '/imgs/ingredients2/212.webp'
 	},
 	{
 		id: 213,
@@ -811,7 +811,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 120,
-		imageUrl: '/imgs/ingredients2/348.webp'
+		imageUrl: '/imgs/ingredients2/213.webp'
 	},
 	{
 		id: 214,
@@ -819,7 +819,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 140,
-		imageUrl: '/imgs/ingredients2/33.webp'
+		imageUrl: '/imgs/ingredients2/214.webp'
 	},
 	// E등급 요리
 	{
@@ -828,7 +828,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 600,
-		imageUrl: '/imgs/ingredients2/221.webp'
+		imageUrl: '/imgs/ingredients2/215.webp'
 	},
 	{
 		id: 216,
@@ -836,7 +836,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 620,
-		imageUrl: '/imgs/ingredients2/207.webp'
+		imageUrl: '/imgs/ingredients2/216.webp'
 	},
 	{
 		id: 217,
@@ -844,7 +844,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 580,
-		imageUrl: '/imgs/ingredients2/221.webp'
+		imageUrl: '/imgs/ingredients2/217.webp'
 	},
 	{
 		id: 218,
@@ -852,7 +852,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 600,
-		imageUrl: '/imgs/ingredients2/207.webp'
+		imageUrl: '/imgs/ingredients2/218.webp'
 	},
 	{
 		id: 219,
@@ -860,7 +860,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 650,
-		imageUrl: '/imgs/ingredients2/323.webp'
+		imageUrl: '/imgs/ingredients2/219.webp'
 	},
 	{
 		id: 220,
@@ -868,7 +868,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 700,
-		imageUrl: '/imgs/ingredients2/323.webp'
+		imageUrl: '/imgs/ingredients2/220.webp'
 	},
 	{
 		id: 221,
@@ -876,7 +876,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 680,
-		imageUrl: '/imgs/ingredients2/312.webp'
+		imageUrl: '/imgs/ingredients2/221.webp'
 	},
 	{
 		id: 222,
@@ -884,7 +884,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 750,
-		imageUrl: '/imgs/ingredients2/312.webp'
+		imageUrl: '/imgs/ingredients2/222.webp'
 	},
 	{
 		id: 223,
@@ -892,7 +892,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 550,
-		imageUrl: '/imgs/ingredients2/227.webp'
+		imageUrl: '/imgs/ingredients2/223.webp'
 	},
 	{
 		id: 224,
@@ -900,7 +900,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 680,
-		imageUrl: '/imgs/ingredients2/324.webp'
+		imageUrl: '/imgs/ingredients2/224.webp'
 	},
 	{
 		id: 225,
@@ -908,7 +908,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 700,
-		imageUrl: '/imgs/ingredients2/334.webp'
+		imageUrl: '/imgs/ingredients2/225.webp'
 	},
 	{
 		id: 226,
@@ -916,7 +916,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 720,
-		imageUrl: '/imgs/ingredients2/334.webp'
+		imageUrl: '/imgs/ingredients2/226.webp'
 	},
 	{
 		id: 227,
@@ -924,7 +924,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 600,
-		imageUrl: '/imgs/ingredients2/102.webp'
+		imageUrl: '/imgs/ingredients2/227.webp'
 	},
 	{
 		id: 228,
@@ -932,7 +932,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 580,
-		imageUrl: '/imgs/ingredients2/102.webp'
+		imageUrl: '/imgs/ingredients2/228.webp'
 	},
 	{
 		id: 229,
@@ -940,7 +940,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 650,
-		imageUrl: '/imgs/ingredients2/102.webp'
+		imageUrl: '/imgs/ingredients2/229.webp'
 	},
 	{
 		id: 230,
@@ -948,7 +948,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 680,
-		imageUrl: '/imgs/ingredients2/102.webp'
+		imageUrl: '/imgs/ingredients2/230.webp'
 	},
 	{
 		id: 231,
@@ -956,7 +956,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 620,
-		imageUrl: '/imgs/ingredients2/329.webp'
+		imageUrl: '/imgs/ingredients2/231.webp'
 	},
 	{
 		id: 232,
@@ -964,7 +964,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 700,
-		imageUrl: '/imgs/ingredients2/505.webp'
+		imageUrl: '/imgs/ingredients2/232.webp'
 	},
 	{
 		id: 233,
@@ -972,7 +972,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 650,
-		imageUrl: '/imgs/ingredients2/329.webp'
+		imageUrl: '/imgs/ingredients2/233.webp'
 	},
 	{
 		id: 234,
@@ -980,7 +980,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 600,
-		imageUrl: '/imgs/ingredients2/404.webp'
+		imageUrl: '/imgs/ingredients2/234.webp'
 	},
 	{
 		id: 235,
@@ -988,7 +988,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 580,
-		imageUrl: '/imgs/ingredients2/221.webp'
+		imageUrl: '/imgs/ingredients2/235.webp'
 	},
 	{
 		id: 236,
@@ -996,7 +996,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 550,
-		imageUrl: '/imgs/ingredients2/37.webp'
+		imageUrl: '/imgs/ingredients2/236.webp'
 	},
 	{
 		id: 237,
@@ -1004,7 +1004,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 620,
-		imageUrl: '/imgs/ingredients2/219.webp'
+		imageUrl: '/imgs/ingredients2/237.webp'
 	},
 	{
 		id: 238,
@@ -1012,7 +1012,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 680,
-		imageUrl: '/imgs/ingredients2/219.webp'
+		imageUrl: '/imgs/ingredients2/238.webp'
 	},
 	{
 		id: 239,
@@ -1020,7 +1020,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 720,
-		imageUrl: '/imgs/ingredients2/109.webp'
+		imageUrl: '/imgs/ingredients2/239.webp'
 	},
 	{
 		id: 240,
@@ -1028,7 +1028,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 600,
-		imageUrl: '/imgs/ingredients2/348.webp'
+		imageUrl: '/imgs/ingredients2/240.webp'
 	},
 	{
 		id: 241,
@@ -1036,7 +1036,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 650,
-		imageUrl: '/imgs/ingredients2/221.webp'
+		imageUrl: '/imgs/ingredients2/241.webp'
 	},
 	{
 		id: 242,
@@ -1044,7 +1044,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 680,
-		imageUrl: '/imgs/ingredients2/227.webp'
+		imageUrl: '/imgs/ingredients2/242.webp'
 	},
 	{
 		id: 243,
@@ -1052,7 +1052,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 550,
-		imageUrl: '/imgs/ingredients2/348.webp'
+		imageUrl: '/imgs/ingredients2/243.webp'
 	},
 	{
 		id: 244,
@@ -1060,7 +1060,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 600,
-		imageUrl: '/imgs/ingredients2/109.webp'
+		imageUrl: '/imgs/ingredients2/244.webp'
 	},
 	{
 		id: 245,
@@ -1068,7 +1068,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 580,
-		imageUrl: '/imgs/ingredients2/227.webp'
+		imageUrl: '/imgs/ingredients2/245.webp'
 	},
 	{
 		id: 246,
@@ -1076,7 +1076,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 550,
-		imageUrl: '/imgs/ingredients2/348.webp'
+		imageUrl: '/imgs/ingredients2/246.webp'
 	},
 	{
 		id: 247,
@@ -1084,7 +1084,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 520,
-		imageUrl: '/imgs/ingredients2/102.webp'
+		imageUrl: '/imgs/ingredients2/247.webp'
 	},
 	{
 		id: 248,
@@ -1092,7 +1092,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: false,
 		sellPrice: 620,
-		imageUrl: '/imgs/ingredients2/221.webp'
+		imageUrl: '/imgs/ingredients2/248.webp'
 	},
 
 	// ========== D등급 - 재료 13개 + 요리 27개 ==========
@@ -1103,7 +1103,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 200,
-		imageUrl: '/imgs/ingredients2/312.webp'
+		imageUrl: '/imgs/ingredients2/301.webp'
 	},
 	{
 		id: 302,
@@ -1111,7 +1111,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 180,
-		imageUrl: '/imgs/ingredients2/331.webp'
+		imageUrl: '/imgs/ingredients2/302.webp'
 	},
 	{
 		id: 303,
@@ -1119,7 +1119,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 190,
-		imageUrl: '/imgs/ingredients2/334.webp'
+		imageUrl: '/imgs/ingredients2/303.webp'
 	},
 	{
 		id: 304,
@@ -1127,7 +1127,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 200,
-		imageUrl: '/imgs/ingredients2/323.webp'
+		imageUrl: '/imgs/ingredients2/304.webp'
 	},
 	{
 		id: 305,
@@ -1135,7 +1135,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 180,
-		imageUrl: '/imgs/ingredients2/332.webp'
+		imageUrl: '/imgs/ingredients2/305.webp'
 	},
 	{
 		id: 306,
@@ -1143,7 +1143,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 210,
-		imageUrl: '/imgs/ingredients2/506.webp'
+		imageUrl: '/imgs/ingredients2/306.webp'
 	},
 	{
 		id: 307,
@@ -1151,7 +1151,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 200,
-		imageUrl: '/imgs/ingredients2/33.webp'
+		imageUrl: '/imgs/ingredients2/307.webp'
 	},
 	{
 		id: 308,
@@ -1159,7 +1159,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 170,
-		imageUrl: '/imgs/ingredients2/409.webp'
+		imageUrl: '/imgs/ingredients2/308.webp'
 	},
 	{
 		id: 309,
@@ -1167,7 +1167,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 190,
-		imageUrl: '/imgs/ingredients2/401.webp'
+		imageUrl: '/imgs/ingredients2/309.webp'
 	},
 	{
 		id: 310,
@@ -1175,7 +1175,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 170,
-		imageUrl: '/imgs/ingredients2/404.webp'
+		imageUrl: '/imgs/ingredients2/310.webp'
 	},
 	{
 		id: 311,
@@ -1183,7 +1183,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 180,
-		imageUrl: '/imgs/ingredients2/344.webp'
+		imageUrl: '/imgs/ingredients2/311.webp'
 	},
 	{
 		id: 312,
@@ -1191,7 +1191,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 170,
-		imageUrl: '/imgs/ingredients2/324.webp'
+		imageUrl: '/imgs/ingredients2/312.webp'
 	},
 	{
 		id: 313,
@@ -1199,7 +1199,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 180,
-		imageUrl: '/imgs/ingredients2/424.webp'
+		imageUrl: '/imgs/ingredients2/313.webp'
 	},
 	// D등급 요리
 	{
@@ -1208,7 +1208,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1400,
-		imageUrl: '/imgs/ingredients2/312.webp'
+		imageUrl: '/imgs/ingredients2/314.webp'
 	},
 	{
 		id: 315,
@@ -1216,7 +1216,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1350,
-		imageUrl: '/imgs/ingredients2/323.webp'
+		imageUrl: '/imgs/ingredients2/315.webp'
 	},
 	{
 		id: 316,
@@ -1224,7 +1224,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1300,
-		imageUrl: '/imgs/ingredients2/109.webp'
+		imageUrl: '/imgs/ingredients2/316.webp'
 	},
 	{
 		id: 317,
@@ -1232,7 +1232,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1350,
-		imageUrl: '/imgs/ingredients2/424.webp'
+		imageUrl: '/imgs/ingredients2/317.webp'
 	},
 	{
 		id: 318,
@@ -1240,7 +1240,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1250,
-		imageUrl: '/imgs/ingredients2/323.webp'
+		imageUrl: '/imgs/ingredients2/318.webp'
 	},
 	{
 		id: 319,
@@ -1248,7 +1248,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1400,
-		imageUrl: '/imgs/ingredients2/334.webp'
+		imageUrl: '/imgs/ingredients2/319.webp'
 	},
 	{
 		id: 320,
@@ -1256,7 +1256,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1450,
-		imageUrl: '/imgs/ingredients2/506.webp'
+		imageUrl: '/imgs/ingredients2/320.webp'
 	},
 	{
 		id: 321,
@@ -1264,7 +1264,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1200,
-		imageUrl: '/imgs/ingredients2/219.webp'
+		imageUrl: '/imgs/ingredients2/321.webp'
 	},
 	{
 		id: 322,
@@ -1272,7 +1272,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1350,
-		imageUrl: '/imgs/ingredients2/401.webp'
+		imageUrl: '/imgs/ingredients2/322.webp'
 	},
 	{
 		id: 323,
@@ -1280,7 +1280,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1300,
-		imageUrl: '/imgs/ingredients2/324.webp'
+		imageUrl: '/imgs/ingredients2/323.webp'
 	},
 	{
 		id: 324,
@@ -1288,7 +1288,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1400,
-		imageUrl: '/imgs/ingredients2/33.webp'
+		imageUrl: '/imgs/ingredients2/324.webp'
 	},
 	{
 		id: 325,
@@ -1296,7 +1296,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1250,
-		imageUrl: '/imgs/ingredients2/424.webp'
+		imageUrl: '/imgs/ingredients2/325.webp'
 	},
 	{
 		id: 326,
@@ -1304,7 +1304,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1400,
-		imageUrl: '/imgs/ingredients2/323.webp'
+		imageUrl: '/imgs/ingredients2/326.webp'
 	},
 	{
 		id: 327,
@@ -1312,7 +1312,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1350,
-		imageUrl: '/imgs/ingredients2/221.webp'
+		imageUrl: '/imgs/ingredients2/327.webp'
 	},
 	{
 		id: 328,
@@ -1320,7 +1320,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1300,
-		imageUrl: '/imgs/ingredients2/424.webp'
+		imageUrl: '/imgs/ingredients2/328.webp'
 	},
 	{
 		id: 329,
@@ -1328,7 +1328,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1350,
-		imageUrl: '/imgs/ingredients2/409.webp'
+		imageUrl: '/imgs/ingredients2/329.webp'
 	},
 	{
 		id: 330,
@@ -1336,7 +1336,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1250,
-		imageUrl: '/imgs/ingredients2/409.webp'
+		imageUrl: '/imgs/ingredients2/330.webp'
 	},
 	{
 		id: 331,
@@ -1344,7 +1344,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1200,
-		imageUrl: '/imgs/ingredients2/409.webp'
+		imageUrl: '/imgs/ingredients2/331.webp'
 	},
 	{
 		id: 332,
@@ -1352,7 +1352,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1300,
-		imageUrl: '/imgs/ingredients2/219.webp'
+		imageUrl: '/imgs/ingredients2/332.webp'
 	},
 	{
 		id: 333,
@@ -1360,7 +1360,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1250,
-		imageUrl: '/imgs/ingredients2/404.webp'
+		imageUrl: '/imgs/ingredients2/333.webp'
 	},
 	{
 		id: 334,
@@ -1368,7 +1368,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1150,
-		imageUrl: '/imgs/ingredients2/404.webp'
+		imageUrl: '/imgs/ingredients2/334.webp'
 	},
 	{
 		id: 335,
@@ -1376,7 +1376,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1350,
-		imageUrl: '/imgs/ingredients2/505.webp'
+		imageUrl: '/imgs/ingredients2/335.webp'
 	},
 	{
 		id: 336,
@@ -1384,7 +1384,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1200,
-		imageUrl: '/imgs/ingredients2/424.webp'
+		imageUrl: '/imgs/ingredients2/336.webp'
 	},
 	{
 		id: 337,
@@ -1392,7 +1392,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1300,
-		imageUrl: '/imgs/ingredients2/323.webp'
+		imageUrl: '/imgs/ingredients2/337.webp'
 	},
 	{
 		id: 338,
@@ -1400,7 +1400,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1100,
-		imageUrl: '/imgs/ingredients2/40.webp'
+		imageUrl: '/imgs/ingredients2/338.webp'
 	},
 	{
 		id: 339,
@@ -1408,7 +1408,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1150,
-		imageUrl: '/imgs/ingredients2/344.webp'
+		imageUrl: '/imgs/ingredients2/339.webp'
 	},
 	{
 		id: 340,
@@ -1416,7 +1416,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1250,
-		imageUrl: '/imgs/ingredients2/404.webp'
+		imageUrl: '/imgs/ingredients2/340.webp'
 	},
 
 	// ========== C등급 - 재료 12개 + 요리 20개 ==========
@@ -1427,7 +1427,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 280,
-		imageUrl: '/imgs/ingredients2/505.webp'
+		imageUrl: '/imgs/ingredients2/401.webp'
 	},
 	{
 		id: 402,
@@ -1435,7 +1435,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 260,
-		imageUrl: '/imgs/ingredients2/334.webp'
+		imageUrl: '/imgs/ingredients2/402.webp'
 	},
 	{
 		id: 403,
@@ -1443,7 +1443,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 300,
-		imageUrl: '/imgs/ingredients2/506.webp'
+		imageUrl: '/imgs/ingredients2/403.webp'
 	},
 	{
 		id: 404,
@@ -1451,7 +1451,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 270,
-		imageUrl: '/imgs/ingredients2/25.webp'
+		imageUrl: '/imgs/ingredients2/404.webp'
 	},
 	{
 		id: 405,
@@ -1459,7 +1459,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 290,
-		imageUrl: '/imgs/ingredients2/324.webp'
+		imageUrl: '/imgs/ingredients2/405.webp'
 	},
 	{
 		id: 406,
@@ -1467,7 +1467,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 300,
-		imageUrl: '/imgs/ingredients2/409.webp'
+		imageUrl: '/imgs/ingredients2/406.webp'
 	},
 	{
 		id: 407,
@@ -1475,7 +1475,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 250,
-		imageUrl: '/imgs/ingredients2/503.webp'
+		imageUrl: '/imgs/ingredients2/407.webp'
 	},
 	{
 		id: 408,
@@ -1483,7 +1483,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 280,
-		imageUrl: '/imgs/ingredients2/332.webp'
+		imageUrl: '/imgs/ingredients2/408.webp'
 	},
 	{
 		id: 409,
@@ -1491,7 +1491,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 270,
-		imageUrl: '/imgs/ingredients2/611.webp'
+		imageUrl: '/imgs/ingredients2/409.webp'
 	},
 	{
 		id: 410,
@@ -1499,7 +1499,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 230,
-		imageUrl: '/imgs/ingredients2/416.webp'
+		imageUrl: '/imgs/ingredients2/410.webp'
 	},
 	{
 		id: 411,
@@ -1507,7 +1507,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 240,
-		imageUrl: '/imgs/ingredients2/226.webp'
+		imageUrl: '/imgs/ingredients2/411.webp'
 	},
 	{
 		id: 412,
@@ -1515,7 +1515,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 250,
-		imageUrl: '/imgs/ingredients2/345.webp'
+		imageUrl: '/imgs/ingredients2/412.webp'
 	},
 	// C등급 요리
 	{
@@ -1524,7 +1524,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1800,
-		imageUrl: '/imgs/ingredients2/409.webp'
+		imageUrl: '/imgs/ingredients2/413.webp'
 	},
 	{
 		id: 414,
@@ -1532,7 +1532,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1900,
-		imageUrl: '/imgs/ingredients2/611.webp'
+		imageUrl: '/imgs/ingredients2/414.webp'
 	},
 	{
 		id: 415,
@@ -1540,7 +1540,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1750,
-		imageUrl: '/imgs/ingredients2/611.webp'
+		imageUrl: '/imgs/ingredients2/415.webp'
 	},
 	{
 		id: 416,
@@ -1548,7 +1548,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1850,
-		imageUrl: '/imgs/ingredients2/324.webp'
+		imageUrl: '/imgs/ingredients2/416.webp'
 	},
 	{
 		id: 417,
@@ -1556,7 +1556,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 2000,
-		imageUrl: '/imgs/ingredients2/25.webp'
+		imageUrl: '/imgs/ingredients2/417.webp'
 	},
 	{
 		id: 418,
@@ -1564,7 +1564,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1900,
-		imageUrl: '/imgs/ingredients2/332.webp'
+		imageUrl: '/imgs/ingredients2/418.webp'
 	},
 	{
 		id: 419,
@@ -1572,7 +1572,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1950,
-		imageUrl: '/imgs/ingredients2/409.webp'
+		imageUrl: '/imgs/ingredients2/419.webp'
 	},
 	{
 		id: 420,
@@ -1580,7 +1580,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1850,
-		imageUrl: '/imgs/ingredients2/607.webp'
+		imageUrl: '/imgs/ingredients2/420.webp'
 	},
 	{
 		id: 421,
@@ -1588,7 +1588,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 2100,
-		imageUrl: '/imgs/ingredients2/334.webp'
+		imageUrl: '/imgs/ingredients2/421.webp'
 	},
 	{
 		id: 422,
@@ -1596,7 +1596,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1800,
-		imageUrl: '/imgs/ingredients2/332.webp'
+		imageUrl: '/imgs/ingredients2/422.webp'
 	},
 	{
 		id: 423,
@@ -1604,7 +1604,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 2000,
-		imageUrl: '/imgs/ingredients2/334.webp'
+		imageUrl: '/imgs/ingredients2/423.webp'
 	},
 	{
 		id: 424,
@@ -1612,7 +1612,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1750,
-		imageUrl: '/imgs/ingredients2/506.webp'
+		imageUrl: '/imgs/ingredients2/424.webp'
 	},
 	{
 		id: 425,
@@ -1620,7 +1620,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1800,
-		imageUrl: '/imgs/ingredients2/109.webp'
+		imageUrl: '/imgs/ingredients2/425.webp'
 	},
 	{
 		id: 426,
@@ -1628,7 +1628,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1900,
-		imageUrl: '/imgs/ingredients2/103.webp'
+		imageUrl: '/imgs/ingredients2/426.webp'
 	},
 	{
 		id: 427,
@@ -1636,7 +1636,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 2200,
-		imageUrl: '/imgs/ingredients2/601.webp'
+		imageUrl: '/imgs/ingredients2/427.webp'
 	},
 	{
 		id: 428,
@@ -1644,7 +1644,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1700,
-		imageUrl: '/imgs/ingredients2/323.webp'
+		imageUrl: '/imgs/ingredients2/428.webp'
 	},
 	{
 		id: 429,
@@ -1652,7 +1652,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1850,
-		imageUrl: '/imgs/ingredients2/416.webp'
+		imageUrl: '/imgs/ingredients2/429.webp'
 	},
 	{
 		id: 430,
@@ -1660,7 +1660,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1600,
-		imageUrl: '/imgs/ingredients2/226.webp'
+		imageUrl: '/imgs/ingredients2/430.webp'
 	},
 	{
 		id: 431,
@@ -1668,7 +1668,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1650,
-		imageUrl: '/imgs/ingredients2/344.webp'
+		imageUrl: '/imgs/ingredients2/431.webp'
 	},
 	{
 		id: 432,
@@ -1676,7 +1676,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1700,
-		imageUrl: '/imgs/ingredients2/227.webp'
+		imageUrl: '/imgs/ingredients2/432.webp'
 	},
 
 	// ========== B등급 - 재료 11개 + 요리 18개 ==========
@@ -1687,7 +1687,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 380,
-		imageUrl: '/imgs/ingredients2/16.webp'
+		imageUrl: '/imgs/ingredients2/501.webp'
 	},
 	{
 		id: 502,
@@ -1695,7 +1695,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 400,
-		imageUrl: '/imgs/ingredients2/616.webp'
+		imageUrl: '/imgs/ingredients2/502.webp'
 	},
 	{
 		id: 503,
@@ -1703,7 +1703,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 420,
-		imageUrl: '/imgs/ingredients2/120.webp'
+		imageUrl: '/imgs/ingredients2/503.webp'
 	},
 	{
 		id: 504,
@@ -1711,7 +1711,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 380,
-		imageUrl: '/imgs/ingredients2/3.webp'
+		imageUrl: '/imgs/ingredients2/504.webp'
 	},
 	{
 		id: 505,
@@ -1719,7 +1719,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 350,
-		imageUrl: '/imgs/ingredients2/744.webp'
+		imageUrl: '/imgs/ingredients2/505.webp'
 	},
 	{
 		id: 506,
@@ -1727,7 +1727,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 360,
-		imageUrl: '/imgs/ingredients2/17.webp'
+		imageUrl: '/imgs/ingredients2/506.webp'
 	},
 	{
 		id: 507,
@@ -1735,7 +1735,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 400,
-		imageUrl: '/imgs/ingredients2/619.webp'
+		imageUrl: '/imgs/ingredients2/507.webp'
 	},
 	{
 		id: 508,
@@ -1743,7 +1743,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 380,
-		imageUrl: '/imgs/ingredients2/600.webp'
+		imageUrl: '/imgs/ingredients2/508.webp'
 	},
 	{
 		id: 509,
@@ -1751,7 +1751,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 390,
-		imageUrl: '/imgs/ingredients2/617.webp'
+		imageUrl: '/imgs/ingredients2/509.webp'
 	},
 	{
 		id: 510,
@@ -1759,7 +1759,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 340,
-		imageUrl: '/imgs/ingredients2/344.webp'
+		imageUrl: '/imgs/ingredients2/510.webp'
 	},
 	{
 		id: 511,
@@ -1767,7 +1767,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 350,
-		imageUrl: '/imgs/ingredients2/751.webp'
+		imageUrl: '/imgs/ingredients2/511.webp'
 	},
 	// B등급 요리
 	{
@@ -1776,7 +1776,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2400,
-		imageUrl: '/imgs/ingredients2/16.webp'
+		imageUrl: '/imgs/ingredients2/512.webp'
 	},
 	{
 		id: 513,
@@ -1784,7 +1784,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2500,
-		imageUrl: '/imgs/ingredients2/312.webp'
+		imageUrl: '/imgs/ingredients2/513.webp'
 	},
 	{
 		id: 514,
@@ -1792,7 +1792,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2800,
-		imageUrl: '/imgs/ingredients2/312.webp'
+		imageUrl: '/imgs/ingredients2/514.webp'
 	},
 	{
 		id: 515,
@@ -1800,7 +1800,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2600,
-		imageUrl: '/imgs/ingredients2/334.webp'
+		imageUrl: '/imgs/ingredients2/515.webp'
 	},
 	{
 		id: 516,
@@ -1808,7 +1808,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2700,
-		imageUrl: '/imgs/ingredients2/332.webp'
+		imageUrl: '/imgs/ingredients2/516.webp'
 	},
 	{
 		id: 517,
@@ -1816,7 +1816,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2900,
-		imageUrl: '/imgs/ingredients2/324.webp'
+		imageUrl: '/imgs/ingredients2/517.webp'
 	},
 	{
 		id: 518,
@@ -1824,7 +1824,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2650,
-		imageUrl: '/imgs/ingredients2/611.webp'
+		imageUrl: '/imgs/ingredients2/518.webp'
 	},
 	{
 		id: 519,
@@ -1832,7 +1832,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2550,
-		imageUrl: '/imgs/ingredients2/611.webp'
+		imageUrl: '/imgs/ingredients2/519.webp'
 	},
 	{
 		id: 520,
@@ -1840,7 +1840,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2700,
-		imageUrl: '/imgs/ingredients2/17.webp'
+		imageUrl: '/imgs/ingredients2/520.webp'
 	},
 	{
 		id: 521,
@@ -1848,7 +1848,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2750,
-		imageUrl: '/imgs/ingredients2/17.webp'
+		imageUrl: '/imgs/ingredients2/521.webp'
 	},
 	{
 		id: 522,
@@ -1856,7 +1856,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2850,
-		imageUrl: '/imgs/ingredients2/332.webp'
+		imageUrl: '/imgs/ingredients2/522.webp'
 	},
 	{
 		id: 523,
@@ -1864,7 +1864,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2600,
-		imageUrl: '/imgs/ingredients2/25.webp'
+		imageUrl: '/imgs/ingredients2/523.webp'
 	},
 	{
 		id: 524,
@@ -1872,7 +1872,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2800,
-		imageUrl: '/imgs/ingredients2/500.webp'
+		imageUrl: '/imgs/ingredients2/524.webp'
 	},
 	{
 		id: 525,
@@ -1880,7 +1880,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2500,
-		imageUrl: '/imgs/ingredients2/300.webp'
+		imageUrl: '/imgs/ingredients2/525.webp'
 	},
 	{
 		id: 526,
@@ -1888,7 +1888,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2300,
-		imageUrl: '/imgs/ingredients2/344.webp'
+		imageUrl: '/imgs/ingredients2/526.webp'
 	},
 	{
 		id: 527,
@@ -1896,7 +1896,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2400,
-		imageUrl: '/imgs/ingredients2/344.webp'
+		imageUrl: '/imgs/ingredients2/527.webp'
 	},
 	{
 		id: 528,
@@ -1904,7 +1904,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2650,
-		imageUrl: '/imgs/ingredients2/607.webp'
+		imageUrl: '/imgs/ingredients2/528.webp'
 	},
 	{
 		id: 529,
@@ -1912,7 +1912,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2750,
-		imageUrl: '/imgs/ingredients2/506.webp'
+		imageUrl: '/imgs/ingredients2/529.webp'
 	},
 
 	// ========== A등급 - 재료 12개 + 요리 16개 ==========
@@ -1923,7 +1923,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 550,
-		imageUrl: '/imgs/ingredients2/16.webp'
+		imageUrl: '/imgs/ingredients2/601.webp'
 	},
 	{
 		id: 602,
@@ -1931,7 +1931,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 560,
-		imageUrl: '/imgs/ingredients2/21.webp'
+		imageUrl: '/imgs/ingredients2/602.webp'
 	},
 	{
 		id: 603,
@@ -1939,7 +1939,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 540,
-		imageUrl: '/imgs/ingredients2/324.webp'
+		imageUrl: '/imgs/ingredients2/603.webp'
 	},
 	{
 		id: 604,
@@ -1947,7 +1947,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 560,
-		imageUrl: '/imgs/ingredients2/506.webp'
+		imageUrl: '/imgs/ingredients2/604.webp'
 	},
 	{
 		id: 605,
@@ -1955,7 +1955,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 580,
-		imageUrl: '/imgs/ingredients2/120.webp'
+		imageUrl: '/imgs/ingredients2/605.webp'
 	},
 	{
 		id: 606,
@@ -1963,7 +1963,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 600,
-		imageUrl: '/imgs/ingredients2/618.webp'
+		imageUrl: '/imgs/ingredients2/606.webp'
 	},
 	{
 		id: 607,
@@ -1971,7 +1971,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 520,
-		imageUrl: '/imgs/ingredients2/17.webp'
+		imageUrl: '/imgs/ingredients2/607.webp'
 	},
 	{
 		id: 608,
@@ -1979,7 +1979,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 500,
-		imageUrl: '/imgs/ingredients2/611.webp'
+		imageUrl: '/imgs/ingredients2/608.webp'
 	},
 	{
 		id: 609,
@@ -1987,7 +1987,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 570,
-		imageUrl: '/imgs/ingredients2/600.webp'
+		imageUrl: '/imgs/ingredients2/609.webp'
 	},
 	{
 		id: 610,
@@ -1995,7 +1995,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 480,
-		imageUrl: '/imgs/ingredients2/500.webp'
+		imageUrl: '/imgs/ingredients2/610.webp'
 	},
 	{
 		id: 611,
@@ -2003,7 +2003,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 590,
-		imageUrl: '/imgs/ingredients2/619.webp'
+		imageUrl: '/imgs/ingredients2/611.webp'
 	},
 	{
 		id: 612,
@@ -2011,7 +2011,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 450,
-		imageUrl: '/imgs/ingredients2/344.webp'
+		imageUrl: '/imgs/ingredients2/612.webp'
 	},
 	// A등급 요리
 	{
@@ -2020,7 +2020,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3200,
-		imageUrl: '/imgs/ingredients2/700.webp'
+		imageUrl: '/imgs/ingredients2/613.webp'
 	},
 	{
 		id: 614,
@@ -2028,7 +2028,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3300,
-		imageUrl: '/imgs/ingredients2/701.webp'
+		imageUrl: '/imgs/ingredients2/614.webp'
 	},
 	{
 		id: 615,
@@ -2036,7 +2036,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3400,
-		imageUrl: '/imgs/ingredients2/710.webp'
+		imageUrl: '/imgs/ingredients2/615.webp'
 	},
 	{
 		id: 616,
@@ -2044,7 +2044,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3500,
-		imageUrl: '/imgs/ingredients2/711.webp'
+		imageUrl: '/imgs/ingredients2/616.webp'
 	},
 	{
 		id: 617,
@@ -2052,7 +2052,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3300,
-		imageUrl: '/imgs/ingredients2/712.webp'
+		imageUrl: '/imgs/ingredients2/617.webp'
 	},
 	{
 		id: 618,
@@ -2060,7 +2060,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3400,
-		imageUrl: '/imgs/ingredients2/713.webp'
+		imageUrl: '/imgs/ingredients2/618.webp'
 	},
 	{
 		id: 619,
@@ -2068,7 +2068,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3350,
-		imageUrl: '/imgs/ingredients2/714.webp'
+		imageUrl: '/imgs/ingredients2/619.webp'
 	},
 	{
 		id: 620,
@@ -2076,7 +2076,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3100,
-		imageUrl: '/imgs/ingredients2/720.webp'
+		imageUrl: '/imgs/ingredients2/620.webp'
 	},
 	{
 		id: 621,
@@ -2084,7 +2084,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3200,
-		imageUrl: '/imgs/ingredients2/721.webp'
+		imageUrl: '/imgs/ingredients2/621.webp'
 	},
 	{
 		id: 622,
@@ -2092,7 +2092,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3450,
-		imageUrl: '/imgs/ingredients2/722.webp'
+		imageUrl: '/imgs/ingredients2/622.webp'
 	},
 	{
 		id: 623,
@@ -2100,7 +2100,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3300,
-		imageUrl: '/imgs/ingredients2/730.webp'
+		imageUrl: '/imgs/ingredients2/623.webp'
 	},
 	{
 		id: 624,
@@ -2108,7 +2108,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3250,
-		imageUrl: '/imgs/ingredients2/740.webp'
+		imageUrl: '/imgs/ingredients2/624.webp'
 	},
 	{
 		id: 625,
@@ -2116,7 +2116,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3350,
-		imageUrl: '/imgs/ingredients2/741.webp'
+		imageUrl: '/imgs/ingredients2/625.webp'
 	},
 	{
 		id: 626,
@@ -2124,7 +2124,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3500,
-		imageUrl: '/imgs/ingredients2/742.webp'
+		imageUrl: '/imgs/ingredients2/626.webp'
 	},
 	{
 		id: 627,
@@ -2132,7 +2132,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 2800,
-		imageUrl: '/imgs/ingredients2/750.webp'
+		imageUrl: '/imgs/ingredients2/627.webp'
 	},
 	{
 		id: 628,
@@ -2140,6 +2140,6 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: false,
 		sellPrice: 3000,
-		imageUrl: '/imgs/ingredients2/754.webp'
+		imageUrl: '/imgs/ingredients2/628.webp'
 	}
 ];
