@@ -112,28 +112,22 @@
 
 	// RV 보기 (힌트 공개)
 	async function handleWatchAd() {
-		const { showRewardedAdWithCallback } = await import('../lib/native-bridge');
+		const { showRewardedAd } = await import('../lib/native-bridge');
 
-		showRewardedAdWithCallback({
-			onRewarded: () => {
+		try {
+			const result = await showRewardedAd();
+			if (result.success) {
 				// 보상 획득 → 힌트 공개
 				customerStore.revealHint();
-			},
-			onClosed: () => {
+			} else {
 				// 광고 닫힘 (보상 없음)
 				console.log('Ad closed without reward');
-			},
-			onError: (error) => {
-				// 에러 발생
-				console.error('Ad error:', error);
-				alert('광고를 불러올 수 없습니다.');
-			},
-			onNotReady: () => {
-				// 광고 미준비
-				console.log('Ad not ready');
-				alert('광고가 준비되지 않았습니다. 잠시 후 다시 시도해주세요.');
 			}
-		});
+		} catch (error) {
+			// 에러 발생
+			console.error('Ad error:', error);
+			alert('광고를 불러올 수 없습니다.');
+		}
 	}
 
 	/**
@@ -563,7 +557,7 @@
 
 	/* 펼친 패널 */
 	.expanded-panel {
-		@apply absolute bottom-full left-0 mb-2;
+		@apply absolute top-0 left-full ml-2;
 		@apply rounded-2xl;
 		@apply overflow-hidden;
 		width: 180px;
@@ -578,11 +572,11 @@
 	@keyframes expandIn {
 		from {
 			opacity: 0;
-			transform: scale(0.9) translateY(-10px);
+			transform: scale(0.9) translateX(-10px);
 		}
 		to {
 			opacity: 1;
-			transform: scale(1) translateY(0);
+			transform: scale(1) translateX(0);
 		}
 	}
 

@@ -275,8 +275,8 @@
 		/>
 	{/if}
 
-	<!-- 테스트 버튼 -->
-	<div class="test-controls">
+	<!-- 테스트 버튼 (숨김) -->
+	<!-- <div class="test-controls">
 		<div class="test-label">긴급도 테스트</div>
 		<div class="test-buttons">
 			<button class="test-btn" onclick={() => (testUrgency = 10)}>여유</button>
@@ -286,20 +286,17 @@
 		</div>
 		<div class="test-label">주문 테스트</div>
 		<div class="test-buttons">
-			<!-- F급: 해물무침 (해물 + 채소) -->
 			<button class="test-btn" onclick={() => customerStore.setTestOrder(13, runState.turn)}>
 				F급
 			</button>
-			<!-- C급: 한우구이 (갈비 + 갈비) -->
 			<button class="test-btn" onclick={() => customerStore.setTestOrder(313, runState.turn)}>
 				C급
 			</button>
-			<!-- R급: 신선로 (궁중요리 + 타라바가니) -->
 			<button class="test-btn" onclick={() => customerStore.setTestOrder(601, runState.turn)}>
 				R급
 			</button>
 		</div>
-	</div>
+	</div> -->
 
 	<!-- 게임 화면 -->
 	<div class="game-area">
