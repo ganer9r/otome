@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Flame, Coins } from 'lucide-svelte';
+	import { Flame, Coins, ChevronLeft } from 'lucide-svelte';
+	import { goto } from '$app/navigation';
 	import IngredientGrid from './IngredientGrid.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { runStore, upgradeStore } from '../lib/store';
@@ -29,6 +30,11 @@
 		turnsUntilTax = 0,
 		customerBadge
 	}: Props = $props();
+
+	// 홈으로 이동
+	function handleBack() {
+		goto('/cook2');
+	}
 
 	// 업그레이드 효과
 	let upgradeEffects = $derived(upgradeStore.getEffects());
@@ -145,7 +151,10 @@
 
 		<!-- 상단 정보 바 -->
 		<div class="info-bar">
-			<div class="left-info">
+			<button class="back-button" onclick={handleBack}>
+				<ChevronLeft size={20} />
+			</button>
+			<div class="right-info">
 				<div class="capital-badge">
 					<Coins size={18} />
 					<span class:negative={capital < 0}>{capital.toLocaleString()}원</span>
@@ -156,10 +165,10 @@
 						<span>{earnedStars}</span>
 					</div>
 				{/if}
-			</div>
-			<div class="tax-badge">
-				<span class="tax-label">세금</span>
-				<span class="tax-count">{turnsUntilTax}턴</span>
+				<div class="tax-badge">
+					<span class="tax-label">세금</span>
+					<span class="tax-count">{turnsUntilTax}턴</span>
+				</div>
 			</div>
 		</div>
 
@@ -267,7 +276,23 @@
 		@apply px-2 py-1;
 	}
 
-	.left-info {
+	.back-button {
+		@apply flex items-center justify-center;
+		@apply rounded-lg;
+		@apply p-1;
+		background: rgba(255, 255, 255, 0.9);
+		border: 1px solid #e8d4a8;
+		color: #5d4037;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+		transition: all 0.15s;
+	}
+
+	.back-button:active {
+		transform: scale(0.95);
+		background: rgba(255, 255, 255, 1);
+	}
+
+	.right-info {
 		@apply flex items-center gap-1;
 	}
 
