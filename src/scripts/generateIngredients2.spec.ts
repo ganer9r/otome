@@ -17,20 +17,20 @@ const OUTPUT_DIR = path.join(ASSETS_DIR, 'ingredients2');
 
 const NAME_TO_ENGLISH: Record<string, string> = {
 	// ========== G등급 재료 (8개) ==========
-	쌀: 'scattered raw rice grains', // 1
+	쌀: 'single white rice grain', // 1
 	밀: 'bundle of golden wheat stalks', // 2
 	고기: 'raw red meat chunk', // 3
-	해물: 'raw shrimp and octopus', // 4
+	해물: 'whole raw fish and clam shell', // 4
 	채소: 'fresh green cabbage', // 5
 	과일: 'red apple', // 6
 	물: 'single blue water droplet', // 7
 	불: 'single orange flame', // 8
 
 	// ========== G등급 요리 (15개) ==========
-	해물무침: 'seasoned raw seafood salad', // 9
-	구운해물: 'grilled shrimp and squid', // 10
+	해초나물: 'green seaweed salad', // 9
+	구운해물: 'grilled clam shell on fire', // 10
 	샐러드: 'fresh green salad bowl', // 11
-	칼솟: 'stir-fried vegetables', // 12
+	칼솟: 'grilled green onion', // 12
 	과일청: 'jar of fruit syrup', // 13
 	주스: 'glass of orange juice', // 14
 	누룽지: 'crispy golden rice crust', // 15
@@ -40,8 +40,8 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	크래커: 'stack of crackers', // 19
 	또띠아: 'round flour tortilla', // 20
 	소시지: 'grilled sausage links', // 21
-	묵: 'cube of acorn jelly', // 22
-	온수: 'cup of hot water with steam', // 23
+	묵: 'acorn on top of brown jelly cube', // 22
+	온수: 'cup of boiling water with bubbles', // 23
 
 	// ========== F등급 재료 (12개) ==========
 	밥: 'bowl of steamed white rice', // 101
@@ -49,9 +49,9 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	빵: 'golden loaf of bread', // 103
 	다짐육: 'raw ground meat', // 104
 	양념육: 'raw marinated meat chunks', // 105
-	양념장: 'red sauce blob', // 106
+	양념장: 'brown korean sauce with sesame seeds', // 106
 	육수: 'bowl of golden broth', // 107
-	횟감: 'fresh raw fish fillet', // 108
+	횟감: 'fish shaped fillet without head and scales', // 108
 	절임: 'jar of pickled vegetables', // 109
 	잼: 'jar of red jam', // 111
 	얼음: 'single ice cube', // 112
@@ -64,23 +64,23 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	오므라이스: 'omurice with ketchup', // 127
 	유부초밥: 'inari sushi pieces', // 128
 	떡국: 'sliced rice cake soup', // 129
-	칼국수: 'knife-cut noodle soup', // 130
+	칼국수: 'korean kalguksu noodle soup in red spicy broth', // 130
 	라면: 'bowl of ramen noodles', // 131
-	파이: 'golden baked pie', // 132
+	파이: 'golden baked pie without plate', // 132
 	냉면: 'cold noodles with ice', // 133
 	호떡: 'korean sweet pancake', // 134
 	햄버거: 'hamburger with bun', // 135
 	토스트: 'golden buttered toast', // 136
 	샌드위치: 'layered sandwich', // 137
 	쿠키: 'chocolate chip cookie', // 138
-	빵푸딩: 'bread pudding dessert', // 139
+	프렌치토스트: 'french toast with butter and syrup', // 139
 	카나페: 'canape appetizers', // 140
-	완자탕: 'meatball soup', // 141
+	완자탕: 'korean wanja meatball soup in clear broth with green onion', // 141
 	불고기: 'marinated beef bulgogi', // 142
 	장조림: 'soy braised beef', // 143
-	미트볼: 'meatballs in sauce', // 144
+	미트볼: 'italian meatballs in red tomato sauce', // 144
 	떡갈비: 'grilled short rib patties', // 145
-	냉채: 'cold meat salad', // 146
+	냉채: 'cold julienned vegetables with ice', // 146
 	육회: 'beef tartare with egg yolk', // 147
 	제육볶음: 'spicy stir-fried pork', // 148
 	보쌈: 'boiled pork belly slices', // 149
@@ -88,15 +88,15 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	떡꼬치: 'rice cake skewers', // 151
 	냉삼: 'cold pork belly slices', // 152
 	쌈장: 'ssamjang dipping sauce', // 153
-	회무침: 'spicy raw fish salad', // 154
+	회무침: 'cubed raw fish with julienned vegetables', // 154
 	떡볶이: 'spicy rice cakes', // 155
 	데리야끼: 'teriyaki glazed meat', // 156
 	냉소스: 'cold dipping sauce', // 157
 	된장국: 'soybean paste soup', // 158
 	단팥죽: 'sweet red bean porridge', // 159
-	냉국: 'cold cucumber soup', // 160
+	냉국: 'cold soup with clear broth and ice cubes', // 160
 	젓갈: 'jar of fermented seafood', // 161
-	회냉채: 'cold raw fish salad', // 162
+	빙어회: 'small icefish sashimi on ice', // 162
 	어묵탕: 'fish cake soup', // 163
 	피클: 'pickled cucumbers', // 164
 	과일절임: 'preserved fruit in syrup', // 165
@@ -104,7 +104,7 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	푸딩: 'caramel pudding', // 167
 	약과: 'korean honey cookie', // 168
 	약밥: 'sweet rice with nuts', // 169
-	빙수: 'shaved ice dessert', // 170
+	팥빙수: 'shaved ice with red bean only no fruit', // 170
 	떡빙수: 'rice cake shaved ice', // 171
 	도넛: 'glazed donut', // 172
 
@@ -117,7 +117,7 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	가래떡: 'long cylinder rice cake', // 206
 	찜: 'steamed dish in pot', // 207
 	김치: 'red napa cabbage kimchi', // 208
-	만두: 'single pleated dumpling', // 209
+	만두: 'steamed dumpling mandu', // 209
 	찌개: 'pot of red stew', // 210
 	초밥: 'salmon nigiri sushi', // 211
 	케이크: 'layered birthday cake', // 212
@@ -125,24 +125,24 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	게살: 'crab meat pieces', // 214
 
 	// ========== E등급 요리 (34개) ==========
-	우동: 'bowl of udon noodles', // 215
+	우동: 'udon noodles in clear broth with fish cake', // 215
 	볶음면: 'stir-fried noodles', // 216
 	잔치국수: 'banquet noodle soup', // 217
 	비빔국수: 'spicy mixed noodles', // 218
 	새우튀김: 'fried shrimp tempura', // 219
 	텐동: 'tempura rice bowl', // 220
 	꼬치구이: 'grilled meat skewers', // 221
-	철판구이: 'teppanyaki grill', // 222
+	철판구이: 'vegetables grilling on hot iron plate', // 222
 	핫케이크: 'stack of pancakes', // 223
 	해물수프: 'seafood cream soup', // 224
-	물회: 'cold raw fish soup', // 225
-	회덮밥: 'sashimi rice bowl', // 226
-	떡찜: 'steamed rice cake dish', // 227
+	물회: 'korean mulhoe with julienned fish in red icy broth', // 225
+	회덮밥: 'cubed raw fish on rice with red chojang sauce', // 226
+	떡찜: 'steamed rice cake with beef and vegetables in soy sauce', // 227
 	두부김치: 'tofu with stir-fried kimchi', // 228
 	떡만두국: 'rice cake dumpling soup', // 229
 	궁중떡볶이: 'royal court rice cakes', // 230
 	만두찜: 'steamed dumplings', // 231
-	코다리찜: 'steamed dried pollock', // 232
+	코다리찜: 'whole dried pollock fish covered in spicy red sauce', // 232
 	김치만두: 'kimchi dumplings', // 233
 	김치전: 'kimchi pancake', // 234
 	김치수제비: 'kimchi sujebi soup', // 235
@@ -163,12 +163,12 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	// ========== D등급 재료 (13개) ==========
 	스테이크: 'grilled beef steak', // 301
 	삼겹살구이: 'grilled pork belly', // 302
-	사시미: 'sashimi platter', // 303
+	후토마키: 'futomaki thick sushi roll sliced', // 303
 	돈카츠: 'breaded pork cutlet', // 304
 	모듬초밥: 'assorted sushi plate', // 305
 	해물찜: 'steamed seafood platter', // 306
-	꽃게탕: 'blue crab stew', // 307
-	파스타: 'spaghetti with sauce', // 308
+	꽃게탕: 'red cooked crab in stew', // 307
+	알리오올리오: 'aglio e olio pasta with garlic and olive oil', // 308
 	전골: 'hot pot with ingredients', // 309
 	모듬전: 'assorted korean pancakes', // 310
 	과일케이크: 'fresh fruit cake', // 311
@@ -180,26 +180,26 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	돈카츠카레: 'pork cutlet curry', // 315
 	규동: 'beef bowl gyudon', // 316
 	차슈멘: 'chashu ramen bowl', // 317
-	치킨카츠: 'chicken cutlet', // 318
-	해물덮밥: 'seafood rice bowl', // 319
-	조개찜: 'steamed clams', // 320
-	매운탕: 'spicy fish stew', // 321
+	치킨카츠: 'chicken nuggets pieces', // 318
+	문어숙회: 'boiled octopus slices on plate', // 319
+	조개찜: 'steamed clams with shells open in pot', // 320
+	매운탕: 'spicy fish stew in korean pot', // 321
 	낙지전골: 'octopus hot pot', // 322
 	크림새우: 'cream sauce shrimp', // 323
 	꽃게찜: 'steamed blue crab', // 324
 	짬뽕: 'spicy seafood noodles', // 325
 	돈가스정식: 'tonkatsu set meal', // 326
-	우동전골: 'udon hot pot', // 327
+	우동전골: 'udon noodles in hot pot with vegetables', // 327
 	라멘교자: 'ramen with gyoza', // 328
-	삼겹파스타: 'pork belly pasta', // 329
-	카르보나라: 'carbonara pasta', // 330
-	봉골레: 'clam pasta vongole', // 331
+	삼겹파스타: 'pork belly pasta on plate', // 329
+	카르보나라: 'carbonara pasta on plate', // 330
+	봉골레: 'clam pasta vongole on plate', // 331
 	부대찌개: 'army stew budaejjigae', // 332
 	해물전: 'seafood pancake', // 333
-	파전: 'green onion pancake', // 334
+	파전: 'korean pajeon pancake with long green onion strips visible on top', // 334
 	김치찜: 'braised kimchi with pork', // 335
-	울면: 'thick seafood noodles', // 336
-	유린기: 'chinese crispy chicken', // 337
+	울면: 'korean ulmyeon noodles in thick starchy brown gravy with seafood', // 336
+	유린기: 'youlinji crispy fried chicken pieces with sweet soy glaze and sliced green onion', // 337
 	츄러스: 'sugar churros', // 338
 	티라미수: 'tiramisu cake slice', // 339
 	해물파전: 'seafood green onion pancake', // 340
@@ -215,7 +215,7 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	초밥세트: 'sushi set platter', // 408
 	오리로스: 'roasted duck breast', // 409
 	탕수육: 'sweet and sour pork', // 410
-	과일타르트: 'fresh fruit tart', // 411
+	과일타르트: 'fresh fruit tart without plate', // 411
 	크림브륄레: 'creme brulee', // 412
 
 	// ========== C등급 요리 (20개) ==========
@@ -224,16 +224,16 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	오리훈제: 'smoked duck breast', // 415
 	비프스튜: 'beef stew pot', // 416
 	전복버터구이: 'butter grilled abalone', // 417
-	전복초밥: 'abalone nigiri sushi', // 418
+	전복초밥: 'multiple abalone nigiri sushi pieces', // 418
 	전복크림파스타: 'abalone cream pasta', // 419
 	게살크림리조또: 'crab cream risotto', // 420
-	사시미모듬: 'premium sashimi platter', // 421
-	해물초밥: 'seafood sushi set', // 422
+	도미회: 'sea bream sashimi with fish head decoration', // 421
+	해물솥밥: 'seafood pot rice with open lid', // 422
 	회샤브샤브: 'sashimi shabu shabu', // 423
 	해물그라탕: 'seafood gratin', // 424
 	전복죽: 'abalone rice porridge', // 425
 	갈비탕: 'short rib soup', // 426
-	한정식: 'korean full course meal', // 427
+	한정식: 'korean traditional wooden bapsang table with multiple side dishes', // 427
 	깐쇼새우: 'crispy chili shrimp', // 428
 	팔보채: 'eight treasure vegetables', // 429
 	타르트타탱: 'tarte tatin', // 430
@@ -249,22 +249,23 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	슈바인학센: 'schweinshaxe pork knuckle', // 506
 	스시모듬: 'premium sushi platter', // 507
 	프렌치정식: 'french set meal', // 508
-	궁중떡갈비: 'royal short rib patties', // 509
+	궁중떡갈비: 'korean royal court tteokgalbi on elegant brass plate with garnish', // 509
 	전복스테이크: 'abalone steak', // 510
 	가토쇼콜라: 'gateau au chocolat', // 511
 
 	// ========== B등급 요리 (18개) ==========
-	스테이크타르타르: 'steak tartare', // 512
+	스테이크타르타르:
+		'round steak tartare with ring mold shape served with crispy toast points on side', // 512
 	로스트비프: 'roast beef slices', // 513
 	트러플스테이크: 'truffle steak', // 514
 	참치카르파초: 'tuna carpaccio', // 515
-	니기리모듬: 'assorted nigiri sushi', // 516
-	랍스터비스크: 'lobster bisque soup', // 517
+	카이세키: 'single kaiseki bento box with compartments', // 516
+	랍스터비스크: 'lobster bisque cream soup with lobster claw garnish on top', // 517
 	오리가슴살구이: 'grilled duck breast', // 518
 	오리불고기: 'duck bulgogi', // 519
 	아이스바인: 'german eisbein', // 520
 	슈바인브라텐: 'schweinebraten roast', // 521
-	에도마에스시: 'edomae style sushi', // 522
+	카이센동: 'kaisendon seafood rice bowl with various sashimi', // 522
 	전복회무침: 'spicy abalone salad', // 523
 	어복쟁반: 'royal seafood platter', // 524
 	불고기정식: 'bulgogi set meal', // 525
@@ -277,19 +278,20 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	T본스테이크: 't-bone steak', // 601
 	참치스테이크: 'seared tuna steak', // 602
 	트러플크림수프: 'truffle cream soup', // 603
-	전복해물찜: 'abalone seafood steam', // 604
+	전복해물찜: 'steamed abalone and seafood in shallow brass bowl with no soup', // 604
 	랍스터그라탕: 'lobster gratin', // 605
 	킹크랩버터구이: 'butter grilled king crab', // 606
 	카수레: 'french cassoulet', // 607
 	마그레: 'magret de canard', // 608
 	씨푸드플래터: 'luxury seafood platter', // 609
 	궁중잡채: 'royal japchae', // 610
-	카이세키: 'kaiseki course meal', // 611
+	후나모리: 'funamori sashimi platter on wooden boat shaped plate', // 611
 	파리브레스트: 'paris-brest pastry', // 612
 
 	// ========== A등급 요리 (16개) ==========
 	신선로: 'royal sinseollo hot pot', // 613
-	구절판: 'nine-section platter', // 614
+	구절판:
+		'korean gujeolpan octagonal wooden platter with nine sections filled with colorful julienned vegetables and meat with thin crepes in center', // 614
 	비프웰링턴: 'beef wellington', // 615
 	트러플카르보나라: 'truffle carbonara', // 616
 	코키유생자크: 'coquilles saint-jacques', // 617

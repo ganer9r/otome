@@ -86,7 +86,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	// G등급 요리
 	{
 		id: 9,
-		name: '해물무침',
+		name: '해초나물',
 		grade: 'G',
 		isIngredient: false,
 		sellPrice: 230,
@@ -436,7 +436,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 139,
-		name: '빵푸딩',
+		name: '프렌치토스트',
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 420,
@@ -620,7 +620,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 162,
-		name: '회냉채',
+		name: '빙어회',
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 450,
@@ -684,7 +684,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 170,
-		name: '빙수',
+		name: '팥빙수',
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 400,
@@ -1115,7 +1115,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 303,
-		name: '사시미',
+		name: '후토마키',
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 190,
@@ -1155,7 +1155,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 308,
-		name: '파스타',
+		name: '알리오올리오',
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 170,
@@ -1244,7 +1244,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 319,
-		name: '해물덮밥',
+		name: '문어숙회',
 		grade: 'D',
 		isIngredient: false,
 		sellPrice: 1400,
@@ -1584,7 +1584,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 421,
-		name: '사시미모듬',
+		name: '도미회',
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 2100,
@@ -1592,7 +1592,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 422,
-		name: '해물초밥',
+		name: '해물솥밥',
 		grade: 'C',
 		isIngredient: false,
 		sellPrice: 1800,
@@ -1804,7 +1804,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 516,
-		name: '니기리모듬',
+		name: '카이세키',
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2700,
@@ -1852,7 +1852,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 522,
-		name: '에도마에스시',
+		name: '카이센동',
 		grade: 'B',
 		isIngredient: false,
 		sellPrice: 2850,
@@ -1999,7 +1999,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 611,
-		name: '카이세키',
+		name: '후나모리',
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 590,
