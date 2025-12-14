@@ -219,8 +219,16 @@ function getStoredCustomerState(): CustomerState {
 			const recipe = RECIPES.find((r) => r.id === parsed.currentOrder.recipeId);
 			const dish = findIngredientById(parsed.currentOrder.dishId);
 			if (recipe && dish) {
-				parsed.currentOrder.recipe = recipe;
-				parsed.currentOrder.dish = dish;
+				// 완전히 새 객체로 복원 (기존 undefined 값 제거)
+				parsed.currentOrder = {
+					id: parsed.currentOrder.id,
+					recipe,
+					dish,
+					bonusAmount: parsed.currentOrder.bonusAmount,
+					createdAtTurn: parsed.currentOrder.createdAtTurn,
+					completed: parsed.currentOrder.completed,
+					hintRevealed: parsed.currentOrder.hintRevealed
+				};
 			} else {
 				parsed.currentOrder = null;
 			}
