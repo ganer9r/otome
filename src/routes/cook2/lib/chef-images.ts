@@ -20,15 +20,15 @@ export type ChefEmotion =
 	| 'proud'
 	| 'sad';
 
-// 이미지 경로 (나중에 표정별로 추가)
+// 이미지 경로
 export const CHEF_IMAGES: Record<ChefEmotion, string> = {
 	default: '/imgs/character/chef_default.png',
-	happy: '/imgs/character/chef_default.png', // TODO: chef_happy.png
-	surprised: '/imgs/character/chef_default.png', // TODO: chef_surprised.png
-	embarrassed: '/imgs/character/chef_default.png', // TODO: chef_embarrassed.png
-	angry: '/imgs/character/chef_default.png', // TODO: chef_angry.png
-	proud: '/imgs/character/chef_default.png', // TODO: chef_proud.png
-	sad: '/imgs/character/chef_default.png' // TODO: chef_sad.png
+	happy: '/imgs/character/chef_happy.webp',
+	surprised: '/imgs/character/chef_surprised.webp',
+	embarrassed: '/imgs/character/chef_embarrassed.webp',
+	angry: '/imgs/character/chef_angry.webp',
+	proud: '/imgs/character/chef_proud.webp',
+	sad: '/imgs/character/chef_sad.webp'
 };
 
 // 상황별 대사

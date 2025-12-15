@@ -114,7 +114,6 @@
 	function claimMission(missionId: string) {
 		missionStore.claimReward(missionId);
 	}
-
 	function goBattle() {
 		goto('/cook2/battle');
 	}
@@ -245,8 +244,7 @@
 			<span class="menu-label">미션</span>
 		</button>
 	</nav>
-
-	<!-- 플로팅 대결 버튼 -->
+	<!-- 플로팅 대결 버튼 (임시 비활성화)
 	{#if currentChef}
 		<button class="floating-battle" onclick={goBattle}>
 			<span class="floating-icon">{currentChef.emoji}</span>
@@ -259,6 +257,7 @@
 			<span class="floating-badge">완료!</span>
 		</button>
 	{/if}
+	-->
 </div>
 
 <style lang="postcss">

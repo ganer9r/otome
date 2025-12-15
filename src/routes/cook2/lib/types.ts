@@ -99,6 +99,94 @@ export function getIngredientPrice(grade: IngredientGrade): number {
 }
 
 // ============================================
+// 요리 결과 시스템
+// ============================================
+
+/**
+ * 요리 결과 타입
+ * - critical: 대성공
+ * - success: 성공 (테이블에 없음, 기본값)
+ * - fail: 실패
+ * - total_fail: 완전 실패 (레시피 없음, 재료 부족 등)
+ */
+export type DishResultType = 'critical' | 'success' | 'fail' | 'total_fail';
+
+/**
+ * 요리 결과 (Dish)
+ * Ingredient와 1:N 관계 - 하나의 레시피 결과물에 여러 변형 가능
+ */
+export interface Dish {
+	/** 고유 ID */
+	id: number;
+	/** 참조하는 Ingredient ID (레시피 결과물) */
+	ingredientId: number;
+	/** 요리 이름 (예: "겉바속촉 스테이크", "질긴 스테이크") */
+	name: string;
+	/** 결과 타입 */
+	resultType: DishResultType;
+	/** 확률 영역 크기 (정수, 예: 5 = 5%) */
+	probability: number;
+	/** 이미지 URL (없으면 Ingredient 이미지 사용) */
+	imageUrl?: string;
+	/** 유머 텍스트 */
+	description?: string;
+	/** 효과 (판매가 배수, 보너스 등) */
+	effects?: DishEffects;
+}
+
+/**
+ * 요리 효과
+ */
+export interface DishEffects {
+	/** 판매가 배수 (기본 1.0) */
+	sellPriceMultiplier?: number;
+	/** 추가 보너스 금액 */
+	bonusMoney?: number;
+	/** 스타 추가 획득 */
+	starBonus?: number;
+	/** 재료비 환불 비율 (실패 시, 0~1) */
+	ingredientRefund?: number;
+	/** 다음 요리 대성공 확률 보너스 */
+	criticalBonus?: number;
+	/** 다음 요리 실패 확률 감소 */
+	failReduction?: number;
+}
+
+/**
+ * 등급별 기본 확률 (critical, success, fail)
+ */
+export const GRADE_PROBABILITIES: Record<IngredientGrade, { critical: number; fail: number }> = {
+	G: { critical: 5, fail: 5 },
+	F: { critical: 5, fail: 7 },
+	E: { critical: 5, fail: 10 },
+	D: { critical: 5, fail: 15 },
+	C: { critical: 5, fail: 20 },
+	B: { critical: 5, fail: 25 },
+	A: { critical: 5, fail: 30 },
+	R: { critical: 5, fail: 35 }
+};
+
+/**
+ * 요리 결과 (계산 후)
+ */
+export interface CookResult {
+	/** 결과 타입 */
+	resultType: DishResultType;
+	/** 실제 나온 Dish (있으면) */
+	dish?: Dish;
+	/** 기본 Ingredient (Dish 없을 때 사용) */
+	ingredient: Ingredient;
+	/** 최종 판매가 */
+	sellPrice: number;
+	/** 표시할 이름 */
+	displayName: string;
+	/** 표시할 이미지 */
+	displayImage?: string;
+	/** 유머 텍스트 */
+	description?: string;
+}
+
+// ============================================
 // 미션 시스템
 // ============================================
 

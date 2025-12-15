@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { Ingredient } from '../lib/types';
+	import type { Ingredient, DishResultType } from '../lib/types';
 	import { GRADE_COLORS, GRADE_NAMES } from '../lib/types';
 	import { getChefImage, getRandomDialogue } from '../lib/chef-images';
 
@@ -12,13 +12,31 @@
 		profit: number;
 		/** 손님 주문 보너스 */
 		orderBonus?: number;
+		/** 결과 타입 */
+		resultType?: DishResultType;
+		/** 표시할 이름 (완전 실패 등) */
+		displayName?: string;
+		/** 유머 텍스트 */
+		description?: string;
 		onComplete?: () => void;
 	}
 
-	let { resultIngredient, sellPrice, profit, orderBonus = 0, onComplete }: Props = $props();
+	let {
+		resultIngredient,
+		sellPrice,
+		profit,
+		orderBonus = 0,
+		resultType = 'success',
+		displayName,
+		description,
+		onComplete
+	}: Props = $props();
 
-	// 단계: pot -> steam -> reveal -> result
-	let stage = $state<'pot' | 'steam' | 'reveal' | 'result'>('pot');
+	// 완전 실패 여부
+	const isTotalFail = $derived(resultType === 'total_fail');
+
+	// 단계: pot -> steam -> reveal -> result (완전 실패는 pot -> smoke -> reveal -> result)
+	let stage = $state<'pot' | 'steam' | 'smoke' | 'reveal' | 'result'>('pot');
 	let canSkip = $state(true);
 
 	// 카운팅 애니메이션
@@ -28,11 +46,16 @@
 	const potImage = '/imgs/cw_pot.webp';
 
 	// 셰프 이미지 & 대사
-	let chefImage = $derived(getChefImage('proud'));
+	let chefEmotion = $derived<'proud' | 'angry'>(isTotalFail ? 'angry' : 'proud');
+	let chefImage = $derived(getChefImage(chefEmotion));
 	let chefDialogue = $state('');
 
 	$effect(() => {
-		chefDialogue = getRandomDialogue('proud');
+		if (isTotalFail && description) {
+			chefDialogue = description;
+		} else {
+			chefDialogue = getRandomDialogue(chefEmotion);
+		}
 	});
 
 	// 김 파티클
@@ -47,10 +70,10 @@
 	onMount(() => {
 		// 1. 냄비 두근두근 (0.8초)
 		const timer1 = setTimeout(() => {
-			stage = 'steam';
+			stage = isTotalFail ? 'smoke' : 'steam';
 		}, 800);
 
-		// 2. 김 모락모락 (0.8초)
+		// 2. 김 모락모락 / 연기 폭발 (0.8초)
 		const timer2 = setTimeout(() => {
 			stage = 'reveal';
 		}, 1600);
@@ -108,6 +131,7 @@
 
 <div
 	class="dish-result-screen"
+	class:total-fail-bg={isTotalFail}
 	onclick={handleSkip}
 	onkeydown={(e) => e.key === 'Enter' && handleSkip()}
 	role="button"
@@ -145,35 +169,86 @@
 			</div>
 			<div class="steam-text">모락모락~</div>
 		</div>
+	{:else if stage === 'smoke'}
+		<!-- 완전 실패: 연기 폭발 -->
+		<div class="stage-smoke">
+			<div class="pot-wrapper">
+				<img src={potImage} alt="냄비" class="pot-exploding" />
+				<!-- 검은 연기 파티클 -->
+				<div class="smoke-container">
+					{#each steamParticles as particle}
+						<div
+							class="smoke-particle"
+							style="
+								left: {particle.left}%;
+								animation-delay: {particle.delay * 0.5}s;
+								animation-duration: {particle.duration * 0.8}s;
+								width: {particle.size * 1.5}px;
+								height: {particle.size * 1.5}px;
+							"
+						></div>
+					{/each}
+				</div>
+			</div>
+			<div class="smoke-text">펑!!!</div>
+		</div>
 	{:else}
 		<!-- 요리 등장 & 결과 -->
-		<div class="stage-result">
-			<!-- 상단: 요리 완성 타이틀 -->
+		<div class="stage-result" class:total-fail={isTotalFail}>
+			<!-- 상단: 타이틀 -->
 			<div class="result-header">
-				<span class="header-icon">🍳</span>
-				<span class="header-text">요리 완성!</span>
-				<span class="header-icon">🍳</span>
+				{#if isTotalFail}
+					<span class="header-icon">💀</span>
+					<span class="header-text fail-text">완전 실패!</span>
+					<span class="header-icon">💀</span>
+				{:else}
+					<span class="header-icon">🍳</span>
+					<span class="header-text">요리 완성!</span>
+					<span class="header-icon">🍳</span>
+				{/if}
 			</div>
 
-			<!-- 중앙: 요리 이미지 -->
+			<!-- 중앙: 요리 이미지 or 검은 덩어리 -->
 			<div class="dish-image-container" class:revealed={stage === 'result'}>
-				<div class="dish-glow"></div>
-				<img src={resultIngredient.imageUrl} alt={resultIngredient.name} class="dish-image" />
+				{#if isTotalFail}
+					<!-- 검은 덩어리 (CSS로 그림) -->
+					<div class="black-blob">
+						<div class="blob-body">
+							<div class="blob-eye left"></div>
+							<div class="blob-eye right"></div>
+						</div>
+						<div class="blob-drip drip1"></div>
+						<div class="blob-drip drip2"></div>
+						<div class="blob-drip drip3"></div>
+					</div>
+				{:else}
+					<div class="dish-glow"></div>
+					<img src={resultIngredient.imageUrl} alt={resultIngredient.name} class="dish-image" />
+				{/if}
 			</div>
 
 			<!-- 요리 정보 -->
 			<div class="dish-info" class:visible={stage === 'result'}>
-				<h2 class="dish-name">{resultIngredient.name}</h2>
-				<div class="dish-grade" style="background-color: {GRADE_COLORS[resultIngredient.grade]}">
-					{resultIngredient.grade}등급 · {GRADE_NAMES[resultIngredient.grade]}
-				</div>
+				{#if isTotalFail}
+					<h2 class="dish-name fail-name">{displayName || '미확인 물체'}</h2>
+					<div class="dish-grade fail-grade">??? · 판매 불가</div>
+				{:else}
+					<h2 class="dish-name">{resultIngredient.name}</h2>
+					<div class="dish-grade" style="background-color: {GRADE_COLORS[resultIngredient.grade]}">
+						{resultIngredient.grade}등급 · {GRADE_NAMES[resultIngredient.grade]}
+					</div>
+				{/if}
 			</div>
 
 			<!-- 수익 표시 -->
 			{#if stage === 'result'}
 				<div class="profit-section">
 					<div class="profit-main" class:counting={!countingComplete}>
-						<span class="coin-icon" class:bounce={countingComplete}>💰</span>
+						{#if isTotalFail}
+							<span class="coin-icon broken">💸</span>
+						{:else}
+							<span class="coin-icon" class:bounce={countingComplete}>💰</span>
+						{/if}
 						<span
 							class="profit-number"
 							class:positive={displayedProfit >= 0}
@@ -182,7 +257,9 @@
 							{displayedProfit >= 0 ? '+' : ''}{displayedProfit.toLocaleString()}원
 						</span>
 					</div>
-					{#if orderBonus > 0 && countingComplete}
+					{#if isTotalFail && countingComplete}
+						<div class="fail-tag">환불 없음</div>
+					{:else if orderBonus > 0 && countingComplete}
 						<div class="bonus-tag">
 							주문 보너스 +{orderBonus.toLocaleString()}원
 						</div>
@@ -192,10 +269,17 @@
 				<!-- 하단: 셰프 + 버튼 -->
 				<div class="bottom-section">
 					<div class="chef-area">
-						<div class="chef-bubble">{chefDialogue}</div>
+						<div class="chef-bubble" class:fail-bubble={isTotalFail}>{chefDialogue}</div>
 						<img src={chefImage} alt="셰프" class="chef-img" />
 					</div>
-					<button type="button" class="confirm-btn" onclick={handleConfirm}> 확인 </button>
+					<button
+						type="button"
+						class="confirm-btn"
+						class:fail-btn={isTotalFail}
+						onclick={handleConfirm}
+					>
+						{isTotalFail ? '다시 도전' : '확인'}
+					</button>
 				</div>
 			{/if}
 		</div>
@@ -214,6 +298,10 @@
 		@apply flex items-center justify-center;
 		@apply cursor-pointer overflow-hidden;
 		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
+	}
+
+	.dish-result-screen.total-fail-bg {
+		background: linear-gradient(to bottom, #5d4e4e, #3d3535);
 	}
 
 	/* ===== 1단계: 냄비 두근두근 ===== */
@@ -606,6 +694,299 @@
 		}
 		50% {
 			opacity: 0.8;
+		}
+	}
+
+	/* ===== 완전 실패 스타일 ===== */
+
+	/* 배경 변경 */
+	.stage-result.total-fail {
+		background: linear-gradient(to bottom, #4a4a4a, #2d2d2d);
+	}
+
+	/* 연기 스테이지 */
+	.stage-smoke {
+		@apply flex flex-col items-center gap-4;
+	}
+
+	.pot-exploding {
+		@apply relative z-10 h-40 w-40 object-contain;
+		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
+		animation: potExplode 0.15s ease-in-out infinite;
+	}
+
+	@keyframes potExplode {
+		0%,
+		100% {
+			transform: translateX(0) translateY(0) rotate(0deg);
+		}
+		25% {
+			transform: translateX(-5px) translateY(-3px) rotate(-2deg);
+		}
+		75% {
+			transform: translateX(5px) translateY(-3px) rotate(2deg);
+		}
+	}
+
+	.smoke-container {
+		@apply absolute;
+		top: -30px;
+		left: 0;
+		right: 0;
+		height: 120px;
+		pointer-events: none;
+	}
+
+	.smoke-particle {
+		@apply absolute rounded-full;
+		background: rgba(50, 50, 50, 0.9);
+		filter: blur(12px);
+		animation: smokeRise linear infinite;
+	}
+
+	@keyframes smokeRise {
+		0% {
+			opacity: 0;
+			transform: translateY(0) scale(0.5);
+		}
+		20% {
+			opacity: 0.9;
+		}
+		80% {
+			opacity: 0.5;
+		}
+		100% {
+			opacity: 0;
+			transform: translateY(-100px) scale(2);
+		}
+	}
+
+	.smoke-text {
+		@apply font-black text-red-600;
+		font-size: clamp(24px, 6vw, 36px);
+		animation: smokeTextShake 0.1s ease-in-out infinite;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+	}
+
+	@keyframes smokeTextShake {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		25% {
+			transform: translateX(-3px);
+		}
+		75% {
+			transform: translateX(3px);
+		}
+	}
+
+	/* 실패 타이틀 */
+	.header-text.fail-text {
+		@apply text-red-500;
+	}
+
+	/* 검은 덩어리 (CSS 아트) */
+	.black-blob {
+		@apply relative;
+		width: clamp(140px, 40vw, 200px);
+		height: clamp(140px, 40vw, 200px);
+		animation: blobWobble 0.8s ease-in-out infinite;
+	}
+
+	@keyframes blobWobble {
+		0%,
+		100% {
+			transform: scale(1) rotate(0deg);
+		}
+		25% {
+			transform: scale(1.02, 0.98) rotate(-1deg);
+		}
+		50% {
+			transform: scale(0.98, 1.02) rotate(1deg);
+		}
+		75% {
+			transform: scale(1.01, 0.99) rotate(-0.5deg);
+		}
+	}
+
+	.blob-body {
+		@apply absolute inset-0 rounded-full;
+		background: radial-gradient(ellipse at 30% 30%, #4a4a4a 0%, #1a1a1a 50%, #0a0a0a 100%);
+		box-shadow:
+			inset 0 -20px 40px rgba(0, 0, 0, 0.5),
+			0 10px 30px rgba(0, 0, 0, 0.5);
+		animation: blobPulse 1.5s ease-in-out infinite;
+	}
+
+	@keyframes blobPulse {
+		0%,
+		100% {
+			box-shadow:
+				inset 0 -20px 40px rgba(0, 0, 0, 0.5),
+				0 10px 30px rgba(0, 0, 0, 0.5);
+		}
+		50% {
+			box-shadow:
+				inset 0 -15px 35px rgba(0, 0, 0, 0.4),
+				0 15px 40px rgba(0, 0, 0, 0.6);
+		}
+	}
+
+	/* 눈 */
+	.blob-eye {
+		@apply absolute rounded-full;
+		width: 20%;
+		height: 25%;
+		background: white;
+		top: 35%;
+		animation: eyeBlink 3s ease-in-out infinite;
+	}
+
+	.blob-eye.left {
+		left: 25%;
+	}
+
+	.blob-eye.right {
+		right: 25%;
+	}
+
+	.blob-eye::after {
+		content: '';
+		@apply absolute rounded-full;
+		width: 50%;
+		height: 50%;
+		background: #1a1a1a;
+		top: 30%;
+		left: 25%;
+		animation: eyeLook 2s ease-in-out infinite;
+	}
+
+	@keyframes eyeBlink {
+		0%,
+		45%,
+		55%,
+		100% {
+			transform: scaleY(1);
+		}
+		50% {
+			transform: scaleY(0.1);
+		}
+	}
+
+	@keyframes eyeLook {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		25% {
+			transform: translateX(30%);
+		}
+		75% {
+			transform: translateX(-30%);
+		}
+	}
+
+	/* 흐르는 물방울 */
+	.blob-drip {
+		@apply absolute rounded-full;
+		background: #1a1a1a;
+		width: 15%;
+		height: 0;
+		bottom: 0;
+		animation: drip 2s ease-in-out infinite;
+	}
+
+	.blob-drip.drip1 {
+		left: 20%;
+		animation-delay: 0s;
+	}
+
+	.blob-drip.drip2 {
+		left: 50%;
+		transform: translateX(-50%);
+		animation-delay: 0.7s;
+	}
+
+	.blob-drip.drip3 {
+		right: 20%;
+		animation-delay: 1.4s;
+	}
+
+	@keyframes drip {
+		0%,
+		100% {
+			height: 0;
+			opacity: 0;
+			transform: translateY(0);
+		}
+		30% {
+			height: 30%;
+			opacity: 1;
+			transform: translateY(20%);
+		}
+		70% {
+			height: 20%;
+			opacity: 0.8;
+			transform: translateY(60%);
+		}
+		90% {
+			height: 10%;
+			opacity: 0;
+			transform: translateY(100%);
+		}
+	}
+
+	/* 실패 정보 텍스트 */
+	.dish-name.fail-name {
+		@apply text-red-400;
+	}
+
+	.dish-grade.fail-grade {
+		background: #666;
+		color: #ccc;
+	}
+
+	/* 실패 태그 */
+	.fail-tag {
+		@apply px-4 py-1.5;
+		@apply rounded-full;
+		@apply font-bold;
+		font-size: clamp(12px, 3vw, 16px);
+		background: linear-gradient(180deg, #ef5350 0%, #c62828 100%);
+		color: white;
+		border: 2px solid #b71c1c;
+		box-shadow: 0 2px 4px rgba(183, 28, 28, 0.3);
+		animation: bonusPop 0.4s ease-out;
+	}
+
+	/* 실패 버튼 */
+	.confirm-btn.fail-btn {
+		background: linear-gradient(180deg, #78909c 0%, #546e7a 100%);
+		border-bottom-color: #37474f;
+		box-shadow: 0 4px 12px rgba(55, 71, 79, 0.3);
+	}
+
+	/* 실패 말풍선 */
+	.chef-bubble.fail-bubble {
+		background: #ffebee;
+		border-color: #c62828;
+		color: #c62828;
+		box-shadow: 0 2px 0 #b71c1c;
+	}
+
+	/* 돈 날아가는 아이콘 */
+	.coin-icon.broken {
+		animation: moneyFly 1s ease-out infinite;
+	}
+
+	@keyframes moneyFly {
+		0%,
+		100% {
+			transform: translateY(0) rotate(0deg);
+		}
+		50% {
+			transform: translateY(-10px) rotate(10deg);
 		}
 	}
 </style>

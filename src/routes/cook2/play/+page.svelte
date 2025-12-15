@@ -4,6 +4,7 @@
 	import IngredientSelectScreen from '../components/IngredientSelectScreen.svelte';
 	import CookingScreen from '../components/CookingScreen.svelte';
 	import DishResultScreen from '../components/DishResultScreen.svelte';
+	import ExplosionFailScreen from '../components/ExplosionFailScreen.svelte';
 	import RestartModal from '../components/RestartModal.svelte';
 	import TaxModal from '../components/TaxModal.svelte';
 	import RunEndModal from '../components/RunEndModal.svelte';
@@ -45,7 +46,7 @@
 	let selectedIngredients = $state<number[]>([]);
 
 	// 단계별 상태 관리
-	let step = $state<'ingredient' | 'cooking' | 'result'>('ingredient');
+	let step = $state<'ingredient' | 'cooking' | 'result' | 'explosion'>('ingredient');
 	let currentRecipe = $state<Recipe | null>(null);
 	let resultIngredient = $state<Ingredient | null>(null);
 	let currentIngredientCost = $state(0);
@@ -69,35 +70,22 @@
 		// 1. 레시피 찾기
 		const recipe = findRecipe(selectedIngredients);
 
+		// 2. 재료비 계산 (할인 적용)
+		currentIngredientCost = selectedIngredients.reduce((sum, id) => {
+			const ing = findIngredientById(id);
+			return sum + getDiscountedPrice(ing?.buyPrice ?? 0);
+		}, 0);
+
 		if (!recipe) {
 			// 실패한 조합 저장
 			failedCombinationsStore.addFailed(selectedIngredients);
 			triedCombinationsStore.addTried(selectedIngredients);
 
-			// 턴 증가 + 세금 체크
-			const taxResult = runStore.nextTurn();
-
-			if (taxResult.collected) {
-				lastTaxResult = taxResult;
-				if (taxResult.isBankrupt) {
-					showRunEndModal = true;
-				} else {
-					showTaxModal = true;
-				}
-				selectedIngredients = [];
-				return;
-			}
-
-			alert('해당 조합으로 만들 수 있는 요리가 없습니다!');
-			selectedIngredients = [];
+			// 조리 화면으로 전환 (레시피 없음 = null 상태로)
+			currentRecipe = null;
+			step = 'cooking';
 			return;
 		}
-
-		// 2. 재료비 계산 (할인 적용, 이미 차감되었으므로 기록만)
-		currentIngredientCost = selectedIngredients.reduce((sum, id) => {
-			const ing = findIngredientById(id);
-			return sum + getDiscountedPrice(ing?.buyPrice ?? 0);
-		}, 0);
 
 		// 3. 성공한 조합 저장
 		triedCombinationsStore.addTried(selectedIngredients);
@@ -110,7 +98,11 @@
 
 	// 조리 완료
 	async function handleCookingComplete() {
-		if (!currentRecipe) return;
+		// 레시피가 없으면 폭발 화면으로
+		if (!currentRecipe) {
+			step = 'explosion';
+			return;
+		}
 
 		// 1. 결과 재료 가져오기
 		const result = findIngredientById(currentRecipe.resultIngredientId);
@@ -177,6 +169,35 @@
 				showTaxModal = true;
 			}
 			return; // 모달 닫힌 후 계속 진행
+		}
+
+		// 다시하기 모달 표시
+		await modalStore.open({
+			component: RestartModal,
+			props: {},
+			hideClose: true
+		});
+
+		// 초기화
+		resetRound();
+	}
+
+	// 폭발 실패 완료 (레시피 없는 조합)
+	async function handleExplosionComplete() {
+		// 턴 증가 + 세금 체크
+		const taxResult = runStore.nextTurn();
+
+		if (taxResult.collected) {
+			lastTaxResult = taxResult;
+
+			if (taxResult.isBankrupt) {
+				showRunEndModal = true;
+			} else {
+				showTaxModal = true;
+			}
+			selectedIngredients = [];
+			step = 'ingredient';
+			return;
 		}
 
 		// 다시하기 모달 표시
@@ -325,6 +346,12 @@
 				orderBonus={earnedBonus}
 				onComplete={handleResultComplete}
 				onUseNow={resultIngredient.isIngredient ? handleUseNow : undefined}
+			/>
+		{:else if step === 'explosion'}
+			<!-- 폭발 실패 화면 (레시피 없는 조합) -->
+			<ExplosionFailScreen
+				ingredientCost={currentIngredientCost}
+				onComplete={handleExplosionComplete}
 			/>
 		{/if}
 	</div>
