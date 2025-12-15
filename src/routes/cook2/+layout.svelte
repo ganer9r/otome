@@ -8,9 +8,9 @@
 
 	let { children }: Props = $props();
 
-	// 기준 해상도 (9:16)
+	// 기준 해상도 (360x740)
 	const BASE_WIDTH = 360;
-	const BASE_HEIGHT = 640;
+	const BASE_HEIGHT = 740;
 
 	let scaleX = $state(1);
 	let scaleY = $state(1);
@@ -52,7 +52,7 @@
 
 	.game-viewport {
 		width: 360px;
-		height: 640px;
+		height: 740px;
 		transform-origin: top left;
 		@apply flex flex-col;
 		@apply bg-base-100;
