@@ -540,7 +540,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 152,
-		name: '냉삼',
+		name: '절편',
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 420,
@@ -548,7 +548,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 153,
-		name: '쌈장',
+		name: '빈대떡',
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 350,
@@ -580,7 +580,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 	},
 	{
 		id: 157,
-		name: '냉소스',
+		name: '식혜',
 		grade: 'F',
 		isIngredient: false,
 		sellPrice: 380,

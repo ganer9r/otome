@@ -86,12 +86,12 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 	보쌈: 'boiled pork belly slices', // 149
 	닭강정: 'crispy sweet chicken', // 150
 	떡꼬치: 'rice cake skewers', // 151
-	냉삼: 'cold pork belly slices', // 152
-	쌈장: 'ssamjang dipping sauce', // 153
+	절편: 'diamond shaped white korean jeolpyeon rice cake with fine parallel diagonal ridges on surface', // 152
+	빈대떡: 'crispy golden nokdu bindaetteok with green mung bean specks', // 153
 	회무침: 'cubed raw fish with julienned vegetables', // 154
 	떡볶이: 'spicy rice cakes', // 155
 	데리야끼: 'teriyaki glazed meat', // 156
-	냉소스: 'cold dipping sauce', // 157
+	식혜: 'korean sikhye sweet rice drink with rice grains floating', // 157
 	된장국: 'soybean paste soup', // 158
 	단팥죽: 'sweet red bean porridge', // 159
 	냉국: 'cold soup with clear broth and ice cubes', // 160
@@ -255,7 +255,7 @@ const NAME_TO_ENGLISH: Record<string, string> = {
 
 	// ========== B등급 요리 (18개) ==========
 	스테이크타르타르:
-		'round steak tartare with ring mold shape served with crispy toast points on side', // 512
+		'beef tartare tower with tropical fruits mango and avocado on fine dining plate', // 512
 	로스트비프: 'roast beef slices', // 513
 	트러플스테이크: 'truffle steak', // 514
 	참치카르파초: 'tuna carpaccio', // 515
