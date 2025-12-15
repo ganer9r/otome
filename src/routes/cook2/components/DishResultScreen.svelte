@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { Ingredient, Recipe } from '../lib/types';
+	import type { Ingredient, Recipe, CookResult } from '../lib/types';
 	import { GRADE_COLORS } from '../lib/types';
 	import { getProgressByGrade } from '../lib/data/ingredients';
 	import { unlockedIngredientsStore, runStore, upgradeStore } from '../lib/store';
@@ -11,6 +11,8 @@
 	interface Props {
 		resultIngredient: Ingredient;
 		recipe: Recipe;
+		/** 요리 결과 (critical/success/fail) */
+		cookResult: CookResult;
 		/** 재료비 (이미 차감됨) */
 		ingredientCost?: number;
 		/** 손님 주문 보너스 */
@@ -22,6 +24,7 @@
 	let {
 		resultIngredient,
 		recipe,
+		cookResult,
 		ingredientCost = 0,
 		orderBonus = 0,
 		onComplete,
@@ -37,8 +40,8 @@
 	// 업그레이드 효과
 	let upgradeEffects = $derived(upgradeStore.getEffects());
 
-	// 판매 금액 (업그레이드 보너스 적용)
-	let baseSellPrice = $derived(resultIngredient.sellPrice ?? 0);
+	// 판매 금액 (cookResult에서 가져옴 + 업그레이드 보너스 적용)
+	let baseSellPrice = $derived(cookResult.sellPrice);
 	let sellPrice = $derived(Math.round(baseSellPrice * (1 + upgradeEffects.sellBonusRate)));
 	// 순이익 (판매가 - 재료비 + 보너스)
 	let profit = $derived(sellPrice - ingredientCost + orderBonus);
@@ -56,14 +59,22 @@
 	let unlockedIds = $derived($unlockedIngredientsStore);
 	let gradeProgress = $derived(getProgressByGrade(unlockedIds, resultIngredient.grade));
 
-	let stage = $state<'heartbeat' | 'explosion' | 'card' | 'result'>('heartbeat');
+	let stage = $state<'heartbeat' | 'explosion' | 'card' | 'cardShake' | 'result'>('heartbeat');
 	let cardFlipped = $state(false);
+	let cardShaking = $state(false);
 	let canSkip = $state(true);
+
+	// 대성공 여부
+	let isCritical = $derived(cookResult.resultType === 'critical');
 
 	const potImage = '/imgs/cw_pot.webp';
 
-	// 캐릭터 이모션 결정
+	// 캐릭터 이모션 결정 (cookResult 기반)
 	let chefEmotion = $derived((): ChefEmotion => {
+		// 결과 타입에 따른 감정
+		if (cookResult.resultType === 'critical') return 'surprised';
+		if (cookResult.resultType === 'fail') return 'embarrassed';
+		// success인 경우
 		if (resultIngredient.isIngredient) return 'surprised'; // 새 재료 발견
 		const gradeIndex = ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'R'].indexOf(resultIngredient.grade);
 		if (gradeIndex >= 6) return 'surprised'; // A, R 등급
@@ -90,24 +101,54 @@
 	});
 
 	onMount(() => {
-		const timer1 = setTimeout(() => {
-			stage = 'explosion';
-		}, 1200);
-		const timer2 = setTimeout(() => {
-			stage = 'card';
-		}, 2000);
-		const timer3 = setTimeout(() => {
-			cardFlipped = true;
-		}, 2500);
-		const timer4 = setTimeout(() => {
-			stage = 'result';
-		}, 3300);
+		const timers: ReturnType<typeof setTimeout>[] = [];
+
+		timers.push(
+			setTimeout(() => {
+				stage = 'explosion';
+			}, 1200)
+		);
+
+		timers.push(
+			setTimeout(() => {
+				stage = 'card';
+				if (isCritical) {
+					cardShaking = true;
+				}
+			}, 2000)
+		);
+
+		if (isCritical) {
+			// 대성공: 2초 흔들림 후 뒤집기
+			timers.push(
+				setTimeout(() => {
+					cardShaking = false;
+					cardFlipped = true;
+				}, 4000)
+			); // 2초 흔들림
+
+			timers.push(
+				setTimeout(() => {
+					stage = 'result';
+				}, 4800)
+			);
+		} else {
+			// 일반: 바로 뒤집기
+			timers.push(
+				setTimeout(() => {
+					cardFlipped = true;
+				}, 2500)
+			);
+
+			timers.push(
+				setTimeout(() => {
+					stage = 'result';
+				}, 3300)
+			);
+		}
 
 		return () => {
-			clearTimeout(timer1);
-			clearTimeout(timer2);
-			clearTimeout(timer3);
-			clearTimeout(timer4);
+			timers.forEach((t) => clearTimeout(t));
 		};
 	});
 
@@ -150,11 +191,18 @@
 	}));
 </script>
 
-<!-- 요리: 새로운 심플 연출 -->
-{#if isDish}
-	<DishResult {resultIngredient} {sellPrice} {profit} {orderBonus} onComplete={handleConfirm} />
+<!-- 요리 또는 실패: DishResult 사용 -->
+{#if isDish || cookResult.resultType === 'fail'}
+	<DishResult
+		{resultIngredient}
+		{cookResult}
+		{sellPrice}
+		{profit}
+		{orderBonus}
+		onComplete={handleConfirm}
+	/>
 {:else}
-	<!-- 재료: 기존 카드 뒤집기 연출 -->
+	<!-- 재료 성공/대성공: 카드 뒤집기 연출 -->
 	<div
 		class="result-screen"
 		onclick={handleSkip}
@@ -209,8 +257,16 @@
 				<div class="card-result-container">
 					<!-- 카드 영역 -->
 					<div class="card-chef-area">
+						<!-- 대성공 흔들림 텍스트 -->
+						{#if cardShaking}
+							<div class="shake-text">두근두근...</div>
+						{/if}
 						<!-- 카드 -->
-						<div class="card-wrapper" class:card-entered={stage === 'card' || stage === 'result'}>
+						<div
+							class="card-wrapper"
+							class:card-entered={stage === 'card' || stage === 'result'}
+							class:card-shaking={cardShaking}
+						>
 							<div
 								class="sunburst-wrapper"
 								class:card-entered={stage === 'card' || stage === 'result'}
@@ -549,6 +605,46 @@
 	.card-wrapper.card-entered {
 		transform: scale(1) translateY(0);
 		opacity: 1;
+	}
+
+	/* 대성공 카드 흔들림 */
+	.card-wrapper.card-shaking {
+		animation: cardShake 0.15s ease-in-out infinite;
+	}
+
+	@keyframes cardShake {
+		0%,
+		100% {
+			transform: scale(1) translateY(0) rotate(0deg);
+		}
+		25% {
+			transform: scale(1) translateY(0) rotate(-3deg) translateX(-5px);
+		}
+		75% {
+			transform: scale(1) translateY(0) rotate(3deg) translateX(5px);
+		}
+	}
+
+	/* 대성공 두근두근 텍스트 */
+	.shake-text {
+		@apply absolute -top-12 left-1/2 -translate-x-1/2;
+		@apply font-bold text-amber-600;
+		font-size: clamp(18px, 4.5vw, 24px);
+		animation: shakeTextPulse 0.5s ease-in-out infinite;
+		white-space: nowrap;
+		z-index: 20;
+	}
+
+	@keyframes shakeTextPulse {
+		0%,
+		100% {
+			opacity: 0.6;
+			transform: translateX(-50%) scale(1);
+		}
+		50% {
+			opacity: 1;
+			transform: translateX(-50%) scale(1.1);
+		}
 	}
 
 	/* 결과 UI */

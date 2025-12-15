@@ -1,60 +1,66 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { Ingredient, DishResultType } from '../lib/types';
+	import type { Ingredient, CookResult } from '../lib/types';
 	import { GRADE_COLORS, GRADE_NAMES } from '../lib/types';
-	import { getChefImage, getRandomDialogue } from '../lib/chef-images';
+	import { getChefImage, getRandomDialogue, type ChefEmotion } from '../lib/chef-images';
 
 	interface Props {
 		resultIngredient: Ingredient;
+		/** 요리 결과 */
+		cookResult: CookResult;
 		/** 판매가 (업그레이드 보너스 적용됨) */
 		sellPrice: number;
 		/** 순이익 (판매가 - 재료비 + 보너스) */
 		profit: number;
 		/** 손님 주문 보너스 */
 		orderBonus?: number;
-		/** 결과 타입 */
-		resultType?: DishResultType;
-		/** 표시할 이름 (완전 실패 등) */
-		displayName?: string;
-		/** 유머 텍스트 */
-		description?: string;
 		onComplete?: () => void;
 	}
 
 	let {
 		resultIngredient,
+		cookResult,
 		sellPrice,
 		profit,
 		orderBonus = 0,
-		resultType = 'success',
-		displayName,
-		description,
 		onComplete
 	}: Props = $props();
 
-	// 완전 실패 여부
-	const isTotalFail = $derived(resultType === 'total_fail');
+	// 결과 타입
+	let isFail = $derived(cookResult.resultType === 'fail');
+	let isCritical = $derived(cookResult.resultType === 'critical');
+	let displayName = $derived(cookResult.displayName);
+	let description = $derived(cookResult.description);
 
-	// 단계: pot -> steam -> reveal -> result (완전 실패는 pot -> smoke -> reveal -> result)
-	let stage = $state<'pot' | 'steam' | 'smoke' | 'reveal' | 'result'>('pot');
+	// 단계: pot -> steam -> reveal -> result (대성공은 cardShake 추가)
+	let stage = $state<'pot' | 'steam' | 'smoke' | 'reveal' | 'cardShake' | 'cardFlip' | 'result'>(
+		'pot'
+	);
 	let canSkip = $state(true);
 
 	// 카운팅 애니메이션
 	let displayedProfit = $state(0);
 	let countingComplete = $state(false);
 
+	// 대성공 카드 뒤집기 상태
+	let cardFlipped = $state(false);
+
 	const potImage = '/imgs/cw_pot.webp';
 
-	// 셰프 이미지 & 대사
-	let chefEmotion = $derived<'proud' | 'angry'>(isTotalFail ? 'angry' : 'proud');
-	let chefImage = $derived(getChefImage(chefEmotion));
+	// 셰프 이미지 & 대사 (결과 타입에 따라)
+	let chefEmotion = $derived((): ChefEmotion => {
+		if (isCritical) return 'surprised';
+		if (isFail) return 'embarrassed';
+		return 'proud';
+	});
+	let chefImage = $derived(getChefImage(chefEmotion()));
 	let chefDialogue = $state('');
 
 	$effect(() => {
-		if (isTotalFail && description) {
+		if (description) {
 			chefDialogue = description;
 		} else {
-			chefDialogue = getRandomDialogue(chefEmotion);
+			chefDialogue = getRandomDialogue(chefEmotion());
 		}
 	});
 
@@ -68,26 +74,55 @@
 	}));
 
 	onMount(() => {
-		// 1. 냄비 두근두근 (0.8초)
-		const timer1 = setTimeout(() => {
-			stage = isTotalFail ? 'smoke' : 'steam';
-		}, 800);
+		const timers: ReturnType<typeof setTimeout>[] = [];
 
-		// 2. 김 모락모락 / 연기 폭발 (0.8초)
-		const timer2 = setTimeout(() => {
-			stage = 'reveal';
-		}, 1600);
+		// 1. 냄비 두근두근 (0.8초) - 모든 결과 동일
+		timers.push(
+			setTimeout(() => {
+				stage = 'steam';
+			}, 800)
+		);
 
-		// 3. 요리 등장 (0.5초 후 결과)
-		const timer3 = setTimeout(() => {
-			stage = 'result';
-			startCounting();
-		}, 2100);
+		// 2. 김 모락모락 (0.8초)
+		timers.push(
+			setTimeout(() => {
+				stage = 'reveal';
+			}, 1600)
+		);
+
+		if (isCritical) {
+			// 대성공: 카드 흔들림 (2초) -> 뒤집기 -> 결과
+			timers.push(
+				setTimeout(() => {
+					stage = 'cardShake';
+				}, 2100)
+			);
+
+			timers.push(
+				setTimeout(() => {
+					stage = 'cardFlip';
+					cardFlipped = true;
+				}, 4100)
+			); // 2초 흔들림 후
+
+			timers.push(
+				setTimeout(() => {
+					stage = 'result';
+					startCounting();
+				}, 4900)
+			); // 뒤집기 0.8초 후
+		} else {
+			// 일반/실패: 바로 결과
+			timers.push(
+				setTimeout(() => {
+					stage = 'result';
+					startCounting();
+				}, 2100)
+			);
+		}
 
 		return () => {
-			clearTimeout(timer1);
-			clearTimeout(timer2);
-			clearTimeout(timer3);
+			timers.forEach((t) => clearTimeout(t));
 		};
 	});
 
@@ -131,7 +166,7 @@
 
 <div
 	class="dish-result-screen"
-	class:total-fail-bg={isTotalFail}
+	class:total-fail-bg={isFail && stage === 'result'}
 	onclick={handleSkip}
 	onkeydown={(e) => e.key === 'Enter' && handleSkip()}
 	role="button"
@@ -192,15 +227,48 @@
 			</div>
 			<div class="smoke-text">펑!!!</div>
 		</div>
+	{:else if stage === 'cardShake' || stage === 'cardFlip'}
+		<!-- 대성공: 카드 흔들림 & 뒤집기 -->
+		<div class="stage-card-critical">
+			<div class="card-container" class:flipped={cardFlipped}>
+				<div class="card-inner" class:shaking={stage === 'cardShake'}>
+					<!-- 카드 뒷면 -->
+					<div class="card-back">
+						<div class="card-back-pattern">
+							<div class="pattern-circle"></div>
+							<div class="pattern-circle pattern-circle-2"></div>
+							<span class="card-back-text">?</span>
+						</div>
+					</div>
+					<!-- 카드 앞면 -->
+					<div class="card-front">
+						<div class="card-glow"></div>
+						<img
+							src={resultIngredient.imageUrl}
+							alt={resultIngredient.name}
+							class="card-dish-image"
+						/>
+						<h3 class="card-dish-name">{displayName}</h3>
+					</div>
+				</div>
+			</div>
+			{#if stage === 'cardShake'}
+				<div class="suspense-text">두근두근...</div>
+			{/if}
+		</div>
 	{:else}
 		<!-- 요리 등장 & 결과 -->
-		<div class="stage-result" class:total-fail={isTotalFail}>
+		<div class="stage-result" class:total-fail={isFail}>
 			<!-- 상단: 타이틀 -->
 			<div class="result-header">
-				{#if isTotalFail}
+				{#if isFail}
 					<span class="header-icon">💀</span>
-					<span class="header-text fail-text">완전 실패!</span>
+					<span class="header-text fail-text">요리 실패!</span>
 					<span class="header-icon">💀</span>
+				{:else if isCritical}
+					<span class="header-icon">⭐</span>
+					<span class="header-text critical-text">대성공!</span>
+					<span class="header-icon">⭐</span>
 				{:else}
 					<span class="header-icon">🍳</span>
 					<span class="header-text">요리 완성!</span>
@@ -210,7 +278,7 @@
 
 			<!-- 중앙: 요리 이미지 or 검은 덩어리 -->
 			<div class="dish-image-container" class:revealed={stage === 'result'}>
-				{#if isTotalFail}
+				{#if isFail}
 					<!-- 검은 덩어리 (CSS로 그림) -->
 					<div class="black-blob">
 						<div class="blob-body">
@@ -229,7 +297,7 @@
 
 			<!-- 요리 정보 -->
 			<div class="dish-info" class:visible={stage === 'result'}>
-				{#if isTotalFail}
+				{#if isFail}
 					<h2 class="dish-name fail-name">{displayName || '미확인 물체'}</h2>
 					<div class="dish-grade fail-grade">??? · 판매 불가</div>
 				{:else}
@@ -244,7 +312,7 @@
 			{#if stage === 'result'}
 				<div class="profit-section">
 					<div class="profit-main" class:counting={!countingComplete}>
-						{#if isTotalFail}
+						{#if isFail}
 							<span class="coin-icon broken">💸</span>
 						{:else}
 							<span class="coin-icon" class:bounce={countingComplete}>💰</span>
@@ -257,7 +325,7 @@
 							{displayedProfit >= 0 ? '+' : ''}{displayedProfit.toLocaleString()}원
 						</span>
 					</div>
-					{#if isTotalFail && countingComplete}
+					{#if isFail && countingComplete}
 						<div class="fail-tag">환불 없음</div>
 					{:else if orderBonus > 0 && countingComplete}
 						<div class="bonus-tag">
@@ -269,16 +337,11 @@
 				<!-- 하단: 셰프 + 버튼 -->
 				<div class="bottom-section">
 					<div class="chef-area">
-						<div class="chef-bubble" class:fail-bubble={isTotalFail}>{chefDialogue}</div>
+						<div class="chef-bubble" class:fail-bubble={isFail}>{chefDialogue}</div>
 						<img src={chefImage} alt="셰프" class="chef-img" />
 					</div>
-					<button
-						type="button"
-						class="confirm-btn"
-						class:fail-btn={isTotalFail}
-						onclick={handleConfirm}
-					>
-						{isTotalFail ? '다시 도전' : '확인'}
+					<button type="button" class="confirm-btn" class:fail-btn={isFail} onclick={handleConfirm}>
+						{isFail ? '다시 도전' : '확인'}
 					</button>
 				</div>
 			{/if}
@@ -987,6 +1050,170 @@
 		}
 		50% {
 			transform: translateY(-10px) rotate(10deg);
+		}
+	}
+
+	/* ===== 대성공 카드 연출 ===== */
+	.stage-card-critical {
+		@apply flex flex-col items-center justify-center gap-6;
+		@apply h-full w-full;
+		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
+	}
+
+	.card-container {
+		perspective: 1000px;
+		width: clamp(180px, 45vw, 240px);
+		height: clamp(250px, 62vw, 340px);
+	}
+
+	.card-inner {
+		@apply relative h-full w-full;
+		transform-style: preserve-3d;
+		transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	}
+
+	.card-inner.shaking {
+		animation: cardShake 0.15s ease-in-out infinite;
+	}
+
+	@keyframes cardShake {
+		0%,
+		100% {
+			transform: rotate(0deg) translateX(0);
+		}
+		25% {
+			transform: rotate(-3deg) translateX(-5px);
+		}
+		75% {
+			transform: rotate(3deg) translateX(5px);
+		}
+	}
+
+	.card-container.flipped .card-inner {
+		transform: rotateY(180deg);
+	}
+
+	.card-back,
+	.card-front {
+		@apply absolute h-full w-full;
+		backface-visibility: hidden;
+		border-radius: 16px;
+		overflow: hidden;
+	}
+
+	.card-back {
+		@apply flex items-center justify-center;
+		background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #f59e0b 100%);
+		border: 4px solid #fbbf24;
+		box-shadow: 0 8px 32px rgba(245, 158, 11, 0.4);
+	}
+
+	.card-back-pattern {
+		@apply relative flex items-center justify-center;
+		@apply h-full w-full;
+	}
+
+	.pattern-circle {
+		@apply absolute rounded-full;
+		border: 3px solid rgba(255, 255, 255, 0.4);
+		width: 70%;
+		height: 50%;
+	}
+
+	.pattern-circle-2 {
+		width: 50%;
+		height: 35%;
+	}
+
+	.card-back-text {
+		@apply absolute font-black;
+		color: rgba(255, 255, 255, 0.6);
+		font-size: clamp(48px, 12vw, 72px);
+		text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	}
+
+	.card-front {
+		@apply flex flex-col items-center justify-center gap-4;
+		transform: rotateY(180deg);
+		background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
+		border: 4px solid #fbbf24;
+		box-shadow: 0 8px 32px rgba(245, 158, 11, 0.4);
+	}
+
+	.card-glow {
+		@apply absolute inset-0;
+		background: radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%);
+		animation: cardGlow 1.5s ease-in-out infinite;
+	}
+
+	@keyframes cardGlow {
+		0%,
+		100% {
+			opacity: 0.5;
+			transform: scale(1);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.1);
+		}
+	}
+
+	.card-dish-image {
+		@apply relative z-10;
+		width: 60%;
+		height: auto;
+		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+	}
+
+	.card-dish-name {
+		@apply relative z-10 text-center font-bold;
+		color: #92400e;
+		font-size: clamp(16px, 4vw, 22px);
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+	}
+
+	.suspense-text {
+		@apply font-bold text-amber-700;
+		font-size: clamp(20px, 5vw, 28px);
+		animation: suspensePulse 0.5s ease-in-out infinite;
+	}
+
+	@keyframes suspensePulse {
+		0%,
+		100% {
+			opacity: 0.6;
+			transform: scale(1);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.05);
+		}
+	}
+
+	/* 대성공 타이틀 애니메이션 */
+	.header-text.critical-text {
+		@apply text-yellow-500;
+		text-shadow:
+			0 0 10px rgba(234, 179, 8, 0.5),
+			0 0 20px rgba(234, 179, 8, 0.3),
+			0 2px 4px rgba(0, 0, 0, 0.2);
+		animation: criticalBounce 0.6s ease-out;
+	}
+
+	@keyframes criticalBounce {
+		0% {
+			transform: scale(0) rotate(-10deg);
+			opacity: 0;
+		}
+		50% {
+			transform: scale(1.3) rotate(5deg);
+		}
+		70% {
+			transform: scale(0.9) rotate(-2deg);
+		}
+		100% {
+			transform: scale(1) rotate(0deg);
+			opacity: 1;
 		}
 	}
 </style>

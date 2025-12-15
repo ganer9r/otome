@@ -123,8 +123,9 @@ function calculateProbabilityRanges(
  * @param bonuses 재료 효과로 인한 보너스
  */
 export function cookDish(ingredient: Ingredient, bonuses: DishEffects = {}): CookResult {
-	const ranges = calculateProbabilityRanges(ingredient, bonuses);
 	const baseSellPrice = ingredient.sellPrice ?? 0;
+
+	const ranges = calculateProbabilityRanges(ingredient, bonuses);
 
 	// 난수 생성 (0 ~ total)
 	const roll = Math.random() * ranges.total;

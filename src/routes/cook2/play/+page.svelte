@@ -9,6 +9,8 @@
 	import TaxModal from '../components/TaxModal.svelte';
 	import RunEndModal from '../components/RunEndModal.svelte';
 	import { findRecipe } from '../lib/usecase/findRecipe';
+	import { cookDish } from '../lib/usecase/cookDish';
+	import type { CookResult } from '../lib/types';
 	import {
 		unlockedIngredientsStore,
 		failedCombinationsStore,
@@ -50,6 +52,7 @@
 	let currentRecipe = $state<Recipe | null>(null);
 	let resultIngredient = $state<Ingredient | null>(null);
 	let currentIngredientCost = $state(0);
+	let currentCookResult = $state<CookResult | null>(null);
 
 	// 세금/런종료 모달 상태
 	let showTaxModal = $state(false);
@@ -106,51 +109,53 @@
 
 		// 1. 결과 재료 가져오기
 		const result = findIngredientById(currentRecipe.resultIngredientId);
-		if (result) {
-			resultIngredient = result;
-
-			// 2. 이미 발견한 레시피인지 확인
-			const alreadyDiscovered = $unlockedIngredientsStore.includes(
-				currentRecipe.resultIngredientId
-			);
-
-			// 3. 재료 오픈
-			unlockedIngredientsStore.unlock(currentRecipe.resultIngredientId);
-
-			// 4. 재료인 경우 NEW 뱃지 추가
-			if (result.isIngredient) {
-				newIngredientsStore.add(currentRecipe.resultIngredientId);
-			}
-
-			// 5. 손님 주문 체크 → 보너스 지급
-			earnedBonus = customerStore.checkOrder(currentRecipe.resultIngredientId);
-			if (earnedBonus > 0) {
-				// 보너스 금액 추가
-				runStore.earn(earnedBonus);
-			}
-
-			// 6. 결과 화면 먼저 표시
+		if (!result) {
 			step = 'result';
-
-			// 7. 결과 화면 뜬 후 미션 업데이트 (토스트가 결과 화면에서 보이도록)
-			setTimeout(() => {
-				missionStore.onCook(result.grade, result.sellPrice ?? 0);
-			}, 500);
-
-			setTimeout(() => {
-				if (!alreadyDiscovered) {
-					missionStore.onDiscoverRecipe();
-				}
-			}, 700);
-
-			setTimeout(() => {
-				if (result.isIngredient && !alreadyDiscovered) {
-					missionStore.onDiscoverIngredient();
-				}
-			}, 900);
-		} else {
-			step = 'result';
+			return;
 		}
+
+		resultIngredient = result;
+
+		// 2. 요리 결과 판정 (critical/success/fail)
+		currentCookResult = cookDish(result);
+
+		// 3. 이미 발견한 레시피인지 확인
+		const alreadyDiscovered = $unlockedIngredientsStore.includes(currentRecipe.resultIngredientId);
+
+		// 4. 재료 오픈
+		unlockedIngredientsStore.unlock(currentRecipe.resultIngredientId);
+
+		// 5. 재료인 경우 NEW 뱃지 추가
+		if (result.isIngredient) {
+			newIngredientsStore.add(currentRecipe.resultIngredientId);
+		}
+
+		// 6. 손님 주문 체크 → 보너스 지급
+		earnedBonus = customerStore.checkOrder(currentRecipe.resultIngredientId);
+		if (earnedBonus > 0) {
+			// 보너스 금액 추가
+			runStore.earn(earnedBonus);
+		}
+
+		// 7. 결과 화면 먼저 표시
+		step = 'result';
+
+		// 8. 결과 화면 뜬 후 미션 업데이트 (토스트가 결과 화면에서 보이도록)
+		setTimeout(() => {
+			missionStore.onCook(result.grade, currentCookResult?.sellPrice ?? 0);
+		}, 500);
+
+		setTimeout(() => {
+			if (!alreadyDiscovered) {
+				missionStore.onDiscoverRecipe();
+			}
+		}, 700);
+
+		setTimeout(() => {
+			if (result.isIngredient && !alreadyDiscovered) {
+				missionStore.onDiscoverIngredient();
+			}
+		}, 900);
 	}
 
 	// 결과 확인 완료
@@ -337,11 +342,12 @@
 		{:else if step === 'cooking'}
 			<!-- 조리 화면 -->
 			<CookingScreen onComplete={handleCookingComplete} {selectedIngredients} />
-		{:else if step === 'result' && resultIngredient && currentRecipe}
+		{:else if step === 'result' && resultIngredient && currentRecipe && currentCookResult}
 			<!-- 결과 화면 -->
 			<DishResultScreen
 				{resultIngredient}
 				recipe={currentRecipe}
+				cookResult={currentCookResult}
 				ingredientCost={currentIngredientCost}
 				orderBonus={earnedBonus}
 				onComplete={handleResultComplete}
