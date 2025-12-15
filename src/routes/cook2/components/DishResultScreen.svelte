@@ -2,10 +2,11 @@
 	import { onMount } from 'svelte';
 	import type { Ingredient, Recipe } from '../lib/types';
 	import { GRADE_COLORS } from '../lib/types';
-	import { getProgressByGrade, getTotalProgress } from '../lib/data/ingredients';
+	import { getProgressByGrade } from '../lib/data/ingredients';
 	import { unlockedIngredientsStore, runStore, upgradeStore } from '../lib/store';
 	import { getChefImage, getRandomDialogue, type ChefEmotion } from '../lib/chef-images';
 	import ResultCard from './ResultCard.svelte';
+	import DishResult from './DishResult.svelte';
 
 	interface Props {
 		resultIngredient: Ingredient;
@@ -27,6 +28,9 @@
 		onUseNow
 	}: Props = $props();
 
+	// 요리인지 재료인지 구분
+	let isDish = $derived(!resultIngredient.isIngredient);
+
 	// 런 상태
 	let runState = $derived($runStore);
 
@@ -40,7 +44,8 @@
 	let profit = $derived(sellPrice - ingredientCost + orderBonus);
 	let sold = $state(false);
 
-	// 런 진행 중이면 자동 판매 (1회만)
+	// 런 진행 중이면 자동 판매 (1회만) - 재료일 때만 여기서 처리
+	// 요리는 DishResult 컴포넌트에서 처리하지 않고 여기서 통합 처리
 	$effect(() => {
 		if (!sold && runState.isRunning && sellPrice > 0) {
 			runStore.earn(sellPrice);
@@ -50,7 +55,6 @@
 
 	let unlockedIds = $derived($unlockedIngredientsStore);
 	let gradeProgress = $derived(getProgressByGrade(unlockedIds, resultIngredient.grade));
-	let totalProgress = $derived(getTotalProgress(unlockedIds));
 
 	let stage = $state<'heartbeat' | 'explosion' | 'card' | 'result'>('heartbeat');
 	let cardFlipped = $state(false);
@@ -146,129 +150,136 @@
 	}));
 </script>
 
-<div
-	class="result-screen"
-	onclick={handleSkip}
-	onkeydown={(e) => e.key === 'Enter' && handleSkip()}
-	role="button"
-	tabindex="0"
->
-	{#if stage === 'heartbeat'}
-		<div class="stage-heartbeat">
-			<div class="pot-wrapper">
-				<div class="pot-glow"></div>
-				<img src={potImage} alt="냄비" class="pot-shaking" />
+<!-- 요리: 새로운 심플 연출 -->
+{#if isDish}
+	<DishResult {resultIngredient} {sellPrice} {profit} {orderBonus} onComplete={handleConfirm} />
+{:else}
+	<!-- 재료: 기존 카드 뒤집기 연출 -->
+	<div
+		class="result-screen"
+		onclick={handleSkip}
+		onkeydown={(e) => e.key === 'Enter' && handleSkip()}
+		role="button"
+		tabindex="0"
+	>
+		{#if stage === 'heartbeat'}
+			<div class="stage-heartbeat">
+				<div class="pot-wrapper">
+					<div class="pot-glow"></div>
+					<img src={potImage} alt="냄비" class="pot-shaking" />
+				</div>
+				<div class="heartbeat-text">두근두근...</div>
+				<div class="heartbeat-hearts">
+					<span class="heart heart-1">💓</span>
+					<span class="heart heart-2">💗</span>
+					<span class="heart heart-3">💓</span>
+				</div>
 			</div>
-			<div class="heartbeat-text">두근두근...</div>
-			<div class="heartbeat-hearts">
-				<span class="heart heart-1">💓</span>
-				<span class="heart heart-2">💗</span>
-				<span class="heart heart-3">💓</span>
-			</div>
-		</div>
-	{:else if stage === 'explosion'}
-		<div class="stage-explosion">
-			<div class="center-flash" style="--color: {explosionTheme().color}"></div>
-			{#each rings as ring}
-				<div
-					class="explosion-ring"
-					style="--delay: {ring.delay}s; --scale: {ring.scale}; --color: {explosionTheme().color}"
-				></div>
-			{/each}
-			<div class="rays-container">
-				{#each lightRays as ray}
+		{:else if stage === 'explosion'}
+			<div class="stage-explosion">
+				<div class="center-flash" style="--color: {explosionTheme().color}"></div>
+				{#each rings as ring}
 					<div
-						class="light-ray"
-						style="--angle: {ray.angle}deg; --width: {ray.width}px; --delay: {ray.delay}s; --color: {explosionTheme()
-							.color}"
+						class="explosion-ring"
+						style="--delay: {ring.delay}s; --scale: {ring.scale}; --color: {explosionTheme().color}"
 					></div>
 				{/each}
-			</div>
-			<div class="particles-container">
-				{#each burstParticles as particle, i}
-					<div
-						class="burst-particle"
-						style="--angle: {particle.angle}deg; --distance: {particle.distance}px; --size: {particle.size}; --delay: {particle.delay}s"
-					>
-						{explosionTheme().particles[i % 3]}
-					</div>
-				{/each}
-			</div>
-		</div>
-	{:else}
-		<div class="stage-card">
-			<div class="card-result-container">
-				<!-- 카드 영역 -->
-				<div class="card-chef-area">
-					<!-- 카드 -->
-					<div class="card-wrapper" class:card-entered={stage === 'card' || stage === 'result'}>
+				<div class="rays-container">
+					{#each lightRays as ray}
 						<div
-							class="sunburst-wrapper"
-							class:card-entered={stage === 'card' || stage === 'result'}
+							class="light-ray"
+							style="--angle: {ray.angle}deg; --width: {ray.width}px; --delay: {ray.delay}s; --color: {explosionTheme()
+								.color}"
+						></div>
+					{/each}
+				</div>
+				<div class="particles-container">
+					{#each burstParticles as particle, i}
+						<div
+							class="burst-particle"
+							style="--angle: {particle.angle}deg; --distance: {particle.distance}px; --size: {particle.size}; --delay: {particle.delay}s"
 						>
-							<img src="/imgs/bg-sunburst.png" alt="" class="sunburst-img" />
+							{explosionTheme().particles[i % 3]}
 						</div>
-						<ResultCard ingredient={resultIngredient} flipped={cardFlipped} />
+					{/each}
+				</div>
+			</div>
+		{:else}
+			<div class="stage-card">
+				<div class="card-result-container">
+					<!-- 카드 영역 -->
+					<div class="card-chef-area">
+						<!-- 카드 -->
+						<div class="card-wrapper" class:card-entered={stage === 'card' || stage === 'result'}>
+							<div
+								class="sunburst-wrapper"
+								class:card-entered={stage === 'card' || stage === 'result'}
+							>
+								<img src="/imgs/bg-sunburst.png" alt="" class="sunburst-img" />
+							</div>
+							<ResultCard ingredient={resultIngredient} flipped={cardFlipped} />
+						</div>
 					</div>
+
+					<!-- 하단 정보 (심플) -->
+					{#if stage === 'result'}
+						<div class="result-info">
+							<!-- 수익 표시 -->
+							{#if sellPrice > 0}
+								<div class="profit-display">
+									<span
+										class="profit-amount"
+										class:positive={profit >= 0}
+										class:negative={profit < 0}
+									>
+										{profit >= 0 ? '+' : ''}{profit.toLocaleString()}원
+									</span>
+									{#if orderBonus > 0}
+										<div class="bonus-badge">
+											주문 보너스 +{orderBonus}원
+										</div>
+									{/if}
+								</div>
+							{/if}
+
+							<!-- 진행률 -->
+							<div class="progress-display">
+								<span class="progress-text" style="color: {GRADE_COLORS[resultIngredient.grade]}">
+									{resultIngredient.grade}등급 {gradeProgress.discovered}/{gradeProgress.total}
+								</span>
+							</div>
+						</div>
+					{/if}
 				</div>
 
-				<!-- 하단 정보 (심플) -->
+				<!-- 하단 영역: 캐릭터 + 버튼 -->
 				{#if stage === 'result'}
-					<div class="result-info">
-						<!-- 수익 표시 -->
-						{#if sellPrice > 0}
-							<div class="profit-display">
-								<span
-									class="profit-amount"
-									class:positive={profit >= 0}
-									class:negative={profit < 0}
-								>
-									{profit >= 0 ? '+' : ''}{profit.toLocaleString()}원
-								</span>
-								{#if orderBonus > 0}
-									<div class="bonus-badge">
-										주문 보너스 +{orderBonus}원
-									</div>
-								{/if}
-							</div>
-						{/if}
+					<div class="bottom-area">
+						<!-- 캐릭터 -->
+						<div class="chef-section">
+							<div class="chef-bubble">{chefDialogue}</div>
+							<img src={chefImage} alt="셰프" class="chef-img" />
+						</div>
 
-						<!-- 진행률 -->
-						<div class="progress-display">
-							<span class="progress-text" style="color: {GRADE_COLORS[resultIngredient.grade]}">
-								{resultIngredient.grade}등급 {gradeProgress.discovered}/{gradeProgress.total}
-							</span>
+						<!-- 버튼 -->
+						<div class="button-row">
+							{#if onUseNow}
+								<button type="button" class="btn-secondary" onclick={handleUseNow}
+									>바로 써보기</button
+								>
+							{/if}
+							<button type="button" class="btn-primary" onclick={handleConfirm}>확인</button>
 						</div>
 					</div>
 				{/if}
 			</div>
+		{/if}
 
-			<!-- 하단 영역: 캐릭터 + 버튼 -->
-			{#if stage === 'result'}
-				<div class="bottom-area">
-					<!-- 캐릭터 -->
-					<div class="chef-section">
-						<div class="chef-bubble">{chefDialogue}</div>
-						<img src={chefImage} alt="셰프" class="chef-img" />
-					</div>
-
-					<!-- 버튼 -->
-					<div class="button-row">
-						{#if resultIngredient.isIngredient && onUseNow}
-							<button type="button" class="btn-secondary" onclick={handleUseNow}>바로 써보기</button
-							>
-						{/if}
-						<button type="button" class="btn-primary" onclick={handleConfirm}>확인</button>
-					</div>
-				</div>
-			{/if}
-		</div>
-	{/if}
-
-	{#if stage !== 'result' && canSkip}
-		<div class="skip-hint">탭하여 스킵</div>
-	{/if}
-</div>
+		{#if stage !== 'result' && canSkip}
+			<div class="skip-hint">탭하여 스킵</div>
+		{/if}
+	</div>
+{/if}
 
 <style lang="postcss">
 	@reference '$styles/app.css';
