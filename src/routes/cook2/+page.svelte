@@ -3,9 +3,9 @@
 	import { onMount } from 'svelte';
 	import { unlockedIngredientsStore, unlockedDishesStore, runStore, starStore } from './lib/store';
 	import { customerStore } from './lib/customer-store';
-	import { missionStore } from './lib/mission-store';
-	import { DAILY_MISSIONS } from './lib/data/missions';
-	import type { MissionProgress } from './lib/types';
+	// import { missionStore } from './lib/mission-store';
+	// import { DAILY_MISSIONS } from './lib/data/missions';
+	// import type { MissionProgress } from './lib/types';
 	import { INGREDIENTS } from './lib/data/ingredients';
 	import { RECIPES } from './lib/data/recipes';
 	import { getChefImage, getRandomDialogue } from './lib/chef-images';
@@ -100,20 +100,20 @@
 	}
 
 	// 미수령 미션 개수
-	let unclaimedMissions = $derived(missionStore.getUnclaimedCount());
+	// let unclaimedMissions = $derived(missionStore.getUnclaimedCount());
 
 	// 일일 미션 진행도
-	let missionProgress = $derived($missionStore);
+	// let missionProgress = $derived($missionStore);
 
-	function getMissionProgress(missionId: string): MissionProgress {
-		return (
-			missionProgress[missionId] || { missionId, current: 0, completed: false, claimed: false }
-		);
-	}
+	// function getMissionProgress(missionId: string): MissionProgress {
+	// 	return (
+	// 		missionProgress[missionId] || { missionId, current: 0, completed: false, claimed: false }
+	// 	);
+	// }
 
-	function claimMission(missionId: string) {
-		missionStore.claimReward(missionId);
-	}
+	// function claimMission(missionId: string) {
+	// 	missionStore.claimReward(missionId);
+	// }
 	function goBattle() {
 		goto('/cook2/battle');
 	}
@@ -154,7 +154,7 @@
 		</div>
 	{/if}
 
-	<!-- 일일 미션 -->
+	<!-- 일일 미션 (임시 비활성화)
 	<div class="daily-missions">
 		<div class="mission-header">
 			<span class="mission-title">오늘의 미션</span>
@@ -185,6 +185,7 @@
 			{/each}
 		</div>
 	</div>
+	-->
 
 	<!-- 메인 플레이 버튼 -->
 	<div class="main-action">

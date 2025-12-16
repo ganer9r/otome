@@ -21,7 +21,7 @@
 		starStore,
 		upgradeStore
 	} from '../lib/store';
-	import { missionStore } from '../lib/mission-store';
+	// import { missionStore } from '../lib/mission-store';
 	import { customerStore } from '../lib/customer-store';
 	import CustomerOrderBadge from '../components/CustomerOrderBadge.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
@@ -141,21 +141,22 @@
 		step = 'result';
 
 		// 8. 결과 화면 뜬 후 미션 업데이트 (토스트가 결과 화면에서 보이도록)
-		setTimeout(() => {
-			missionStore.onCook(result.grade, currentCookResult?.sellPrice ?? 0);
-		}, 500);
+		// 미션 시스템 임시 비활성화
+		// setTimeout(() => {
+		// 	missionStore.onCook(result.grade, currentCookResult?.sellPrice ?? 0);
+		// }, 500);
 
-		setTimeout(() => {
-			if (!alreadyDiscovered) {
-				missionStore.onDiscoverRecipe();
-			}
-		}, 700);
+		// setTimeout(() => {
+		// 	if (!alreadyDiscovered) {
+		// 		missionStore.onDiscoverRecipe();
+		// 	}
+		// }, 700);
 
-		setTimeout(() => {
-			if (result.isIngredient && !alreadyDiscovered) {
-				missionStore.onDiscoverIngredient();
-			}
-		}, 900);
+		// setTimeout(() => {
+		// 	if (result.isIngredient && !alreadyDiscovered) {
+		// 		missionStore.onDiscoverIngredient();
+		// 	}
+		// }, 900);
 	}
 
 	// 결과 확인 완료
