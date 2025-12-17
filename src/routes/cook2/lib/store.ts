@@ -636,8 +636,8 @@ export const RUN_CONFIG = {
 	INITIAL_CAPITAL: 500,
 	/** 세금 징수 주기 (턴) - 손님 주문 마감 주기이기도 함 */
 	TAX_INTERVAL: 10,
-	/** 세금률 (0.2 = 20%) */
-	TAX_RATE: 0.2
+	/** 기본 세금률 (0.3 = 30%) - customer-store의 taxRate 사용 권장 */
+	TAX_RATE: 0.3
 } as const;
 
 export interface RunState {
@@ -753,9 +753,10 @@ function createRunStore() {
 		},
 		/**
 		 * 턴 증가 + 세금 징수 체크
+		 * @param taxRate 외부에서 전달받은 세금률 (customer-store의 taxRate)
 		 * @returns 세금 징수 결과
 		 */
-		nextTurn: (): TaxResult => {
+		nextTurn: (taxRate?: number): TaxResult => {
 			let result: TaxResult = {
 				collected: false,
 				taxAmount: 0,
@@ -763,12 +764,14 @@ function createRunStore() {
 				starEarned: false
 			};
 
+			const effectiveTaxRate = taxRate ?? RUN_CONFIG.TAX_RATE;
+
 			updateAndSave((state) => {
 				const newTurn = state.turn + 1;
 
 				// 세금 징수 턴인지 확인
 				if (newTurn > 0 && newTurn % RUN_CONFIG.TAX_INTERVAL === 0) {
-					const taxAmount = Math.floor(state.totalEarned * RUN_CONFIG.TAX_RATE);
+					const taxAmount = Math.floor(state.totalEarned * effectiveTaxRate);
 					const newCapital = state.capital - taxAmount;
 					const isBankrupt = newCapital < 0;
 					const starEarned = !isBankrupt; // 생존하면 스타 획득

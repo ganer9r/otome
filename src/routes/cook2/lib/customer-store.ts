@@ -7,6 +7,24 @@ import type { Recipe, Ingredient, IngredientGrade } from './types';
 
 const CUSTOMER_STORAGE_KEY = 'cook2_customer_state';
 
+/** 스테이지별 설정 */
+export const STAGE_CONFIG = {
+	/** 스테이지별 주문 목표 개수 */
+	ORDER_TARGETS: [2, 3, 3, 4, 4, 5, 5, 6, 6, 7], // 스테이지 1~10
+	/** 기본 세금률 */
+	BASE_TAX_RATE: 0.3,
+	/** 주문 실패 시 세금률 증가량 */
+	TAX_RATE_PENALTY: 0.05,
+	/** 최대 세금률 */
+	MAX_TAX_RATE: 0.6
+} as const;
+
+/** 스테이지 주문 목표 가져오기 */
+export function getOrderTarget(stage: number): number {
+	const index = Math.min(stage - 1, STAGE_CONFIG.ORDER_TARGETS.length - 1);
+	return STAGE_CONFIG.ORDER_TARGETS[Math.max(0, index)];
+}
+
 /**
  * 손님 주문 시스템
  * - 내 재료 1개 + 모르는 재료 1개 조합인 레시피를 주문
@@ -29,6 +47,10 @@ export interface CustomerOrder {
 	completed: boolean;
 	/** 힌트 공개 여부 (RV 시청 시 true) */
 	hintRevealed: boolean;
+	/** 짧은 대사 (등장 시) */
+	arrivalMessage: string;
+	/** 짧은 대사 (완료 시) */
+	completeMessage: string;
 }
 
 /**
@@ -53,6 +75,39 @@ function getDishRecipes(): Recipe[] {
 		const result = findIngredientById(recipe.resultIngredientId);
 		return result && !result.isIngredient;
 	});
+}
+
+/** 등장 대사 풀 */
+const ARRIVAL_MESSAGES = [
+	'배고파요~',
+	'맛있는 거 주세요!',
+	'기대할게요!',
+	'오늘 뭐가 맛있어요?',
+	'추천해주세요!',
+	'출출해서 왔어요~',
+	'여기 음식이 맛있다던데!',
+	'빨리 먹고 싶어요!',
+	'든든하게 한 끼 하려고요!',
+	'맛집이라고 들었어요!'
+];
+
+/** 완료 대사 풀 */
+const COMPLETE_MESSAGES = [
+	'맛있어요!',
+	'감사합니다!',
+	'또 올게요!',
+	'최고예요!',
+	'역시 여기가 맛있네요!',
+	'기대 이상이에요!',
+	'친구한테 추천할게요!',
+	'정말 맛있었어요!',
+	'행복해요~',
+	'완벽해요!'
+];
+
+/** 랜덤 대사 가져오기 */
+function getRandomMessage(messages: string[]): string {
+	return messages[Math.floor(Math.random() * messages.length)];
 }
 
 /**
@@ -158,7 +213,9 @@ function generateRandomOrder(currentTurn: number, _difficulty: number = 1): Cust
 		bonusAmount: calculateBonus(dish.grade),
 		createdAtTurn: currentTurn,
 		completed: false,
-		hintRevealed: false
+		hintRevealed: false,
+		arrivalMessage: getRandomMessage(ARRIVAL_MESSAGES),
+		completeMessage: getRandomMessage(COMPLETE_MESSAGES)
 	};
 }
 
@@ -187,22 +244,81 @@ export function getOrderHints(order: CustomerOrder | null): OrderHint[] {
 	});
 }
 
+/**
+ * 새 주문 모달용 힌트 정보 가져오기 (등급별 공개 수준)
+ * - F급: 전체 공개 (튜토리얼)
+ * - E급: 1개 공개 (가진 재료 우선)
+ * - D급~: ??? + ??? (RV로 공개)
+ */
+export function getOrderHintsForModal(order: CustomerOrder | null): OrderHint[] {
+	if (!order) return [];
+
+	const dishGrade = order.dish.grade;
+	const unlockedIds = getUnlockedIngredients();
+	const unlockedSet = new Set(unlockedIds);
+
+	return order.recipe.ingredientIds.map((id, index) => {
+		const ingredient = findIngredientById(id);
+		const owned = unlockedSet.has(id);
+
+		let revealed = false;
+
+		if (dishGrade === 'F') {
+			// F급: 전체 공개
+			revealed = true;
+		} else if (dishGrade === 'E') {
+			// E급: 가진 재료 공개, 또는 첫 번째 재료만 공개
+			revealed = owned || index === 0;
+		} else {
+			// D급 이상: 가진 재료만 공개
+			revealed = owned;
+		}
+
+		// RV로 힌트 공개한 경우
+		if (order.hintRevealed) {
+			revealed = true;
+		}
+
+		return {
+			ingredientId: id,
+			name: ingredient?.name ?? '???',
+			revealed,
+			owned
+		};
+	});
+}
+
 interface CustomerState {
 	/** 현재 주문 */
 	currentOrder: CustomerOrder | null;
-	/** 난이도 (세금 생존 횟수에 따라 증가) */
+	/** 난이도 (세금 생존 횟수에 따라 증가) = 스테이지 */
 	difficulty: number;
-	/** 총 완료한 주문 수 */
+	/** 총 완료한 주문 수 (전체) */
 	completedOrders: number;
 	/** 총 획득한 보너스 */
 	totalBonus: number;
+	/** 현재 스테이지 완료한 주문 수 */
+	stageCompletedOrders: number;
+	/** 현재 세금률 */
+	taxRate: number;
+	/** 새 주문 등장 플래그 (모달 표시용) */
+	showNewOrderModal: boolean;
+	/** 주문 완료 플래그 (모달 표시용) */
+	showOrderCompleteModal: boolean;
+	/** 마지막 완료된 주문 (완료 모달용) */
+	lastCompletedOrder: CustomerOrder | null;
 }
 
 const initialState: CustomerState = {
 	currentOrder: null,
 	difficulty: 1,
 	completedOrders: 0,
-	totalBonus: 0
+	totalBonus: 0,
+	stageCompletedOrders: 0,
+	taxRate: STAGE_CONFIG.BASE_TAX_RATE,
+	showNewOrderModal: false,
+	showOrderCompleteModal: false,
+	lastCompletedOrder: null
 };
 
 /**
@@ -227,13 +343,42 @@ function getStoredCustomerState(): CustomerState {
 					bonusAmount: parsed.currentOrder.bonusAmount,
 					createdAtTurn: parsed.currentOrder.createdAtTurn,
 					completed: parsed.currentOrder.completed,
-					hintRevealed: parsed.currentOrder.hintRevealed
+					hintRevealed: parsed.currentOrder.hintRevealed,
+					arrivalMessage: parsed.currentOrder.arrivalMessage || getRandomMessage(ARRIVAL_MESSAGES),
+					completeMessage:
+						parsed.currentOrder.completeMessage || getRandomMessage(COMPLETE_MESSAGES)
 				};
 			} else {
 				parsed.currentOrder = null;
 			}
 		}
-		return parsed;
+		// lastCompletedOrder도 복원
+		if (parsed.lastCompletedOrder) {
+			const recipe = RECIPES.find((r) => r.id === parsed.lastCompletedOrder.recipeId);
+			const dish = findIngredientById(parsed.lastCompletedOrder.dishId);
+			if (recipe && dish) {
+				parsed.lastCompletedOrder = {
+					id: parsed.lastCompletedOrder.id,
+					recipe,
+					dish,
+					bonusAmount: parsed.lastCompletedOrder.bonusAmount,
+					createdAtTurn: parsed.lastCompletedOrder.createdAtTurn,
+					completed: parsed.lastCompletedOrder.completed,
+					hintRevealed: parsed.lastCompletedOrder.hintRevealed,
+					arrivalMessage: parsed.lastCompletedOrder.arrivalMessage || '',
+					completeMessage: parsed.lastCompletedOrder.completeMessage || ''
+				};
+			} else {
+				parsed.lastCompletedOrder = null;
+			}
+		}
+		// 새 필드들 기본값 보장
+		return {
+			...initialState,
+			...parsed,
+			showNewOrderModal: parsed.showNewOrderModal ?? false,
+			showOrderCompleteModal: parsed.showOrderCompleteModal ?? false
+		};
 	} catch {
 		return initialState;
 	}
@@ -252,6 +397,15 @@ function saveCustomerState(state: CustomerState) {
 					...state.currentOrder,
 					recipeId: state.currentOrder.recipe.id,
 					dishId: state.currentOrder.dish.id,
+					recipe: undefined,
+					dish: undefined
+				}
+			: null,
+		lastCompletedOrder: state.lastCompletedOrder
+			? {
+					...state.lastCompletedOrder,
+					recipeId: state.lastCompletedOrder.recipe.id,
+					dishId: state.lastCompletedOrder.dish.id,
 					recipe: undefined,
 					dish: undefined
 				}
@@ -278,12 +432,13 @@ function createCustomerStore() {
 		/**
 		 * 새 주문 생성
 		 */
-		generateOrder: (currentTurn: number) => {
+		generateOrder: (currentTurn: number, showModal: boolean = true) => {
 			updateAndSave((state) => {
 				const order = generateRandomOrder(currentTurn, state.difficulty);
 				return {
 					...state,
-					currentOrder: order
+					currentOrder: order,
+					showNewOrderModal: showModal
 				};
 			});
 		},
@@ -300,11 +455,15 @@ function createCustomerStore() {
 				if (state.currentOrder.recipe.resultIngredientId === resultIngredientId) {
 					// 주문 성공!
 					bonus = state.currentOrder.bonusAmount;
+					const completedOrder = { ...state.currentOrder, completed: true };
 					return {
 						...state,
-						currentOrder: { ...state.currentOrder, completed: true },
+						currentOrder: completedOrder,
 						completedOrders: state.completedOrders + 1,
-						totalBonus: state.totalBonus + bonus
+						stageCompletedOrders: state.stageCompletedOrders + 1,
+						totalBonus: state.totalBonus + bonus,
+						showOrderCompleteModal: true,
+						lastCompletedOrder: completedOrder
 					};
 				}
 
@@ -327,18 +486,44 @@ function createCustomerStore() {
 		},
 
 		/**
-		 * 세금 주기 종료 시 호출 (주문 리셋 + 난이도 조절)
+		 * 세금 주기 종료 시 호출 (주문 리셋 + 난이도 조절 + 세금률 조절)
+		 * @returns 스테이지 결과 { success: boolean, newTaxRate: number }
 		 */
-		onTaxPeriodEnd: (survived: boolean, currentTurn: number) => {
+		onTaxPeriodEnd: (
+			survived: boolean,
+			currentTurn: number
+		): { success: boolean; newTaxRate: number } => {
+			let result = { success: false, newTaxRate: STAGE_CONFIG.BASE_TAX_RATE as number };
+
 			updateAndSave((state) => {
+				const orderTarget = getOrderTarget(state.difficulty);
+				const stageSuccess = state.stageCompletedOrders >= orderTarget;
+
+				// 세금률 계산: 목표 미달 시 증가
+				let newTaxRate = state.taxRate;
+				if (!stageSuccess) {
+					newTaxRate = Math.min(
+						state.taxRate + STAGE_CONFIG.TAX_RATE_PENALTY,
+						STAGE_CONFIG.MAX_TAX_RATE
+					);
+				}
+
 				const newDifficulty = survived ? state.difficulty + 1 : state.difficulty;
 				const order = generateRandomOrder(currentTurn, newDifficulty);
+
+				result = { success: stageSuccess, newTaxRate };
+
 				return {
 					...state,
 					currentOrder: order,
-					difficulty: newDifficulty
+					difficulty: newDifficulty,
+					stageCompletedOrders: 0, // 스테이지 주문 수 리셋
+					taxRate: newTaxRate,
+					showNewOrderModal: true
 				};
 			});
+
+			return result;
 		},
 
 		/**
@@ -349,15 +534,77 @@ function createCustomerStore() {
 		},
 
 		/**
+		 * 현재 스테이지 정보 가져오기
+		 */
+		getStageInfo: () => {
+			const state = get({ subscribe });
+			return {
+				stage: state.difficulty,
+				completedOrders: state.stageCompletedOrders,
+				orderTarget: getOrderTarget(state.difficulty),
+				taxRate: state.taxRate
+			};
+		},
+
+		/**
+		 * 새 주문 모달 표시
+		 */
+		showNewOrder: () => {
+			updateAndSave((state) => ({
+				...state,
+				showNewOrderModal: true
+			}));
+		},
+
+		/**
+		 * 새 주문 모달 닫기
+		 */
+		closeNewOrderModal: () => {
+			updateAndSave((state) => ({
+				...state,
+				showNewOrderModal: false
+			}));
+		},
+
+		/**
+		 * 주문 완료 모달 닫기 + 다음 주문 생성
+		 */
+		closeOrderCompleteModal: (currentTurn: number) => {
+			updateAndSave((state) => {
+				// 주문 완료 후 다음 주문 생성
+				const order = generateRandomOrder(currentTurn, state.difficulty);
+				return {
+					...state,
+					showOrderCompleteModal: false,
+					lastCompletedOrder: null,
+					currentOrder: order,
+					showNewOrderModal: true
+				};
+			});
+		},
+
+		/**
+		 * 현재 세금률 가져오기
+		 */
+		getTaxRate: (): number => {
+			return get({ subscribe }).taxRate;
+		},
+
+		/**
 		 * 런 시작 시 초기화
 		 */
 		startRun: (currentTurn: number = 0) => {
 			const order = generateRandomOrder(currentTurn, 1);
-			const newState = {
+			const newState: CustomerState = {
 				currentOrder: order,
 				difficulty: 1,
 				completedOrders: 0,
-				totalBonus: 0
+				totalBonus: 0,
+				stageCompletedOrders: 0,
+				taxRate: STAGE_CONFIG.BASE_TAX_RATE,
+				showNewOrderModal: false, // 첫 요리 완료 후 모달 표시
+				showOrderCompleteModal: false,
+				lastCompletedOrder: null
 			};
 			saveCustomerState(newState);
 			set(newState);
@@ -390,7 +637,9 @@ function createCustomerStore() {
 				bonusAmount: calculateBonus(dish.grade),
 				createdAtTurn: currentTurn,
 				completed: false,
-				hintRevealed: false
+				hintRevealed: false,
+				arrivalMessage: getRandomMessage(ARRIVAL_MESSAGES),
+				completeMessage: getRandomMessage(COMPLETE_MESSAGES)
 			};
 
 			updateAndSave((state) => ({

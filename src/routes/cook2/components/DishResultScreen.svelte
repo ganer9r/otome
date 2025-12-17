@@ -15,8 +15,6 @@
 		cookResult: CookResult;
 		/** 재료비 (이미 차감됨) */
 		ingredientCost?: number;
-		/** 손님 주문 보너스 */
-		orderBonus?: number;
 		onComplete?: () => void;
 		onUseNow?: (ingredientId: number) => void;
 	}
@@ -26,7 +24,6 @@
 		recipe,
 		cookResult,
 		ingredientCost = 0,
-		orderBonus = 0,
 		onComplete,
 		onUseNow
 	}: Props = $props();
@@ -43,8 +40,8 @@
 	// 판매 금액 (cookResult에서 가져옴 + 업그레이드 보너스 적용)
 	let baseSellPrice = $derived(cookResult.sellPrice);
 	let sellPrice = $derived(Math.round(baseSellPrice * (1 + upgradeEffects.sellBonusRate)));
-	// 순이익 (판매가 - 재료비 + 보너스)
-	let profit = $derived(sellPrice - ingredientCost + orderBonus);
+	// 순이익 (판매가 - 재료비)
+	let profit = $derived(sellPrice - ingredientCost);
 	let sold = $state(false);
 
 	// 런 진행 중이면 자동 판매 (1회만) - 재료일 때만 여기서 처리
@@ -193,14 +190,7 @@
 
 <!-- 요리 또는 실패: DishResult 사용 -->
 {#if isDish || cookResult.resultType === 'fail'}
-	<DishResult
-		{resultIngredient}
-		{cookResult}
-		{sellPrice}
-		{profit}
-		{orderBonus}
-		onComplete={handleConfirm}
-	/>
+	<DishResult {resultIngredient} {cookResult} {sellPrice} {profit} onComplete={handleConfirm} />
 {:else}
 	<!-- 재료 성공/대성공: 카드 뒤집기 연출 -->
 	<div
@@ -290,11 +280,6 @@
 									>
 										{profit >= 0 ? '+' : ''}{profit.toLocaleString()}원
 									</span>
-									{#if orderBonus > 0}
-										<div class="bonus-badge">
-											주문 보너스 +{orderBonus}원
-										</div>
-									{/if}
 								</div>
 							{/if}
 

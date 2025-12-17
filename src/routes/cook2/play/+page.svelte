@@ -8,6 +8,9 @@
 	import RestartModal from '../components/RestartModal.svelte';
 	import TaxModal from '../components/TaxModal.svelte';
 	import RunEndModal from '../components/RunEndModal.svelte';
+	import OrderArrivalModal from '../components/OrderArrivalModal.svelte';
+	import OrderCompleteModal from '../components/OrderCompleteModal.svelte';
+	import GameHUD from '../components/GameHUD.svelte';
 	import { findRecipe } from '../lib/usecase/findRecipe';
 	import { cookDish } from '../lib/usecase/cookDish';
 	import type { CookResult } from '../lib/types';
@@ -22,7 +25,7 @@
 		upgradeStore
 	} from '../lib/store';
 	// import { missionStore } from '../lib/mission-store';
-	import { customerStore } from '../lib/customer-store';
+	import { customerStore, getOrderHintsForModal } from '../lib/customer-store';
 	import CustomerOrderBadge from '../components/CustomerOrderBadge.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { modalStore } from '$lib/stores/modal';
@@ -67,6 +70,22 @@
 
 	// 테스트용 긴급도 오버라이드
 	let testUrgency = $state<number | undefined>(undefined);
+
+	// 주문 모달 표시 여부
+	let showNewOrderModal = $derived(customerState.showNewOrderModal);
+	let showOrderCompleteModal = $derived(customerState.showOrderCompleteModal);
+	let currentOrder = $derived(customerState.currentOrder);
+	let lastCompletedOrder = $derived(customerState.lastCompletedOrder);
+
+	// 새 주문 모달용 힌트
+	let newOrderHints = $derived(getOrderHintsForModal(currentOrder));
+
+	// 첫 요리 완료 여부 (새 주문 모달 표시용)
+	let isFirstCookDone = $state(false);
+
+	// 주방 복귀 시 모달 표시를 위한 대기 상태
+	let pendingNewOrderModal = $state(false);
+	let pendingCompleteModal = $state(false);
 
 	// 조리 시작 (조리기구 선택 없이 바로)
 	function handleCookRequest() {
@@ -135,9 +154,17 @@
 		if (earnedBonus > 0) {
 			// 보너스 금액 추가
 			runStore.earn(earnedBonus);
+			// 주문 완료 모달 대기 (주방 복귀 시 표시)
+			pendingCompleteModal = true;
 		}
 
-		// 7. 결과 화면 먼저 표시
+		// 7. 첫 요리 완료 시 새 주문 모달 대기
+		if (!isFirstCookDone) {
+			isFirstCookDone = true;
+			pendingNewOrderModal = true;
+		}
+
+		// 8. 결과 화면 먼저 표시
 		step = 'result';
 
 		// 8. 결과 화면 뜬 후 미션 업데이트 (토스트가 결과 화면에서 보이도록)
@@ -161,8 +188,11 @@
 
 	// 결과 확인 완료
 	async function handleResultComplete() {
-		// 턴 증가 + 세금 체크
-		const taxResult = runStore.nextTurn();
+		// 세금률 가져오기
+		const taxRate = customerStore.getTaxRate();
+
+		// 턴 증가 + 세금 체크 (세금률 전달)
+		const taxResult = runStore.nextTurn(taxRate);
 
 		if (taxResult.collected) {
 			lastTaxResult = taxResult;
@@ -190,8 +220,11 @@
 
 	// 폭발 실패 완료 (레시피 없는 조합)
 	async function handleExplosionComplete() {
-		// 턴 증가 + 세금 체크
-		const taxResult = runStore.nextTurn();
+		// 세금률 가져오기
+		const taxRate = customerStore.getTaxRate();
+
+		// 턴 증가 + 세금 체크 (세금률 전달)
+		const taxResult = runStore.nextTurn(taxRate);
 
 		if (taxResult.collected) {
 			lastTaxResult = taxResult;
@@ -254,6 +287,27 @@
 		resultIngredient = null;
 		currentIngredientCost = 0;
 		earnedBonus = 0;
+
+		// 주방 복귀 시 대기 중인 모달 표시
+		// 우선순위: 완료 모달 > 새 주문 모달
+		if (pendingCompleteModal) {
+			pendingCompleteModal = false;
+			pendingNewOrderModal = false; // 완료 모달 닫을 때 새 주문 모달이 자동으로 뜸
+			// showOrderCompleteModal은 이미 true로 설정되어 있음
+		} else if (pendingNewOrderModal) {
+			pendingNewOrderModal = false;
+			customerStore.showNewOrder();
+		}
+	}
+
+	// 새 주문 모달 확인
+	function handleNewOrderConfirm() {
+		customerStore.closeNewOrderModal();
+	}
+
+	// 주문 완료 모달 닫기
+	function handleOrderCompleteClose() {
+		customerStore.closeOrderCompleteModal(runState.turn);
 	}
 
 	// 바로 써보기 (새 재료를 첫 번째 슬롯에 넣고 시작)
@@ -300,6 +354,20 @@
 			finalCapital={runState.capital}
 			onConfirm={handleRunEndConfirm}
 		/>
+	{/if}
+
+	<!-- 새 주문 도착 모달 -->
+	{#if showNewOrderModal && currentOrder}
+		<OrderArrivalModal
+			order={currentOrder}
+			hints={newOrderHints}
+			onConfirm={handleNewOrderConfirm}
+		/>
+	{/if}
+
+	<!-- 주문 완료 모달 -->
+	{#if showOrderCompleteModal && lastCompletedOrder}
+		<OrderCompleteModal order={lastCompletedOrder} onClose={handleOrderCompleteClose} />
 	{/if}
 
 	<!-- 테스트 버튼 (숨김) -->
@@ -350,7 +418,6 @@
 				recipe={currentRecipe}
 				cookResult={currentCookResult}
 				ingredientCost={currentIngredientCost}
-				orderBonus={earnedBonus}
 				onComplete={handleResultComplete}
 				onUseNow={resultIngredient.isIngredient ? handleUseNow : undefined}
 			/>

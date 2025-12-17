@@ -10,21 +10,12 @@
 		cookResult: CookResult;
 		/** 판매가 (업그레이드 보너스 적용됨) */
 		sellPrice: number;
-		/** 순이익 (판매가 - 재료비 + 보너스) */
+		/** 순이익 (판매가 - 재료비) */
 		profit: number;
-		/** 손님 주문 보너스 */
-		orderBonus?: number;
 		onComplete?: () => void;
 	}
 
-	let {
-		resultIngredient,
-		cookResult,
-		sellPrice,
-		profit,
-		orderBonus = 0,
-		onComplete
-	}: Props = $props();
+	let { resultIngredient, cookResult, sellPrice, profit, onComplete }: Props = $props();
 
 	// 결과 타입
 	let isFail = $derived(cookResult.resultType === 'fail');
@@ -327,10 +318,6 @@
 					</div>
 					{#if isFail && countingComplete}
 						<div class="fail-tag">환불 없음</div>
-					{:else if orderBonus > 0 && countingComplete}
-						<div class="bonus-tag">
-							주문 보너스 +{orderBonus.toLocaleString()}원
-						</div>
 					{/if}
 				</div>
 
