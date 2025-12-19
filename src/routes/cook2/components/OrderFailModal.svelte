@@ -22,14 +22,32 @@
 	];
 
 	const failMessage = FAIL_MESSAGES[Math.floor(Math.random() * FAIL_MESSAGES.length)];
+
+	// exit 애니메이션 상태
+	let isExiting = $state(false);
+
+	function handleClose() {
+		if (!isExiting) {
+			isExiting = true;
+			setTimeout(() => {
+				onClose();
+			}, 300);
+		}
+	}
 </script>
 
-<button class="modal-overlay" onclick={onClose} aria-label="닫기">
-	<div class="modal-content">
+<button class="modal-overlay" class:exit={isExiting} onclick={handleClose} aria-label="닫기">
+	<div class="modal-content" class:exit={isExiting}>
+		<!-- 캐릭터 (모달 상단에 걸침) -->
+		<img class="customer-image" src={getCustomerImagePath(order.customerId, 'fail')} alt="손님" />
+
 		<!-- 헤더 -->
 		<div class="header">
 			<span class="header-text">주문 실패...</span>
 		</div>
+
+		<!-- 손님 대사 -->
+		<div class="customer-message">"{failMessage}"</div>
 
 		<!-- 손님 실망 -->
 		<div class="customer-area">
@@ -74,6 +92,7 @@
 		@apply relative;
 		@apply flex flex-col items-center;
 		@apply rounded-3xl p-6;
+		padding-top: 70px;
 		width: 260px;
 		background: linear-gradient(180deg, #fef2f2 0%, #fee2e2 100%);
 		border: 4px solid #ef4444;
@@ -92,6 +111,18 @@
 		}
 	}
 
+	/* Exit 애니메이션: 왼쪽 상단(뱃지 위치)으로 축소 */
+	.modal-overlay.exit {
+		background: rgba(0, 0, 0, 0);
+		transition: background 0.3s ease-out;
+	}
+
+	.modal-content.exit {
+		transform: scale(0.3) translate(-150px, -200px);
+		opacity: 0;
+		transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
+	}
+
 	/* 헤더 */
 	.header {
 		@apply flex items-center gap-2;
@@ -105,40 +136,41 @@
 		text-shadow: 0 2px 0 rgba(255, 255, 255, 0.5);
 	}
 
-	/* 손님 영역 */
-	.customer-area {
-		@apply flex flex-col items-center;
-		@apply mb-4;
-	}
-
+	/* 캐릭터 이미지 (모달 상단에 걸침) */
 	.customer-image {
-		width: 100px;
-		height: 100px;
+		position: absolute;
+		top: -60px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 120px;
+		height: 120px;
 		object-fit: contain;
 		animation: sadShake 0.8s ease-out;
+		animation-fill-mode: backwards;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+		z-index: 1;
 	}
 
 	@keyframes sadShake {
 		0% {
-			transform: scale(0) rotate(0deg);
+			transform: translateX(-50%) scale(0) rotate(0deg);
 		}
 		30% {
-			transform: scale(1.1) rotate(-5deg);
+			transform: translateX(-50%) scale(1.1) rotate(-5deg);
 		}
 		50% {
-			transform: scale(1) rotate(5deg);
+			transform: translateX(-50%) scale(1) rotate(5deg);
 		}
 		70% {
-			transform: scale(1.05) rotate(-3deg);
+			transform: translateX(-50%) scale(1.05) rotate(-3deg);
 		}
 		100% {
-			transform: scale(1) rotate(0deg);
+			transform: translateX(-50%) scale(1) rotate(0deg);
 		}
 	}
 
 	.customer-message {
-		@apply mt-2;
+		@apply mb-3;
 		@apply rounded-xl px-4 py-2;
 		@apply font-bold;
 		font-size: 14px;

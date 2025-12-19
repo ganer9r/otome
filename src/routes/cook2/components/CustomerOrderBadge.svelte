@@ -10,9 +10,11 @@
 		turnsUntilTax: number;
 		/** 테스트용: 긴급도 오버라이드 (1~10) */
 		testUrgency?: number;
+		/** 뱃지 표시 여부 (모달 확인 후에만 true) */
+		visible?: boolean;
 	}
 
-	let { turnsUntilTax, testUrgency }: Props = $props();
+	let { turnsUntilTax, testUrgency, visible = true }: Props = $props();
 
 	// 실제 남은 턴 (테스트 오버라이드 가능)
 	let effectiveTurns = $derived(testUrgency ?? turnsUntilTax);
@@ -188,8 +190,8 @@
 	<button class="overlay" onclick={handleOutsideClick} aria-label="닫기"></button>
 {/if}
 
-<div class="badge-container">
-	{#if order}
+<div class="badge-container" class:visible>
+	{#if order && visible}
 		<!-- 새 주문 말풍선 -->
 		{#if isNewOrder}
 			<div class="speech-bubble">
@@ -356,6 +358,22 @@
 
 	.badge-container {
 		@apply relative z-50;
+	}
+
+	/* 뱃지 등장 애니메이션 (visible 클래스) */
+	.badge-container.visible .order-badge {
+		animation: badgeAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+
+	@keyframes badgeAppear {
+		0% {
+			transform: scale(0);
+			opacity: 0;
+		}
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
 	}
 
 	/* 새 주문 말풍선 */

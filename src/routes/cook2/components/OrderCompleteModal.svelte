@@ -72,10 +72,16 @@
 		requestAnimationFrame(update);
 	}
 
+	// exit 애니메이션 상태
+	let isExiting = $state(false);
+
 	// 탭하면 즉시 닫기 (canClose가 true일 때만)
 	function handleTap() {
-		if (canClose) {
-			onClose();
+		if (canClose && !isExiting) {
+			isExiting = true;
+			setTimeout(() => {
+				onClose();
+			}, 300);
 		}
 	}
 
@@ -89,8 +95,15 @@
 	}));
 </script>
 
-<button class="modal-overlay" onclick={handleTap} aria-label="닫기">
-	<div class="modal-content" class:show={showContent}>
+<button class="modal-overlay" class:exit={isExiting} onclick={handleTap} aria-label="닫기">
+	<div class="modal-content" class:show={showContent} class:exit={isExiting}>
+		<!-- 캐릭터 (모달 상단에 걸침) -->
+		<img
+			class="customer-image"
+			src={getCustomerImagePath(order.customerId, 'success')}
+			alt="손님"
+		/>
+
 		<!-- 파티클 효과 -->
 		{#if showParticles}
 			<div class="particles">
@@ -116,15 +129,8 @@
 			<span class="header-icon">✨</span>
 		</div>
 
-		<!-- 손님 만족 -->
-		<div class="customer-area">
-			<img
-				class="customer-image"
-				src={getCustomerImagePath(order.customerId, 'success')}
-				alt="손님"
-			/>
-			<div class="customer-message">"{order.completeMessage}"</div>
-		</div>
+		<!-- 손님 대사 -->
+		<div class="customer-message">"{order.completeMessage}"</div>
 
 		<!-- 보너스 -->
 		{#if showBonus}
@@ -167,6 +173,7 @@
 		@apply relative;
 		@apply flex flex-col items-center;
 		@apply rounded-3xl p-6;
+		padding-top: 70px;
 		width: 260px;
 		background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%);
 		border: 4px solid #10b981;
@@ -181,6 +188,18 @@
 	.modal-content.show {
 		transform: scale(1) rotate(0deg);
 		opacity: 1;
+	}
+
+	/* Exit 애니메이션: 왼쪽 상단(뱃지 위치)으로 축소 */
+	.modal-overlay.exit {
+		background: rgba(0, 0, 0, 0);
+		transition: background 0.3s ease-out;
+	}
+
+	.modal-content.exit {
+		transform: scale(0.3) translate(-150px, -200px);
+		opacity: 0;
+		transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
 	}
 
 	/* 파티클 */
@@ -238,37 +257,38 @@
 		text-shadow: 0 2px 0 rgba(255, 255, 255, 0.5);
 	}
 
-	/* 손님 영역 */
-	.customer-area {
-		@apply flex flex-col items-center;
-		@apply mb-4;
-	}
-
+	/* 캐릭터 이미지 (모달 상단에 걸침) */
 	.customer-image {
-		width: 100px;
-		height: 100px;
+		position: absolute;
+		top: -60px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 120px;
+		height: 120px;
 		object-fit: contain;
 		animation: happyBounce 0.8s ease-out;
+		animation-fill-mode: backwards;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+		z-index: 1;
 	}
 
 	@keyframes happyBounce {
 		0% {
-			transform: scale(0) rotate(-20deg);
+			transform: translateX(-50%) scale(0) rotate(-20deg);
 		}
 		50% {
-			transform: scale(1.3) rotate(10deg);
+			transform: translateX(-50%) scale(1.3) rotate(10deg);
 		}
 		70% {
-			transform: scale(0.9) rotate(-5deg);
+			transform: translateX(-50%) scale(0.9) rotate(-5deg);
 		}
 		100% {
-			transform: scale(1) rotate(0deg);
+			transform: translateX(-50%) scale(1) rotate(0deg);
 		}
 	}
 
 	.customer-message {
-		@apply mt-2;
+		@apply mb-3;
 		@apply rounded-xl px-4 py-2;
 		@apply font-bold;
 		font-size: 14px;

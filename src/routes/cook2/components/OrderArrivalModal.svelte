@@ -12,7 +12,7 @@
 	let { order, hints, onConfirm }: Props = $props();
 
 	// 애니메이션 단계 상태
-	let animationPhase = $state<'enter' | 'show' | 'ready'>('enter');
+	let animationPhase = $state<'enter' | 'show' | 'ready' | 'exit'>('enter');
 
 	// 등장 애니메이션 타이밍
 	$effect(() => {
@@ -39,25 +39,37 @@
 
 	// 전체 공개 여부 (F급)
 	let isFullyRevealed = $derived(hints.every((h) => h.revealed));
+
+	// 확인 버튼 클릭 시 exit 애니메이션 후 onConfirm 호출
+	function handleConfirm() {
+		animationPhase = 'exit';
+		setTimeout(() => {
+			onConfirm();
+		}, 300);
+	}
 </script>
 
-<div class="modal-overlay" class:enter={animationPhase === 'enter'}>
-	<div class="modal-content" class:show={animationPhase !== 'enter'}>
+<div
+	class="modal-overlay"
+	class:enter={animationPhase === 'enter'}
+	class:exit={animationPhase === 'exit'}
+>
+	<div
+		class="modal-content"
+		class:show={animationPhase !== 'enter'}
+		class:exit={animationPhase === 'exit'}
+	>
+		<!-- 캐릭터 (모달 상단에 걸침) -->
+		<img class="customer-image" src={getCustomerImagePath(order.customerId, 'order')} alt="손님" />
+
 		<!-- 헤더 -->
 		<div class="modal-header">
 			<span class="bell-icon">🔔</span>
 			<span class="header-text">새 주문!</span>
 		</div>
 
-		<!-- 손님 영역 -->
-		<div class="customer-area">
-			<img
-				class="customer-image"
-				src={getCustomerImagePath(order.customerId, 'order')}
-				alt="손님"
-			/>
-			<div class="customer-message">"{order.arrivalMessage}"</div>
-		</div>
+		<!-- 손님 대사 -->
+		<div class="customer-message">"{order.arrivalMessage}"</div>
 
 		<!-- 요리 정보 -->
 		<div class="dish-card">
@@ -109,7 +121,7 @@
 		<button
 			class="confirm-btn"
 			class:ready={animationPhase === 'ready'}
-			onclick={onConfirm}
+			onclick={handleConfirm}
 			disabled={animationPhase !== 'ready'}
 		>
 			알겠어요!
@@ -144,6 +156,7 @@
 		@apply relative;
 		@apply flex flex-col items-center;
 		@apply rounded-3xl p-5;
+		padding-top: 70px;
 		width: 280px;
 		background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
 		border: 4px solid #f59e0b;
@@ -158,6 +171,18 @@
 	.modal-content.show {
 		transform: scale(1) translateY(0);
 		opacity: 1;
+	}
+
+	/* Exit 애니메이션: 왼쪽 상단(뱃지 위치)으로 축소 */
+	.modal-overlay.exit {
+		background: rgba(0, 0, 0, 0);
+		transition: background 0.3s ease-out;
+	}
+
+	.modal-content.exit {
+		transform: scale(0.3) translate(-150px, -200px);
+		opacity: 0;
+		transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
 	}
 
 	/* 헤더 */
@@ -197,34 +222,35 @@
 		text-shadow: 0 2px 0 rgba(255, 255, 255, 0.5);
 	}
 
-	/* 손님 영역 */
-	.customer-area {
-		@apply flex flex-col items-center;
-		@apply mb-4;
-	}
-
+	/* 캐릭터 이미지 (모달 상단에 걸침) */
 	.customer-image {
-		width: 80px;
-		height: 80px;
+		position: absolute;
+		top: -60px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 120px;
+		height: 120px;
 		object-fit: contain;
 		animation: customerBounce 0.6s ease-out 0.3s;
+		animation-fill-mode: backwards;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+		z-index: 1;
 	}
 
 	@keyframes customerBounce {
 		0% {
-			transform: scale(0);
+			transform: translateX(-50%) scale(0);
 		}
 		50% {
-			transform: scale(1.2);
+			transform: translateX(-50%) scale(1.2);
 		}
 		100% {
-			transform: scale(1);
+			transform: translateX(-50%) scale(1);
 		}
 	}
 
 	.customer-message {
-		@apply mt-2;
+		@apply mb-3;
 		@apply rounded-xl px-4 py-2;
 		@apply font-bold;
 		font-size: 14px;

@@ -90,6 +90,9 @@
 	let pendingNewOrderModal = $state(false);
 	let pendingCompleteModal = $state(false);
 
+	// 주문 뱃지 표시 여부 (모달 확인 후에만 표시)
+	let showOrderBadge = $state(false);
+
 	// 조리 시작 (조리기구 선택 없이 바로)
 	function handleCookRequest() {
 		// 1. 레시피 찾기
@@ -306,15 +309,18 @@
 	// 새 주문 모달 확인
 	function handleNewOrderConfirm() {
 		customerStore.closeNewOrderModal();
+		showOrderBadge = true;
 	}
 
 	// 주문 완료 모달 닫기
 	function handleOrderCompleteClose() {
+		showOrderBadge = false; // 완료 후 새 주문 모달이 뜨므로 숨김
 		customerStore.closeOrderCompleteModal(runState.turn);
 	}
 
 	// 주문 실패 모달 닫기
 	function handleOrderFailClose() {
+		showOrderBadge = false; // 실패 후 새 주문 모달이 뜨므로 숨김
 		customerStore.closeOrderFailModal();
 	}
 
@@ -418,7 +424,7 @@
 				{turnsUntilTax}
 			>
 				{#snippet customerBadge()}
-					<CustomerOrderBadge {turnsUntilTax} {testUrgency} />
+					<CustomerOrderBadge {turnsUntilTax} {testUrgency} visible={showOrderBadge} />
 				{/snippet}
 			</IngredientSelectScreen>
 		{:else if step === 'cooking'}
