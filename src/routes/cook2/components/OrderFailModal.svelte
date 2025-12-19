@@ -26,6 +26,7 @@
 
 	// 애니메이션 상태
 	let showContent = $state(false);
+	let showPenalty = $state(false);
 	let canClose = $state(false);
 	let isExiting = $state(false);
 
@@ -35,8 +36,12 @@
 		}, 100);
 
 		setTimeout(() => {
+			showPenalty = true;
+		}, 800);
+
+		setTimeout(() => {
 			canClose = true;
-		}, 1000);
+		}, 1500);
 	});
 
 	function handleClose() {
@@ -49,7 +54,7 @@
 	}
 </script>
 
-<div class="modal-overlay" class:exit={isExiting}>
+<div class="modal-overlay" class:exit={isExiting} class:shake={showContent}>
 	<!-- 딤 영역 상단 타이틀 -->
 	<div class="floating-title" class:show={showContent}>
 		<span class="title-text">손님이 떠났어요</span>
@@ -74,6 +79,13 @@
 			</div>
 		</div>
 
+		<!-- 패널티 경고 -->
+		{#if showPenalty}
+			<div class="penalty-warning">
+				<span class="penalty-text">세금률 +5% 증가!</span>
+			</div>
+		{/if}
+
 		<!-- 닫기 버튼 -->
 		<button class="close-btn" class:ready={canClose} onclick={handleClose} disabled={!canClose}
 			>확인</button
@@ -89,7 +101,48 @@
 		@apply flex items-center justify-center;
 		@apply h-full w-full;
 		background: rgba(0, 0, 0, 0.7);
-		animation: fadeIn 0.3s ease-out;
+		animation: fadeInFlash 0.5s ease-out;
+	}
+
+	@keyframes fadeInFlash {
+		0% {
+			background: rgba(0, 0, 0, 0);
+		}
+		20% {
+			background: rgba(220, 38, 38, 0.6);
+		}
+		40% {
+			background: rgba(0, 0, 0, 0.7);
+		}
+		100% {
+			background: rgba(0, 0, 0, 0.7);
+		}
+	}
+
+	.modal-overlay.shake {
+		animation:
+			fadeInFlash 0.5s ease-out,
+			screenShake 0.4s ease-out 0.1s;
+	}
+
+	@keyframes screenShake {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		10%,
+		30%,
+		50%,
+		70%,
+		90% {
+			transform: translateX(-6px);
+		}
+		20%,
+		40%,
+		60%,
+		80% {
+			transform: translateX(6px);
+		}
 	}
 
 	@keyframes fadeIn {
@@ -238,6 +291,95 @@
 		@apply font-black;
 		font-size: 16px;
 		color: white;
+	}
+
+	/* 패널티 경고 */
+	.penalty-warning {
+		@apply mb-3 flex w-full items-center justify-center py-2;
+		animation: penaltyAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+
+	@keyframes penaltyAppear {
+		0% {
+			transform: scale(0);
+			opacity: 0;
+		}
+		50% {
+			transform: scale(1.2);
+		}
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+
+	.penalty-text {
+		@apply font-black;
+		font-size: 20px;
+		color: #dc2626;
+		animation: textBlink 0.25s linear infinite;
+	}
+
+	@keyframes textBlink {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.4;
+		}
+	}
+
+	@keyframes penaltyShake {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		10%,
+		30%,
+		50%,
+		70%,
+		90% {
+			transform: translateX(-4px);
+		}
+		20%,
+		40%,
+		60%,
+		80% {
+			transform: translateX(4px);
+		}
+	}
+
+	.penalty-icon {
+		font-size: 24px;
+		animation: iconPulse 0.3s ease-in-out infinite;
+	}
+
+	@keyframes iconPulse {
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.2);
+		}
+	}
+
+	.penalty-text {
+		@apply font-black;
+		font-size: 18px;
+		color: #78350f;
+		animation: textBlink 0.25s linear infinite;
+	}
+
+	@keyframes textBlink {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.5;
+		}
 	}
 
 	/* 닫기 버튼 */
