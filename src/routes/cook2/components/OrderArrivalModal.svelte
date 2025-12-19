@@ -16,12 +16,10 @@
 
 	// 등장 애니메이션 타이밍
 	$effect(() => {
-		// enter -> show (0.3초 후)
 		const timer1 = setTimeout(() => {
 			animationPhase = 'show';
 		}, 300);
 
-		// show -> ready (0.6초 후)
 		const timer2 = setTimeout(() => {
 			animationPhase = 'ready';
 		}, 600);
@@ -30,11 +28,6 @@
 			clearTimeout(timer1);
 			clearTimeout(timer2);
 		};
-	});
-
-	// 힌트 텍스트 생성
-	let hintText = $derived(() => {
-		return hints.map((h) => (h.revealed ? h.name : '???')).join(' + ');
 	});
 
 	// 전체 공개 여부 (F급)
@@ -54,6 +47,11 @@
 	class:enter={animationPhase === 'enter'}
 	class:exit={animationPhase === 'exit'}
 >
+	<!-- 딤 영역 상단 타이틀 -->
+	<div class="floating-title" class:show={animationPhase !== 'enter'}>
+		<span class="title-text">새로운 손님이 왔어요!</span>
+	</div>
+
 	<div
 		class="modal-content"
 		class:show={animationPhase !== 'enter'}
@@ -61,12 +59,6 @@
 	>
 		<!-- 캐릭터 (모달 상단에 걸침) -->
 		<img class="customer-image" src={getCustomerImagePath(order.customerId, 'order')} alt="손님" />
-
-		<!-- 헤더 -->
-		<div class="modal-header">
-			<span class="bell-icon">🔔</span>
-			<span class="header-text">새 주문!</span>
-		</div>
 
 		<!-- 손님 대사 -->
 		<div class="customer-message">"{order.arrivalMessage}"</div>
@@ -124,7 +116,7 @@
 			onclick={handleConfirm}
 			disabled={animationPhase !== 'ready'}
 		>
-			알겠어요!
+			확인
 		</button>
 	</div>
 </div>
@@ -152,6 +144,35 @@
 		}
 	}
 
+	/* 딤 영역 상단 타이틀 */
+	.floating-title {
+		@apply absolute;
+		@apply flex items-center justify-center;
+		top: 40px;
+		left: 0;
+		right: 0;
+		width: 100%;
+		padding: 0 16px;
+		transform: translateY(-20px);
+		opacity: 0;
+		transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+		z-index: 10;
+	}
+
+	.floating-title.show {
+		transform: translateY(0);
+		opacity: 1;
+	}
+
+	.title-text {
+		@apply font-black;
+		font-size: 24px;
+		color: white;
+		text-shadow:
+			0 2px 4px rgba(0, 0, 0, 0.5),
+			0 0 20px rgba(255, 200, 50, 0.5);
+	}
+
 	.modal-content {
 		@apply relative;
 		@apply flex flex-col items-center;
@@ -173,7 +194,6 @@
 		opacity: 1;
 	}
 
-	/* Exit 애니메이션: 왼쪽 상단(뱃지 위치)으로 축소 */
 	.modal-overlay.exit {
 		background: rgba(0, 0, 0, 0);
 		transition: background 0.3s ease-out;
@@ -185,44 +205,7 @@
 		transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
 	}
 
-	/* 헤더 */
-	.modal-header {
-		@apply flex items-center gap-2;
-		@apply mb-3;
-	}
-
-	.bell-icon {
-		font-size: 28px;
-		animation: bellRing 0.5s ease-in-out 0.5s;
-	}
-
-	@keyframes bellRing {
-		0%,
-		100% {
-			transform: rotate(0deg);
-		}
-		20% {
-			transform: rotate(15deg);
-		}
-		40% {
-			transform: rotate(-15deg);
-		}
-		60% {
-			transform: rotate(10deg);
-		}
-		80% {
-			transform: rotate(-10deg);
-		}
-	}
-
-	.header-text {
-		@apply font-black;
-		font-size: 22px;
-		color: #78350f;
-		text-shadow: 0 2px 0 rgba(255, 255, 255, 0.5);
-	}
-
-	/* 캐릭터 이미지 (모달 상단에 걸침) */
+	/* 캐릭터 이미지 */
 	.customer-image {
 		position: absolute;
 		top: -60px;
@@ -231,8 +214,7 @@
 		width: 120px;
 		height: 120px;
 		object-fit: contain;
-		animation: customerBounce 0.6s ease-out 0.3s;
-		animation-fill-mode: backwards;
+		animation: customerBounce 0.6s ease-out 0.3s backwards;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 		z-index: 1;
 	}
@@ -250,9 +232,7 @@
 	}
 
 	.customer-message {
-		@apply mb-3;
-		@apply rounded-xl px-4 py-2;
-		@apply font-bold;
+		@apply mb-3 rounded-xl px-4 py-2 font-bold;
 		font-size: 14px;
 		color: #78350f;
 		background: white;
@@ -262,22 +242,20 @@
 
 	/* 요리 카드 */
 	.dish-card {
-		@apply w-full;
-		@apply rounded-xl p-3;
-		@apply mb-3;
-		background: white;
-		border: 2px solid #e5e7eb;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		@apply mb-3 w-full rounded-xl p-3;
+		background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+		border: 3px solid #34d399;
+		box-shadow:
+			0 4px 12px rgba(16, 185, 129, 0.3),
+			inset 0 1px 0 rgba(255, 255, 255, 0.5);
 	}
 
 	.dish-header {
-		@apply flex items-center gap-2;
-		@apply mb-2;
+		@apply mb-2 flex items-center gap-2;
 	}
 
 	.dish-grade {
-		@apply rounded px-2 py-0.5;
-		@apply font-bold text-white;
+		@apply rounded px-2 py-0.5 font-bold text-white;
 		font-size: 12px;
 	}
 
@@ -288,36 +266,45 @@
 	}
 
 	.dish-bonus {
-		@apply flex items-center justify-between;
-		@apply rounded-lg bg-amber-50 px-3 py-2;
-		border: 1px solid #fcd34d;
+		@apply flex items-center justify-between rounded-lg px-3 py-2;
+		background: linear-gradient(180deg, #059669 0%, #047857 100%);
+		border: 2px solid #065f46;
+		box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4);
 	}
 
 	.bonus-label {
-		@apply font-medium;
-		font-size: 12px;
-		color: #92400e;
+		@apply font-bold;
+		font-size: 13px;
+		color: #fde047;
+		animation: labelBlink 0.25s linear infinite;
+	}
+
+	@keyframes labelBlink {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.3;
+		}
 	}
 
 	.bonus-value {
-		@apply font-bold;
-		font-size: 16px;
-		color: #d97706;
+		@apply font-black;
+		font-size: 18px;
+		color: white;
 	}
 
 	/* 힌트 섹션 */
 	.hint-section {
-		@apply w-full;
-		@apply flex items-start gap-2;
-		@apply rounded-xl p-3;
-		@apply mb-4;
-		background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-		border: 2px solid #fbbf24;
+		@apply mb-4 flex w-full items-start gap-2 rounded-xl p-3;
+		background: white;
+		border: 2px solid #e5e7eb;
 	}
 
 	.hint-section.full-reveal {
-		background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-		border-color: #34d399;
+		background: white;
+		border-color: #e5e7eb;
 	}
 
 	.hint-icon {
@@ -330,13 +317,11 @@
 	}
 
 	.hint-formula {
-		@apply flex items-center gap-1;
-		@apply flex-wrap;
+		@apply flex flex-wrap items-center gap-1;
 	}
 
 	.hint-item {
-		@apply rounded px-2 py-1;
-		@apply font-bold;
+		@apply rounded px-2 py-1 font-bold;
 		font-size: 13px;
 	}
 
@@ -360,8 +345,7 @@
 	}
 
 	.hint-result {
-		@apply rounded px-2 py-1;
-		@apply font-bold;
+		@apply rounded px-2 py-1 font-bold;
 		font-size: 13px;
 		background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
 		color: #78350f;
@@ -370,9 +354,7 @@
 
 	/* 확인 버튼 */
 	.confirm-btn {
-		@apply w-full;
-		@apply rounded-xl py-3;
-		@apply font-bold;
+		@apply w-full rounded-xl py-3 font-bold;
 		font-size: 16px;
 		color: white;
 		background: linear-gradient(180deg, #9ca3af 0%, #6b7280 100%);
@@ -390,7 +372,6 @@
 		box-shadow: 0 3px 0 #047857;
 		opacity: 1;
 		transform: scale(1);
-		animation: btnPulse 1s ease-in-out infinite;
 	}
 
 	.confirm-btn.ready:hover {
@@ -400,19 +381,5 @@
 	.confirm-btn.ready:active {
 		transform: translateY(2px);
 		box-shadow: 0 1px 0 #047857;
-	}
-
-	@keyframes btnPulse {
-		0%,
-		100% {
-			box-shadow:
-				0 3px 0 #047857,
-				0 0 0 0 rgba(16, 185, 129, 0.4);
-		}
-		50% {
-			box-shadow:
-				0 3px 0 #047857,
-				0 0 0 8px rgba(16, 185, 129, 0);
-		}
 	}
 </style>

@@ -18,28 +18,23 @@
 	let canClose = $state(false);
 
 	onMount(() => {
-		// 컨텐츠 등장 (0.1초 후)
 		setTimeout(() => {
 			showContent = true;
 		}, 100);
 
-		// 보너스 표시 시작 (0.5초 후)
 		setTimeout(() => {
 			showBonus = true;
 			animateBonus();
 		}, 500);
 
-		// 파티클 효과 (0.8초 후)
 		setTimeout(() => {
 			showParticles = true;
 		}, 800);
 
-		// 닫기 가능 (1.5초 후)
 		setTimeout(() => {
 			canClose = true;
 		}, 1500);
 
-		// 자동 닫기 (3초 후)
 		const autoCloseTimer = setTimeout(() => {
 			handleTap();
 		}, 3000);
@@ -58,7 +53,6 @@
 		function update() {
 			const elapsed = Date.now() - startTime;
 			const progress = Math.min(elapsed / duration, 1);
-			// easeOutQuad
 			const eased = 1 - (1 - progress) * (1 - progress);
 			bonusCount = Math.floor(target * eased);
 
@@ -72,10 +66,8 @@
 		requestAnimationFrame(update);
 	}
 
-	// exit 애니메이션 상태
 	let isExiting = $state(false);
 
-	// 탭하면 즉시 닫기 (canClose가 true일 때만)
 	function handleTap() {
 		if (canClose && !isExiting) {
 			isExiting = true;
@@ -96,6 +88,11 @@
 </script>
 
 <button class="modal-overlay" class:exit={isExiting} onclick={handleTap} aria-label="닫기">
+	<!-- 딤 영역 상단 타이틀 -->
+	<div class="floating-title" class:show={showContent}>
+		<span class="title-text">주문 완료!</span>
+	</div>
+
 	<div class="modal-content" class:show={showContent} class:exit={isExiting}>
 		<!-- 캐릭터 (모달 상단에 걸침) -->
 		<img
@@ -110,11 +107,7 @@
 				{#each particles as particle (particle.id)}
 					<span
 						class="particle"
-						style="
-              left: {particle.x}%;
-              animation-delay: {particle.delay}s;
-              animation-duration: {particle.duration}s;
-            "
+						style="left: {particle.x}%; animation-delay: {particle.delay}s; animation-duration: {particle.duration}s;"
 					>
 						{particle.emoji}
 					</span>
@@ -122,21 +115,14 @@
 			</div>
 		{/if}
 
-		<!-- 헤더 -->
-		<div class="header">
-			<span class="header-icon">✨</span>
-			<span class="header-text">주문 완료!</span>
-			<span class="header-icon">✨</span>
-		</div>
-
 		<!-- 손님 대사 -->
 		<div class="customer-message">"{order.completeMessage}"</div>
 
 		<!-- 보너스 -->
 		{#if showBonus}
 			<div class="bonus-section">
+				<span class="bonus-label">팁</span>
 				<span class="bonus-value">+{bonusCount}원</span>
-				<span class="bonus-label">보너스!</span>
 			</div>
 		{/if}
 
@@ -153,9 +139,7 @@
 	.modal-overlay {
 		@apply fixed inset-0 z-[100];
 		@apply flex items-center justify-center;
-		@apply h-full w-full;
-		@apply border-none;
-		@apply cursor-pointer;
+		@apply h-full w-full cursor-pointer border-none;
 		background: rgba(0, 0, 0, 0.7);
 		animation: fadeIn 0.3s ease-out;
 	}
@@ -169,10 +153,33 @@
 		}
 	}
 
+	/* 딤 영역 상단 타이틀 */
+	.floating-title {
+		@apply absolute flex items-center justify-center;
+		top: 40px;
+		left: 0;
+		right: 0;
+		width: 100%;
+		padding: 0 16px;
+		transform: translateY(-20px);
+		opacity: 0;
+		transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+		z-index: 10;
+	}
+
+	.floating-title.show {
+		transform: translateY(0);
+		opacity: 1;
+	}
+
+	.title-text {
+		@apply font-black;
+		font-size: 24px;
+		color: white;
+	}
+
 	.modal-content {
-		@apply relative;
-		@apply flex flex-col items-center;
-		@apply rounded-3xl p-6;
+		@apply relative flex flex-col items-center rounded-3xl p-6;
 		padding-top: 70px;
 		width: 260px;
 		background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%);
@@ -190,7 +197,6 @@
 		opacity: 1;
 	}
 
-	/* Exit 애니메이션: 왼쪽 상단(뱃지 위치)으로 축소 */
 	.modal-overlay.exit {
 		background: rgba(0, 0, 0, 0);
 		transition: background 0.3s ease-out;
@@ -204,8 +210,7 @@
 
 	/* 파티클 */
 	.particles {
-		@apply absolute inset-0;
-		@apply pointer-events-none;
+		@apply pointer-events-none absolute inset-0;
 		overflow: hidden;
 	}
 
@@ -230,34 +235,7 @@
 		}
 	}
 
-	/* 헤더 */
-	.header {
-		@apply flex items-center gap-2;
-		@apply mb-3;
-	}
-
-	.header-icon {
-		font-size: 24px;
-		animation: sparkle 0.6s ease-in-out infinite alternate;
-	}
-
-	@keyframes sparkle {
-		from {
-			transform: scale(1) rotate(0deg);
-		}
-		to {
-			transform: scale(1.2) rotate(10deg);
-		}
-	}
-
-	.header-text {
-		@apply font-black;
-		font-size: 24px;
-		color: #065f46;
-		text-shadow: 0 2px 0 rgba(255, 255, 255, 0.5);
-	}
-
-	/* 캐릭터 이미지 (모달 상단에 걸침) */
+	/* 캐릭터 이미지 */
 	.customer-image {
 		position: absolute;
 		top: -60px;
@@ -266,8 +244,7 @@
 		width: 120px;
 		height: 120px;
 		object-fit: contain;
-		animation: happyBounce 0.8s ease-out;
-		animation-fill-mode: backwards;
+		animation: happyBounce 0.8s ease-out backwards;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 		z-index: 1;
 	}
@@ -288,9 +265,7 @@
 	}
 
 	.customer-message {
-		@apply mb-3;
-		@apply rounded-xl px-4 py-2;
-		@apply font-bold;
+		@apply mb-3 rounded-xl px-4 py-2 font-bold;
 		font-size: 14px;
 		color: #065f46;
 		background: white;
@@ -300,13 +275,12 @@
 
 	/* 보너스 섹션 */
 	.bonus-section {
-		@apply flex flex-col items-center;
-		@apply rounded-2xl px-8 py-4;
-		background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
-		border: 3px solid #d97706;
+		@apply flex items-center gap-3 rounded-2xl px-6 py-3;
+		background: linear-gradient(180deg, #059669 0%, #047857 100%);
+		border: 3px solid #065f46;
 		box-shadow:
-			0 4px 0 #b45309,
-			0 8px 20px rgba(245, 158, 11, 0.4);
+			0 4px 0 #064e3b,
+			0 8px 20px rgba(5, 150, 105, 0.4);
 		animation: bonusPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 	}
 
@@ -319,25 +293,32 @@
 		}
 	}
 
-	.bonus-value {
-		@apply font-black;
-		font-size: 32px;
-		color: #78350f;
-		text-shadow:
-			0 2px 0 rgba(255, 255, 255, 0.5),
-			0 -1px 0 #d97706;
-	}
-
 	.bonus-label {
 		@apply font-bold;
 		font-size: 14px;
-		color: #92400e;
+		color: #fde047;
+		animation: labelBlink 0.25s linear infinite;
+	}
+
+	@keyframes labelBlink {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.3;
+		}
+	}
+
+	.bonus-value {
+		@apply font-black;
+		font-size: 28px;
+		color: white;
 	}
 
 	/* 탭 힌트 */
 	.tap-hint {
-		@apply mt-4;
-		@apply font-medium;
+		@apply mt-4 font-medium;
 		font-size: 12px;
 		color: #6b7280;
 		animation: tapPulse 1.5s ease-in-out infinite;

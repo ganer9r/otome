@@ -639,18 +639,15 @@ function createCustomerStore() {
 		},
 
 		/**
-		 * 주문 완료 모달 닫기 + 다음 주문 생성
+		 * 주문 완료 모달 닫기 (새 주문은 세금 시점에 생성)
 		 */
-		closeOrderCompleteModal: (currentTurn: number) => {
+		closeOrderCompleteModal: () => {
 			updateAndSave((state) => {
-				// 주문 완료 후 다음 주문 생성
-				const order = generateRandomOrder(currentTurn, state.difficulty);
 				return {
 					...state,
 					showOrderCompleteModal: false,
-					lastCompletedOrder: null,
-					currentOrder: order,
-					showNewOrderModal: true
+					lastCompletedOrder: null
+					// 새 주문은 세금 시점(onTaxPeriodEnd)에서 생성
 				};
 			});
 		},

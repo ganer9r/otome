@@ -11,20 +11,27 @@
 
 	// 실패 대사 풀
 	const FAIL_MESSAGES = [
-		'아쉽네요...',
-		'다음엔 꼭요!',
-		'기다렸는데...',
-		'배고픈데...',
-		'흑흑...',
-		'다른 데 가볼게요...',
-		'시간이 없어서요...',
-		'아쉬워요~'
+		'아쉽~',
+		'다음에 또 올게!',
+		'바빠서 먼저 갈게~',
+		'배고파서 다른 데 갈게!',
+		'다음엔 꼭!',
+		'또 올게요~',
+		'시간이 없어서~',
+		'다음에 봐요!'
 	];
 
 	const failMessage = FAIL_MESSAGES[Math.floor(Math.random() * FAIL_MESSAGES.length)];
 
-	// exit 애니메이션 상태
 	let isExiting = $state(false);
+	let showContent = $state(false);
+
+	// 등장 애니메이션
+	$effect(() => {
+		setTimeout(() => {
+			showContent = true;
+		}, 100);
+	});
 
 	function handleClose() {
 		if (!isExiting) {
@@ -37,23 +44,17 @@
 </script>
 
 <button class="modal-overlay" class:exit={isExiting} onclick={handleClose} aria-label="닫기">
-	<div class="modal-content" class:exit={isExiting}>
+	<!-- 딤 영역 상단 타이틀 -->
+	<div class="floating-title" class:show={showContent}>
+		<span class="title-text">손님이 떠났어요</span>
+	</div>
+
+	<div class="modal-content" class:show={showContent} class:exit={isExiting}>
 		<!-- 캐릭터 (모달 상단에 걸침) -->
 		<img class="customer-image" src={getCustomerImagePath(order.customerId, 'fail')} alt="손님" />
 
-		<!-- 헤더 -->
-		<div class="header">
-			<span class="header-text">주문 실패...</span>
-		</div>
-
 		<!-- 손님 대사 -->
 		<div class="customer-message">"{failMessage}"</div>
-
-		<!-- 손님 실망 -->
-		<div class="customer-area">
-			<img class="customer-image" src={getCustomerImagePath(order.customerId, 'fail')} alt="손님" />
-			<div class="customer-message">"{failMessage}"</div>
-		</div>
 
 		<!-- 실패한 주문 정보 -->
 		<div class="order-info">
@@ -72,9 +73,7 @@
 	.modal-overlay {
 		@apply fixed inset-0 z-[100];
 		@apply flex items-center justify-center;
-		@apply h-full w-full;
-		@apply border-none;
-		@apply cursor-pointer;
+		@apply h-full w-full cursor-pointer border-none;
 		background: rgba(0, 0, 0, 0.7);
 		animation: fadeIn 0.3s ease-out;
 	}
@@ -88,10 +87,33 @@
 		}
 	}
 
+	/* 딤 영역 상단 타이틀 */
+	.floating-title {
+		@apply absolute flex items-center justify-center;
+		top: 40px;
+		left: 0;
+		right: 0;
+		width: 100%;
+		padding: 0 16px;
+		transform: translateY(-20px);
+		opacity: 0;
+		transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+		z-index: 10;
+	}
+
+	.floating-title.show {
+		transform: translateY(0);
+		opacity: 1;
+	}
+
+	.title-text {
+		@apply font-black;
+		font-size: 24px;
+		color: white;
+	}
+
 	.modal-content {
-		@apply relative;
-		@apply flex flex-col items-center;
-		@apply rounded-3xl p-6;
+		@apply relative flex flex-col items-center rounded-3xl p-6;
 		padding-top: 70px;
 		width: 260px;
 		background: linear-gradient(180deg, #fef2f2 0%, #fee2e2 100%);
@@ -101,17 +123,14 @@
 			0 0 0 6px rgba(239, 68, 68, 0.3);
 		transform: scale(0) rotate(10deg);
 		opacity: 0;
-		animation: modalShow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+		transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 	}
 
-	@keyframes modalShow {
-		to {
-			transform: scale(1) rotate(0deg);
-			opacity: 1;
-		}
+	.modal-content.show {
+		transform: scale(1) rotate(0deg);
+		opacity: 1;
 	}
 
-	/* Exit 애니메이션: 왼쪽 상단(뱃지 위치)으로 축소 */
 	.modal-overlay.exit {
 		background: rgba(0, 0, 0, 0);
 		transition: background 0.3s ease-out;
@@ -123,20 +142,7 @@
 		transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
 	}
 
-	/* 헤더 */
-	.header {
-		@apply flex items-center gap-2;
-		@apply mb-3;
-	}
-
-	.header-text {
-		@apply font-black;
-		font-size: 24px;
-		color: #991b1b;
-		text-shadow: 0 2px 0 rgba(255, 255, 255, 0.5);
-	}
-
-	/* 캐릭터 이미지 (모달 상단에 걸침) */
+	/* 캐릭터 이미지 */
 	.customer-image {
 		position: absolute;
 		top: -60px;
@@ -145,8 +151,7 @@
 		width: 120px;
 		height: 120px;
 		object-fit: contain;
-		animation: sadShake 0.8s ease-out;
-		animation-fill-mode: backwards;
+		animation: sadShake 0.8s ease-out backwards;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 		z-index: 1;
 	}
@@ -170,9 +175,7 @@
 	}
 
 	.customer-message {
-		@apply mb-3;
-		@apply rounded-xl px-4 py-2;
-		@apply font-bold;
+		@apply mb-3 rounded-xl px-4 py-2 font-bold;
 		font-size: 14px;
 		color: #991b1b;
 		background: white;
@@ -182,9 +185,7 @@
 
 	/* 주문 정보 */
 	.order-info {
-		@apply flex items-center gap-2;
-		@apply rounded-xl px-4 py-2;
-		@apply mb-4;
+		@apply mb-4 flex items-center gap-2 rounded-xl px-4 py-2;
 		background: rgba(255, 255, 255, 0.8);
 		border: 2px solid #fecaca;
 	}

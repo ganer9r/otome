@@ -11,6 +11,10 @@
 	import OrderArrivalModal from '../components/OrderArrivalModal.svelte';
 	import OrderCompleteModal from '../components/OrderCompleteModal.svelte';
 	import OrderFailModal from '../components/OrderFailModal.svelte';
+	import OnboardingOverlay, {
+		isOnboardingComplete,
+		advanceHintStep
+	} from '../components/OnboardingOverlay.svelte';
 	import GameHUD from '../components/GameHUD.svelte';
 	import { findRecipe } from '../lib/usecase/findRecipe';
 	import { cookDish } from '../lib/usecase/cookDish';
@@ -93,6 +97,9 @@
 	// 주문 뱃지 표시 여부 (모달 확인 후에만 표시)
 	let showOrderBadge = $state(false);
 
+	// 온보딩 완료 여부
+	let onboardingDone = $state(isOnboardingComplete());
+
 	// 조리 시작 (조리기구 선택 없이 바로)
 	function handleCookRequest() {
 		// 1. 레시피 찾기
@@ -170,7 +177,10 @@
 			pendingNewOrderModal = true;
 		}
 
-		// 8. 결과 화면 먼저 표시
+		// 8. 힌트 학습 단계 증가
+		advanceHintStep();
+
+		// 9. 결과 화면 먼저 표시
 		step = 'result';
 
 		// 8. 결과 화면 뜬 후 미션 업데이트 (토스트가 결과 화면에서 보이도록)
@@ -314,8 +324,8 @@
 
 	// 주문 완료 모달 닫기
 	function handleOrderCompleteClose() {
-		showOrderBadge = false; // 완료 후 새 주문 모달이 뜨므로 숨김
-		customerStore.closeOrderCompleteModal(runState.turn);
+		// 주문 완료 상태 유지, 새 주문은 세금 시점에 생성
+		customerStore.closeOrderCompleteModal();
 	}
 
 	// 주문 실패 모달 닫기
@@ -370,8 +380,8 @@
 		/>
 	{/if}
 
-	<!-- 새 주문 도착 모달 -->
-	{#if showNewOrderModal && currentOrder}
+	<!-- 새 주문 도착 모달 (온보딩 완료 후에만) -->
+	{#if showNewOrderModal && currentOrder && onboardingDone}
 		<OrderArrivalModal
 			order={currentOrder}
 			hints={newOrderHints}
@@ -388,6 +398,16 @@
 	{#if showOrderFailModal && lastFailedOrder}
 		<OrderFailModal order={lastFailedOrder} onClose={handleOrderFailClose} />
 	{/if}
+
+	<!-- 온보딩 오버레이 -->
+	<OnboardingOverlay
+		selectedCount={selectedIngredients.length}
+		{step}
+		onComplete={() => {
+			onboardingDone = true;
+			// 온보딩 완료 후 새 주문 모달은 첫 요리 완료 후 표시 (pendingNewOrderModal)
+		}}
+	/>
 
 	<!-- 테스트 버튼 (숨김) -->
 	<!-- <div class="test-controls">
