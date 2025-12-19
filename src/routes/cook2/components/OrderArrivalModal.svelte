@@ -2,6 +2,7 @@
 	import { GRADE_COLORS } from '../lib/types';
 	import type { CustomerOrder, OrderHint } from '../lib/customer-store';
 	import { getCustomerImagePath } from '../lib/customer-store';
+	import AnticipationOverlay from './AnticipationOverlay.svelte';
 
 	interface Props {
 		order: CustomerOrder;
@@ -11,24 +12,20 @@
 
 	let { order, hints, onConfirm }: Props = $props();
 
+	// 기대감 연출 완료 여부
+	let showAnticipation = $state(true);
+
 	// 애니메이션 단계 상태
 	let animationPhase = $state<'enter' | 'show' | 'ready' | 'exit'>('enter');
 
-	// 등장 애니메이션 타이밍
-	$effect(() => {
-		const timer1 = setTimeout(() => {
-			animationPhase = 'show';
-		}, 300);
+	function onAnticipationComplete() {
+		showAnticipation = false;
+		animationPhase = 'show';
 
-		const timer2 = setTimeout(() => {
+		setTimeout(() => {
 			animationPhase = 'ready';
-		}, 600);
-
-		return () => {
-			clearTimeout(timer1);
-			clearTimeout(timer2);
-		};
-	});
+		}, 300);
+	}
 
 	// 전체 공개 여부 (F급)
 	let isFullyRevealed = $derived(hints.every((h) => h.revealed));
@@ -42,10 +39,16 @@
 	}
 </script>
 
+<!-- 기대감 연출 -->
+{#if showAnticipation}
+	<AnticipationOverlay onComplete={onAnticipationComplete} />
+{/if}
+
 <div
 	class="modal-overlay"
 	class:enter={animationPhase === 'enter'}
 	class:exit={animationPhase === 'exit'}
+	class:hidden={showAnticipation}
 >
 	<!-- 딤 영역 상단 타이틀 -->
 	<div class="floating-title" class:show={animationPhase !== 'enter'}>
@@ -133,6 +136,10 @@
 
 	.modal-overlay.enter {
 		background: rgba(0, 0, 0, 0);
+	}
+
+	.modal-overlay.hidden {
+		display: none;
 	}
 
 	@keyframes fadeIn {

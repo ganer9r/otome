@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { CustomerOrder } from '../lib/customer-store';
 	import { getCustomerImagePath } from '../lib/customer-store';
+	import AnticipationOverlay from './AnticipationOverlay.svelte';
 
 	interface Props {
 		order: CustomerOrder;
@@ -24,25 +24,27 @@
 
 	const failMessage = FAIL_MESSAGES[Math.floor(Math.random() * FAIL_MESSAGES.length)];
 
+	// 기대감 연출 완료 여부
+	let showAnticipation = $state(true);
+
 	// 애니메이션 상태
 	let showContent = $state(false);
 	let showPenalty = $state(false);
 	let canClose = $state(false);
 	let isExiting = $state(false);
 
-	onMount(() => {
-		setTimeout(() => {
-			showContent = true;
-		}, 100);
+	function onAnticipationComplete() {
+		showAnticipation = false;
+		showContent = true;
 
 		setTimeout(() => {
 			showPenalty = true;
-		}, 800);
+		}, 700);
 
 		setTimeout(() => {
 			canClose = true;
-		}, 1500);
-	});
+		}, 1400);
+	}
 
 	function handleClose() {
 		if (canClose && !isExiting) {
@@ -54,7 +56,17 @@
 	}
 </script>
 
-<div class="modal-overlay" class:exit={isExiting} class:shake={showContent}>
+<!-- 기대감 연출 -->
+{#if showAnticipation}
+	<AnticipationOverlay onComplete={onAnticipationComplete} />
+{/if}
+
+<div
+	class="modal-overlay"
+	class:exit={isExiting}
+	class:shake={showContent}
+	class:hidden={showAnticipation}
+>
 	<!-- 딤 영역 상단 타이틀 -->
 	<div class="floating-title" class:show={showContent}>
 		<span class="title-text">손님이 떠났어요</span>
@@ -101,7 +113,10 @@
 		@apply flex items-center justify-center;
 		@apply h-full w-full;
 		background: rgba(0, 0, 0, 0.7);
-		animation: fadeInFlash 0.5s ease-out;
+	}
+
+	.modal-overlay.hidden {
+		display: none;
 	}
 
 	@keyframes fadeInFlash {

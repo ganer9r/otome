@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import type { CustomerOrder } from '../lib/customer-store';
 	import { getCustomerImagePath } from '../lib/customer-store';
+	import AnticipationOverlay from './AnticipationOverlay.svelte';
 
 	interface Props {
 		order: CustomerOrder;
@@ -11,15 +12,17 @@
 
 	let { order, onClose, autoClose = true }: Props = $props();
 
+	// 기대감 연출 완료 여부
+	let showAnticipation = $state(true);
+
 	// 애니메이션 상태
 	let showContent = $state(false);
 	let bonusCount = $state(0);
 	let canClose = $state(false);
 
-	onMount(() => {
-		setTimeout(() => {
-			showContent = true;
-		}, 100);
+	function onAnticipationComplete() {
+		showAnticipation = false;
+		showContent = true;
 
 		setTimeout(() => {
 			animateBonus();
@@ -29,17 +32,12 @@
 			canClose = true;
 		}, 1500);
 
-		let autoCloseTimer: ReturnType<typeof setTimeout> | null = null;
 		if (autoClose) {
-			autoCloseTimer = setTimeout(() => {
+			setTimeout(() => {
 				handleClose();
 			}, 3000);
 		}
-
-		return () => {
-			if (autoCloseTimer) clearTimeout(autoCloseTimer);
-		};
-	});
+	}
 
 	// 보너스 카운트업 애니메이션
 	function animateBonus() {
@@ -75,7 +73,12 @@
 	}
 </script>
 
-<div class="modal-overlay" class:exit={isExiting}>
+<!-- 기대감 연출 -->
+{#if showAnticipation}
+	<AnticipationOverlay onComplete={onAnticipationComplete} />
+{/if}
+
+<div class="modal-overlay" class:exit={isExiting} class:hidden={showAnticipation}>
 	<!-- 딤 영역 상단 타이틀 -->
 	<div class="floating-title" class:show={showContent}>
 		<span class="title-text">주문 완료!</span>
@@ -119,16 +122,10 @@
 		@apply flex items-center justify-center;
 		@apply h-full w-full;
 		background: rgba(0, 0, 0, 0.7);
-		animation: fadeIn 0.3s ease-out;
 	}
 
-	@keyframes fadeIn {
-		from {
-			background: rgba(0, 0, 0, 0);
-		}
-		to {
-			background: rgba(0, 0, 0, 0.7);
-		}
+	.modal-overlay.hidden {
+		display: none;
 	}
 
 	/* 딤 영역 상단 타이틀 */
@@ -165,14 +162,33 @@
 		box-shadow:
 			0 12px 40px rgba(0, 0, 0, 0.3),
 			0 0 0 6px rgba(245, 158, 11, 0.3);
-		transform: scale(0) rotate(-10deg);
+		transform: scale(0);
 		opacity: 0;
-		transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 	}
 
 	.modal-content.show {
-		transform: scale(1) rotate(0deg);
-		opacity: 1;
+		animation: successBounce 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+	}
+
+	@keyframes successBounce {
+		0% {
+			transform: scale(0) rotate(-15deg);
+			opacity: 0;
+		}
+		40% {
+			transform: scale(1.15) rotate(5deg);
+			opacity: 1;
+		}
+		60% {
+			transform: scale(0.95) rotate(-3deg);
+		}
+		80% {
+			transform: scale(1.05) rotate(1deg);
+		}
+		100% {
+			transform: scale(1) rotate(0deg);
+			opacity: 1;
+		}
 	}
 
 	.modal-overlay.exit {
@@ -272,50 +288,6 @@
 	}
 
 	.bonus-value {
-		@apply font-black;
-		font-size: 18px;
-		color: white;
-	}
-
-	.tip-header {
-		@apply mb-2 flex items-center gap-2;
-	}
-
-	.tip-icon {
-		font-size: 20px;
-	}
-
-	.tip-title {
-		@apply font-bold;
-		font-size: 14px;
-		color: #065f46;
-	}
-
-	.tip-amount {
-		@apply flex items-center justify-between rounded-lg px-3 py-2;
-		background: linear-gradient(180deg, #059669 0%, #047857 100%);
-		border: 2px solid #065f46;
-		box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4);
-	}
-
-	.tip-label {
-		@apply font-bold;
-		font-size: 13px;
-		color: #fde047;
-		animation: labelBlink 0.25s linear infinite;
-	}
-
-	@keyframes labelBlink {
-		0%,
-		100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0.3;
-		}
-	}
-
-	.tip-value {
 		@apply font-black;
 		font-size: 18px;
 		color: white;
