@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { getAnalytics, logEvent } from '@react-native-firebase/analytics';
@@ -9,6 +9,7 @@ import {
 	setCrashlyticsCollectionEnabled,
 	crash
 } from '@react-native-firebase/crashlytics';
+import * as NavigationBar from 'expo-navigation-bar';
 import { useNotifications } from './src/hooks/useNotifications';
 import { useBridge, bridgeScript } from './src/bridge';
 
@@ -27,6 +28,12 @@ export default function App() {
 
 		// Analytics: 앱 시작 이벤트
 		logEvent(analyticsInstance, 'app_open');
+
+		// Android: 네비게이션 바 투명 + edge-to-edge
+		if (Platform.OS === 'android') {
+			NavigationBar.setBackgroundColorAsync('transparent');
+			NavigationBar.setPositionAsync('absolute');
+		}
 	}, []);
 
 	useNotifications();

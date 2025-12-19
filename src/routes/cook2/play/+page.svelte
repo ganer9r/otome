@@ -10,6 +10,7 @@
 	import RunEndModal from '../components/RunEndModal.svelte';
 	import OrderArrivalModal from '../components/OrderArrivalModal.svelte';
 	import OrderCompleteModal from '../components/OrderCompleteModal.svelte';
+	import OrderFailModal from '../components/OrderFailModal.svelte';
 	import GameHUD from '../components/GameHUD.svelte';
 	import { findRecipe } from '../lib/usecase/findRecipe';
 	import { cookDish } from '../lib/usecase/cookDish';
@@ -74,8 +75,10 @@
 	// 주문 모달 표시 여부
 	let showNewOrderModal = $derived(customerState.showNewOrderModal);
 	let showOrderCompleteModal = $derived(customerState.showOrderCompleteModal);
+	let showOrderFailModal = $derived(customerState.showOrderFailModal);
 	let currentOrder = $derived(customerState.currentOrder);
 	let lastCompletedOrder = $derived(customerState.lastCompletedOrder);
+	let lastFailedOrder = $derived(customerState.lastFailedOrder);
 
 	// 새 주문 모달용 힌트
 	let newOrderHints = $derived(getOrderHintsForModal(currentOrder));
@@ -310,6 +313,11 @@
 		customerStore.closeOrderCompleteModal(runState.turn);
 	}
 
+	// 주문 실패 모달 닫기
+	function handleOrderFailClose() {
+		customerStore.closeOrderFailModal();
+	}
+
 	// 바로 써보기 (새 재료를 첫 번째 슬롯에 넣고 시작)
 	function handleUseNow(ingredientId: number) {
 		step = 'ingredient';
@@ -368,6 +376,11 @@
 	<!-- 주문 완료 모달 -->
 	{#if showOrderCompleteModal && lastCompletedOrder}
 		<OrderCompleteModal order={lastCompletedOrder} onClose={handleOrderCompleteClose} />
+	{/if}
+
+	<!-- 주문 실패 모달 -->
+	{#if showOrderFailModal && lastFailedOrder}
+		<OrderFailModal order={lastFailedOrder} onClose={handleOrderFailClose} />
 	{/if}
 
 	<!-- 테스트 버튼 (숨김) -->

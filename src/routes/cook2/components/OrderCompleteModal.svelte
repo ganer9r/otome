@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { CustomerOrder } from '../lib/customer-store';
+	import { getCustomerImagePath } from '../lib/customer-store';
 
 	interface Props {
 		order: CustomerOrder;
@@ -117,7 +118,11 @@
 
 		<!-- 손님 만족 -->
 		<div class="customer-area">
-			<div class="customer-emoji">😄</div>
+			<img
+				class="customer-image"
+				src={getCustomerImagePath(order.customerId, 'success')}
+				alt="손님"
+			/>
 			<div class="customer-message">"{order.completeMessage}"</div>
 		</div>
 
@@ -239,8 +244,10 @@
 		@apply mb-4;
 	}
 
-	.customer-emoji {
-		font-size: 56px;
+	.customer-image {
+		width: 100px;
+		height: 100px;
+		object-fit: contain;
 		animation: happyBounce 0.8s ease-out;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 	}

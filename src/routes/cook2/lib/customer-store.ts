@@ -32,9 +32,14 @@ export function getOrderTarget(stage: number): number {
  * - 세금 주기(10턴) 안에 주문한 요리를 만들면 보너스
  */
 
+/** 현재 사용 가능한 캐릭터 수 (최대 9) */
+export const MAX_CUSTOMER_ID = 2;
+
 export interface CustomerOrder {
 	/** 주문 ID */
 	id: string;
+	/** 손님 캐릭터 ID (1~9) */
+	customerId: number;
 	/** 요청한 요리 (Recipe) */
 	recipe: Recipe;
 	/** 요청한 요리 결과물 (Ingredient) */
@@ -51,6 +56,18 @@ export interface CustomerOrder {
 	arrivalMessage: string;
 	/** 짧은 대사 (완료 시) */
 	completeMessage: string;
+}
+
+/**
+ * 캐릭터 이미지 경로 생성
+ * @param customerId 손님 ID (1~9)
+ * @param state 상태 ('order' | 'success' | 'fail')
+ */
+export function getCustomerImagePath(
+	customerId: number,
+	state: 'order' | 'success' | 'fail'
+): string {
+	return `/imgs/character/customer/customer_${customerId}_${state}.png`;
 }
 
 /**
@@ -206,8 +223,12 @@ function generateRandomOrder(currentTurn: number, _difficulty: number = 1): Cust
 
 	if (!dish) return null;
 
+	// 랜덤 캐릭터 ID 생성 (1 ~ MAX_CUSTOMER_ID)
+	const customerId = Math.floor(Math.random() * MAX_CUSTOMER_ID) + 1;
+
 	return {
 		id: `order-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+		customerId,
 		recipe,
 		dish,
 		bonusAmount: calculateBonus(dish.grade),
@@ -305,8 +326,12 @@ interface CustomerState {
 	showNewOrderModal: boolean;
 	/** 주문 완료 플래그 (모달 표시용) */
 	showOrderCompleteModal: boolean;
+	/** 주문 실패 플래그 (모달 표시용) */
+	showOrderFailModal: boolean;
 	/** 마지막 완료된 주문 (완료 모달용) */
 	lastCompletedOrder: CustomerOrder | null;
+	/** 마지막 실패한 주문 (실패 모달용) */
+	lastFailedOrder: CustomerOrder | null;
 }
 
 const initialState: CustomerState = {
@@ -318,7 +343,9 @@ const initialState: CustomerState = {
 	taxRate: STAGE_CONFIG.BASE_TAX_RATE,
 	showNewOrderModal: false,
 	showOrderCompleteModal: false,
-	lastCompletedOrder: null
+	showOrderFailModal: false,
+	lastCompletedOrder: null,
+	lastFailedOrder: null
 };
 
 /**
@@ -338,6 +365,7 @@ function getStoredCustomerState(): CustomerState {
 				// 완전히 새 객체로 복원 (기존 undefined 값 제거)
 				parsed.currentOrder = {
 					id: parsed.currentOrder.id,
+					customerId: parsed.currentOrder.customerId || 1,
 					recipe,
 					dish,
 					bonusAmount: parsed.currentOrder.bonusAmount,
@@ -359,6 +387,7 @@ function getStoredCustomerState(): CustomerState {
 			if (recipe && dish) {
 				parsed.lastCompletedOrder = {
 					id: parsed.lastCompletedOrder.id,
+					customerId: parsed.lastCompletedOrder.customerId || 1,
 					recipe,
 					dish,
 					bonusAmount: parsed.lastCompletedOrder.bonusAmount,
@@ -377,7 +406,9 @@ function getStoredCustomerState(): CustomerState {
 			...initialState,
 			...parsed,
 			showNewOrderModal: parsed.showNewOrderModal ?? false,
-			showOrderCompleteModal: parsed.showOrderCompleteModal ?? false
+			showOrderCompleteModal: parsed.showOrderCompleteModal ?? false,
+			showOrderFailModal: parsed.showOrderFailModal ?? false,
+			lastFailedOrder: parsed.lastFailedOrder ?? null
 		};
 	} catch {
 		return initialState;
@@ -487,17 +518,31 @@ function createCustomerStore() {
 
 		/**
 		 * 세금 주기 종료 시 호출 (주문 리셋 + 난이도 조절 + 세금률 조절)
-		 * @returns 스테이지 결과 { success: boolean, newTaxRate: number }
+		 * @returns 스테이지 결과 { success: boolean, newTaxRate: number, orderFailed: boolean }
 		 */
 		onTaxPeriodEnd: (
 			survived: boolean,
 			currentTurn: number
-		): { success: boolean; newTaxRate: number } => {
-			let result = { success: false, newTaxRate: STAGE_CONFIG.BASE_TAX_RATE as number };
+		): {
+			success: boolean;
+			newTaxRate: number;
+			orderFailed: boolean;
+			failedOrder: CustomerOrder | null;
+		} => {
+			let result = {
+				success: false,
+				newTaxRate: STAGE_CONFIG.BASE_TAX_RATE as number,
+				orderFailed: false,
+				failedOrder: null as CustomerOrder | null
+			};
 
 			updateAndSave((state) => {
 				const orderTarget = getOrderTarget(state.difficulty);
 				const stageSuccess = state.stageCompletedOrders >= orderTarget;
+
+				// 현재 주문이 미완료 상태인지 확인
+				const orderFailed = state.currentOrder !== null && !state.currentOrder.completed;
+				const failedOrder = orderFailed ? state.currentOrder : null;
 
 				// 세금률 계산: 목표 미달 시 증가
 				let newTaxRate = state.taxRate;
@@ -511,7 +556,7 @@ function createCustomerStore() {
 				const newDifficulty = survived ? state.difficulty + 1 : state.difficulty;
 				const order = generateRandomOrder(currentTurn, newDifficulty);
 
-				result = { success: stageSuccess, newTaxRate };
+				result = { success: stageSuccess, newTaxRate, orderFailed, failedOrder };
 
 				return {
 					...state,
@@ -519,7 +564,9 @@ function createCustomerStore() {
 					difficulty: newDifficulty,
 					stageCompletedOrders: 0, // 스테이지 주문 수 리셋
 					taxRate: newTaxRate,
-					showNewOrderModal: true
+					showNewOrderModal: !orderFailed, // 실패 모달 후에 표시
+					showOrderFailModal: orderFailed,
+					lastFailedOrder: failedOrder
 				};
 			});
 
@@ -584,6 +631,18 @@ function createCustomerStore() {
 		},
 
 		/**
+		 * 주문 실패 모달 닫기 + 새 주문 모달 표시
+		 */
+		closeOrderFailModal: () => {
+			updateAndSave((state) => ({
+				...state,
+				showOrderFailModal: false,
+				lastFailedOrder: null,
+				showNewOrderModal: true
+			}));
+		},
+
+		/**
 		 * 현재 세금률 가져오기
 		 */
 		getTaxRate: (): number => {
@@ -604,7 +663,9 @@ function createCustomerStore() {
 				taxRate: STAGE_CONFIG.BASE_TAX_RATE,
 				showNewOrderModal: false, // 첫 요리 완료 후 모달 표시
 				showOrderCompleteModal: false,
-				lastCompletedOrder: null
+				showOrderFailModal: false,
+				lastCompletedOrder: null,
+				lastFailedOrder: null
 			};
 			saveCustomerState(newState);
 			set(newState);
@@ -632,6 +693,7 @@ function createCustomerStore() {
 
 			const order: CustomerOrder = {
 				id: `test-order-${Date.now()}`,
+				customerId: Math.floor(Math.random() * MAX_CUSTOMER_ID) + 1,
 				recipe,
 				dish,
 				bonusAmount: calculateBonus(dish.grade),

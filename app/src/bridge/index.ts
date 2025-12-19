@@ -4,11 +4,23 @@
  * 웹(WebView) ↔ 앱(RN) 통신을 담당
  * Promise 기반 양방향 통신 지원
  */
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { getCrashlytics, crash, log, recordError } from '@react-native-firebase/crashlytics';
 import { handleHaptic, HapticStyle } from './handlers/haptics';
 import { useAdsHandler } from './handlers/ads';
+import {
+	audioManager,
+	handlePlayBGM,
+	handleStopBGM,
+	handlePauseBGM,
+	handleResumeBGM,
+	handlePlayEffect,
+	handleSetBGMVolume,
+	handleSetEffectVolume,
+	handleSetMuted,
+	handleGetAudioStatus
+} from './handlers/audio';
 
 // 스크립트 export
 export { bridgeScript } from './script';
@@ -20,10 +32,27 @@ export type { HapticStyle } from './handlers/haptics';
  * 웹 → 앱 메시지 타입
  */
 interface BridgeMessage {
-	type: 'haptic' | 'showRewardedAd' | 'showInterstitialAd' | 'testCrash';
+	type:
+		| 'haptic'
+		| 'showRewardedAd'
+		| 'showInterstitialAd'
+		| 'testCrash'
+		| 'playBGM'
+		| 'stopBGM'
+		| 'pauseBGM'
+		| 'resumeBGM'
+		| 'playEffect'
+		| 'setBGMVolume'
+		| 'setEffectVolume'
+		| 'setMuted'
+		| 'getAudioStatus';
 	callId: number;
 	payload?: {
 		style?: HapticStyle;
+		uri?: string;
+		loop?: boolean;
+		volume?: number;
+		muted?: boolean;
 	};
 }
 
@@ -55,6 +84,14 @@ function sendError(webViewRef: React.RefObject<WebView | null>, callId: number, 
  */
 export function useBridge(webViewRef: React.RefObject<WebView | null>) {
 	const { showRewardedAd, showInterstitialAd } = useAdsHandler();
+
+	// 오디오 매니저 초기화
+	useEffect(() => {
+		audioManager.init();
+		return () => {
+			audioManager.cleanup();
+		};
+	}, []);
 
 	const handleMessage = useCallback(
 		async (event: WebViewMessageEvent) => {
@@ -97,6 +134,81 @@ export function useBridge(webViewRef: React.RefObject<WebView | null>) {
 							log(crashlyticsInstance, 'Test crash triggered by user');
 							crash(crashlyticsInstance);
 						}
+						break;
+					}
+
+					// 오디오 관련 핸들러
+					case 'playBGM': {
+						if (payload?.uri) {
+							const result = await handlePlayBGM(payload.uri, payload.loop);
+							sendResult(webViewRef, callId, result);
+						} else {
+							sendError(webViewRef, callId, 'playBGM requires uri');
+						}
+						break;
+					}
+
+					case 'stopBGM': {
+						const result = await handleStopBGM();
+						sendResult(webViewRef, callId, result);
+						break;
+					}
+
+					case 'pauseBGM': {
+						const result = await handlePauseBGM();
+						sendResult(webViewRef, callId, result);
+						break;
+					}
+
+					case 'resumeBGM': {
+						const result = await handleResumeBGM();
+						sendResult(webViewRef, callId, result);
+						break;
+					}
+
+					case 'playEffect': {
+						if (payload?.uri) {
+							const result = await handlePlayEffect(payload.uri);
+							sendResult(webViewRef, callId, result);
+						} else {
+							sendError(webViewRef, callId, 'playEffect requires uri');
+						}
+						break;
+					}
+
+					case 'setBGMVolume': {
+						if (payload?.volume !== undefined) {
+							const result = await handleSetBGMVolume(payload.volume);
+							sendResult(webViewRef, callId, result);
+						} else {
+							sendError(webViewRef, callId, 'setBGMVolume requires volume');
+						}
+						break;
+					}
+
+					case 'setEffectVolume': {
+						if (payload?.volume !== undefined) {
+							const result = await handleSetEffectVolume(payload.volume);
+							sendResult(webViewRef, callId, result);
+						} else {
+							sendError(webViewRef, callId, 'setEffectVolume requires volume');
+						}
+						break;
+					}
+
+					case 'setMuted': {
+						if (payload?.muted !== undefined) {
+							const result = await handleSetMuted(payload.muted);
+							sendResult(webViewRef, callId, result);
+						} else {
+							sendError(webViewRef, callId, 'setMuted requires muted');
+						}
+						break;
+					}
+
+					case 'getAudioStatus': {
+						const result = handleGetAudioStatus();
+						sendResult(webViewRef, callId, result);
 						break;
 					}
 

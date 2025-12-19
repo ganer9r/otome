@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { GRADE_COLORS } from '../lib/types';
 	import type { CustomerOrder, OrderHint } from '../lib/customer-store';
+	import { getCustomerImagePath } from '../lib/customer-store';
 
 	interface Props {
 		order: CustomerOrder;
@@ -50,7 +51,11 @@
 
 		<!-- 손님 영역 -->
 		<div class="customer-area">
-			<div class="customer-emoji">😊</div>
+			<img
+				class="customer-image"
+				src={getCustomerImagePath(order.customerId, 'order')}
+				alt="손님"
+			/>
 			<div class="customer-message">"{order.arrivalMessage}"</div>
 		</div>
 
@@ -198,8 +203,10 @@
 		@apply mb-4;
 	}
 
-	.customer-emoji {
-		font-size: 48px;
+	.customer-image {
+		width: 80px;
+		height: 80px;
+		object-fit: contain;
 		animation: customerBounce 0.6s ease-out 0.3s;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 	}

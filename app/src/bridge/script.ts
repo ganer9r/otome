@@ -5,6 +5,15 @@
  * - NativeBridge.haptic(style) : 진동 피드백 (Promise)
  * - NativeBridge.showRewardedAd() : 리워드 광고 (Promise<{ success, type, amount }>)
  * - NativeBridge.showInterstitialAd() : 전면 광고 (Promise<{ success }>)
+ * - NativeBridge.playBGM(uri, loop) : BGM 재생 (Promise)
+ * - NativeBridge.stopBGM() : BGM 정지 (Promise)
+ * - NativeBridge.pauseBGM() : BGM 일시정지 (Promise)
+ * - NativeBridge.resumeBGM() : BGM 재개 (Promise)
+ * - NativeBridge.playEffect(uri) : 효과음 재생 (Promise)
+ * - NativeBridge.setBGMVolume(volume) : BGM 볼륨 설정 (0.0~1.0) (Promise)
+ * - NativeBridge.setEffectVolume(volume) : 효과음 볼륨 설정 (0.0~1.0) (Promise)
+ * - NativeBridge.setMuted(muted) : 음소거 설정 (Promise)
+ * - NativeBridge.getAudioStatus() : 오디오 상태 조회 (Promise)
  *
  * 내부 메서드:
  * - NativeBridge._resolve(callId, result) : 앱에서 호출하여 Promise resolve
@@ -66,6 +75,53 @@ export const bridgeScript = `
     // 크래시 테스트 (개발용)
     testCrash: function() {
       return this._call('testCrash', {});
+    },
+
+    // ====== 오디오 관련 ======
+
+    // BGM 재생 (uri: 오디오 URL, loop: 반복 여부)
+    playBGM: function(uri, loop) {
+      return this._call('playBGM', { uri: uri, loop: loop !== false });
+    },
+
+    // BGM 정지
+    stopBGM: function() {
+      return this._call('stopBGM', {});
+    },
+
+    // BGM 일시정지
+    pauseBGM: function() {
+      return this._call('pauseBGM', {});
+    },
+
+    // BGM 재개
+    resumeBGM: function() {
+      return this._call('resumeBGM', {});
+    },
+
+    // 효과음 재생 (uri: 오디오 URL)
+    playEffect: function(uri) {
+      return this._call('playEffect', { uri: uri });
+    },
+
+    // BGM 볼륨 설정 (0.0 ~ 1.0)
+    setBGMVolume: function(volume) {
+      return this._call('setBGMVolume', { volume: volume });
+    },
+
+    // 효과음 볼륨 설정 (0.0 ~ 1.0)
+    setEffectVolume: function(volume) {
+      return this._call('setEffectVolume', { volume: volume });
+    },
+
+    // 음소거 설정
+    setMuted: function(muted) {
+      return this._call('setMuted', { muted: muted });
+    },
+
+    // 오디오 상태 조회
+    getAudioStatus: function() {
+      return this._call('getAudioStatus', {});
     }
   };
 
