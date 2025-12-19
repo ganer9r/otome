@@ -658,6 +658,7 @@ function createCustomerStore() {
 			updateAndSave((state) => {
 				return {
 					...state,
+					currentOrder: null, // 완료된 주문 제거
 					showOrderCompleteModal: false,
 					lastCompletedOrder: null
 					// 새 주문은 세금 시점(onTaxPeriodEnd)에서 생성

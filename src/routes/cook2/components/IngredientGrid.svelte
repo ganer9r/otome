@@ -172,6 +172,8 @@
 						type="button"
 						class="ingredient-card"
 						class:tried={isTried && selectedIds.length === 1}
+						class:possible={isHintEnabled && isPossible && !isTried && selectedIds.length === 1}
+						class:impossible={isImpossible}
 						class:is-new={isNew}
 						class:unaffordable={!affordable}
 						onclick={(e) => addIngredient(ingredient, e)}
@@ -225,6 +227,11 @@
 									type="button"
 									class="ingredient-card"
 									class:tried={isTried && selectedIds.length === 1}
+									class:possible={isHintEnabled &&
+										isPossible &&
+										!isTried &&
+										selectedIds.length === 1}
+									class:impossible={isImpossible}
 									class:is-new={isNew}
 									class:unaffordable={!affordable}
 									onclick={(e) => addIngredient(ingredient, e)}
