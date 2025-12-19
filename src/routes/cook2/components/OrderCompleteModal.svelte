@@ -6,15 +6,14 @@
 	interface Props {
 		order: CustomerOrder;
 		onClose: () => void;
+		autoClose?: boolean;
 	}
 
-	let { order, onClose }: Props = $props();
+	let { order, onClose, autoClose = true }: Props = $props();
 
 	// 애니메이션 상태
 	let showContent = $state(false);
-	let showBonus = $state(false);
 	let bonusCount = $state(0);
-	let showParticles = $state(false);
 	let canClose = $state(false);
 
 	onMount(() => {
@@ -23,24 +22,22 @@
 		}, 100);
 
 		setTimeout(() => {
-			showBonus = true;
 			animateBonus();
 		}, 500);
-
-		setTimeout(() => {
-			showParticles = true;
-		}, 800);
 
 		setTimeout(() => {
 			canClose = true;
 		}, 1500);
 
-		const autoCloseTimer = setTimeout(() => {
-			handleTap();
-		}, 3000);
+		let autoCloseTimer: ReturnType<typeof setTimeout> | null = null;
+		if (autoClose) {
+			autoCloseTimer = setTimeout(() => {
+				handleClose();
+			}, 3000);
+		}
 
 		return () => {
-			clearTimeout(autoCloseTimer);
+			if (autoCloseTimer) clearTimeout(autoCloseTimer);
 		};
 	});
 
@@ -68,7 +65,7 @@
 
 	let isExiting = $state(false);
 
-	function handleTap() {
+	function handleClose() {
 		if (canClose && !isExiting) {
 			isExiting = true;
 			setTimeout(() => {
@@ -76,18 +73,9 @@
 			}, 300);
 		}
 	}
-
-	// 파티클 생성
-	const particles = Array.from({ length: 20 }, (_, i) => ({
-		id: i,
-		x: Math.random() * 100,
-		delay: Math.random() * 0.5,
-		duration: 1 + Math.random() * 0.5,
-		emoji: ['✨', '🎉', '⭐', '🌟'][Math.floor(Math.random() * 4)]
-	}));
 </script>
 
-<button class="modal-overlay" class:exit={isExiting} onclick={handleTap} aria-label="닫기">
+<div class="modal-overlay" class:exit={isExiting}>
 	<!-- 딤 영역 상단 타이틀 -->
 	<div class="floating-title" class:show={showContent}>
 		<span class="title-text">주문 완료!</span>
@@ -101,37 +89,27 @@
 			alt="손님"
 		/>
 
-		<!-- 파티클 효과 -->
-		{#if showParticles}
-			<div class="particles">
-				{#each particles as particle (particle.id)}
-					<span
-						class="particle"
-						style="left: {particle.x}%; animation-delay: {particle.delay}s; animation-duration: {particle.duration}s;"
-					>
-						{particle.emoji}
-					</span>
-				{/each}
-			</div>
-		{/if}
-
 		<!-- 손님 대사 -->
 		<div class="customer-message">"{order.completeMessage}"</div>
 
-		<!-- 보너스 -->
-		{#if showBonus}
-			<div class="bonus-section">
-				<span class="bonus-label">팁</span>
+		<!-- 보너스 카드 -->
+		<div class="bonus-card">
+			<div class="bonus-header">
+				<span class="bonus-icon">💰</span>
+				<span class="bonus-title">보너스를 받았어요!</span>
+			</div>
+			<div class="bonus-amount">
+				<span class="bonus-label">보너스</span>
 				<span class="bonus-value">+{bonusCount}원</span>
 			</div>
-		{/if}
+		</div>
 
-		<!-- 안내 텍스트 -->
-		{#if canClose}
-			<div class="tap-hint">탭하여 계속</div>
-		{/if}
+		<!-- 닫기 버튼 -->
+		<button class="close-btn" class:ready={canClose} onclick={handleClose} disabled={!canClose}
+			>확인</button
+		>
 	</div>
-</button>
+</div>
 
 <style lang="postcss">
 	@reference '$styles/app.css';
@@ -139,7 +117,7 @@
 	.modal-overlay {
 		@apply fixed inset-0 z-[100];
 		@apply flex items-center justify-center;
-		@apply h-full w-full cursor-pointer border-none;
+		@apply h-full w-full;
 		background: rgba(0, 0, 0, 0.7);
 		animation: fadeIn 0.3s ease-out;
 	}
@@ -179,14 +157,14 @@
 	}
 
 	.modal-content {
-		@apply relative flex flex-col items-center rounded-3xl p-6;
+		@apply relative flex flex-col items-center rounded-3xl p-5;
 		padding-top: 70px;
-		width: 260px;
-		background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%);
-		border: 4px solid #10b981;
+		width: 280px;
+		background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+		border: 4px solid #f59e0b;
 		box-shadow:
 			0 12px 40px rgba(0, 0, 0, 0.3),
-			0 0 0 6px rgba(16, 185, 129, 0.3);
+			0 0 0 6px rgba(245, 158, 11, 0.3);
 		transform: scale(0) rotate(-10deg);
 		opacity: 0;
 		transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -206,33 +184,6 @@
 		transform: scale(0.3) translate(-150px, -200px);
 		opacity: 0;
 		transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
-	}
-
-	/* 파티클 */
-	.particles {
-		@apply pointer-events-none absolute inset-0;
-		overflow: hidden;
-	}
-
-	.particle {
-		@apply absolute;
-		font-size: 20px;
-		top: 50%;
-		animation: particleFly linear forwards;
-	}
-
-	@keyframes particleFly {
-		0% {
-			transform: translateY(0) scale(0);
-			opacity: 1;
-		}
-		50% {
-			opacity: 1;
-		}
-		100% {
-			transform: translateY(-150px) scale(1);
-			opacity: 0;
-		}
 	}
 
 	/* 캐릭터 이미지 */
@@ -267,37 +218,47 @@
 	.customer-message {
 		@apply mb-3 rounded-xl px-4 py-2 font-bold;
 		font-size: 14px;
-		color: #065f46;
+		color: #78350f;
 		background: white;
-		border: 2px solid #34d399;
-		box-shadow: 0 2px 0 #10b981;
+		border: 2px solid #fcd34d;
+		box-shadow: 0 2px 0 #f59e0b;
 	}
 
-	/* 보너스 섹션 */
-	.bonus-section {
-		@apply flex items-center gap-3 rounded-2xl px-6 py-3;
-		background: linear-gradient(180deg, #059669 0%, #047857 100%);
-		border: 3px solid #065f46;
+	/* 보너스 카드 */
+	.bonus-card {
+		@apply mb-3 w-full rounded-xl p-3;
+		background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+		border: 3px solid #34d399;
 		box-shadow:
-			0 4px 0 #064e3b,
-			0 8px 20px rgba(5, 150, 105, 0.4);
-		animation: bonusPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+			0 4px 12px rgba(16, 185, 129, 0.3),
+			inset 0 1px 0 rgba(255, 255, 255, 0.5);
 	}
 
-	@keyframes bonusPopIn {
-		0% {
-			transform: scale(0) rotate(20deg);
-		}
-		100% {
-			transform: scale(1) rotate(0deg);
-		}
+	.bonus-header {
+		@apply mb-2 flex items-center gap-2;
+	}
+
+	.bonus-icon {
+		font-size: 20px;
+	}
+
+	.bonus-title {
+		@apply font-bold;
+		font-size: 14px;
+		color: #065f46;
+	}
+
+	.bonus-amount {
+		@apply flex items-center justify-between rounded-lg px-3 py-2;
+		background: linear-gradient(180deg, #059669 0%, #047857 100%);
+		border: 2px solid #065f46;
+		box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4);
 	}
 
 	.bonus-label {
 		@apply font-bold;
-		font-size: 14px;
+		font-size: 13px;
 		color: #fde047;
-		animation: labelBlink 0.25s linear infinite;
 	}
 
 	@keyframes labelBlink {
@@ -312,25 +273,82 @@
 
 	.bonus-value {
 		@apply font-black;
-		font-size: 28px;
+		font-size: 18px;
 		color: white;
 	}
 
-	/* 탭 힌트 */
-	.tap-hint {
-		@apply mt-4 font-medium;
-		font-size: 12px;
-		color: #6b7280;
-		animation: tapPulse 1.5s ease-in-out infinite;
+	.tip-header {
+		@apply mb-2 flex items-center gap-2;
 	}
 
-	@keyframes tapPulse {
+	.tip-icon {
+		font-size: 20px;
+	}
+
+	.tip-title {
+		@apply font-bold;
+		font-size: 14px;
+		color: #065f46;
+	}
+
+	.tip-amount {
+		@apply flex items-center justify-between rounded-lg px-3 py-2;
+		background: linear-gradient(180deg, #059669 0%, #047857 100%);
+		border: 2px solid #065f46;
+		box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4);
+	}
+
+	.tip-label {
+		@apply font-bold;
+		font-size: 13px;
+		color: #fde047;
+		animation: labelBlink 0.25s linear infinite;
+	}
+
+	@keyframes labelBlink {
 		0%,
 		100% {
-			opacity: 0.5;
-		}
-		50% {
 			opacity: 1;
 		}
+		50% {
+			opacity: 0.3;
+		}
+	}
+
+	.tip-value {
+		@apply font-black;
+		font-size: 18px;
+		color: white;
+	}
+
+	/* 닫기 버튼 */
+	.close-btn {
+		@apply w-full rounded-xl py-3 font-bold;
+		font-size: 16px;
+		color: white;
+		background: linear-gradient(180deg, #9ca3af 0%, #6b7280 100%);
+		border: none;
+		border-bottom: 3px solid #4b5563;
+		box-shadow: 0 3px 0 #374151;
+		opacity: 0.6;
+		cursor: not-allowed;
+		transition: all 0.3s ease;
+	}
+
+	.close-btn.ready {
+		background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+		border-bottom-color: #059669;
+		box-shadow: 0 3px 0 #047857;
+		opacity: 1;
+		cursor: pointer;
+	}
+
+	.close-btn.ready:hover {
+		filter: brightness(1.05);
+	}
+
+	.close-btn.ready:active {
+		transform: translateY(2px);
+		box-shadow: 0 1px 0 #047857;
 	}
 </style>

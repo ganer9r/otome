@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { CustomerOrder } from '../lib/customer-store';
 	import { getCustomerImagePath } from '../lib/customer-store';
 
@@ -9,32 +10,37 @@
 
 	let { order, onClose }: Props = $props();
 
-	// 실패 대사 풀
+	// 실패 대사 풀 (불만 느낌)
 	const FAIL_MESSAGES = [
-		'아쉽~',
-		'다음에 또 올게!',
-		'바빠서 먼저 갈게~',
-		'배고파서 다른 데 갈게!',
-		'다음엔 꼭!',
-		'또 올게요~',
-		'시간이 없어서~',
-		'다음에 봐요!'
+		'너무 오래 걸려요...',
+		'언제 나오는 거예요?',
+		'다른 데 갈게요!',
+		'기다리다 지쳤어요',
+		'배고파 죽겠는데...',
+		'왜 이렇게 늦어요?',
+		'다음엔 빨리 해주세요',
+		'실망이에요...'
 	];
 
 	const failMessage = FAIL_MESSAGES[Math.floor(Math.random() * FAIL_MESSAGES.length)];
 
-	let isExiting = $state(false);
+	// 애니메이션 상태
 	let showContent = $state(false);
+	let canClose = $state(false);
+	let isExiting = $state(false);
 
-	// 등장 애니메이션
-	$effect(() => {
+	onMount(() => {
 		setTimeout(() => {
 			showContent = true;
 		}, 100);
+
+		setTimeout(() => {
+			canClose = true;
+		}, 1000);
 	});
 
 	function handleClose() {
-		if (!isExiting) {
+		if (canClose && !isExiting) {
 			isExiting = true;
 			setTimeout(() => {
 				onClose();
@@ -43,7 +49,7 @@
 	}
 </script>
 
-<button class="modal-overlay" class:exit={isExiting} onclick={handleClose} aria-label="닫기">
+<div class="modal-overlay" class:exit={isExiting}>
 	<!-- 딤 영역 상단 타이틀 -->
 	<div class="floating-title" class:show={showContent}>
 		<span class="title-text">손님이 떠났어요</span>
@@ -56,16 +62,24 @@
 		<!-- 손님 대사 -->
 		<div class="customer-message">"{failMessage}"</div>
 
-		<!-- 실패한 주문 정보 -->
-		<div class="order-info">
-			<span class="order-label">주문:</span>
-			<span class="order-dish">{order.dish.name}</span>
+		<!-- 실패 카드 -->
+		<div class="fail-card">
+			<div class="fail-header">
+				<span class="fail-icon">😢</span>
+				<span class="fail-title">주문 실패</span>
+			</div>
+			<div class="fail-order">
+				<span class="fail-label">주문한 요리</span>
+				<span class="fail-dish">{order.dish.name}</span>
+			</div>
 		</div>
 
-		<!-- 안내 텍스트 -->
-		<div class="tap-hint">탭하여 계속</div>
+		<!-- 닫기 버튼 -->
+		<button class="close-btn" class:ready={canClose} onclick={handleClose} disabled={!canClose}
+			>확인</button
+		>
 	</div>
-</button>
+</div>
 
 <style lang="postcss">
 	@reference '$styles/app.css';
@@ -73,7 +87,7 @@
 	.modal-overlay {
 		@apply fixed inset-0 z-[100];
 		@apply flex items-center justify-center;
-		@apply h-full w-full cursor-pointer border-none;
+		@apply h-full w-full;
 		background: rgba(0, 0, 0, 0.7);
 		animation: fadeIn 0.3s ease-out;
 	}
@@ -113,9 +127,9 @@
 	}
 
 	.modal-content {
-		@apply relative flex flex-col items-center rounded-3xl p-6;
+		@apply relative flex flex-col items-center rounded-3xl p-5;
 		padding-top: 70px;
-		width: 260px;
+		width: 280px;
 		background: linear-gradient(180deg, #fef2f2 0%, #fee2e2 100%);
 		border: 4px solid #ef4444;
 		box-shadow:
@@ -183,40 +197,77 @@
 		box-shadow: 0 2px 0 #ef4444;
 	}
 
-	/* 주문 정보 */
-	.order-info {
-		@apply mb-4 flex items-center gap-2 rounded-xl px-4 py-2;
-		background: rgba(255, 255, 255, 0.8);
-		border: 2px solid #fecaca;
+	/* 실패 카드 */
+	.fail-card {
+		@apply mb-3 w-full rounded-xl p-3;
+		background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+		border: 3px solid #f87171;
+		box-shadow:
+			0 4px 12px rgba(239, 68, 68, 0.2),
+			inset 0 1px 0 rgba(255, 255, 255, 0.5);
 	}
 
-	.order-label {
-		@apply font-medium;
-		font-size: 12px;
+	.fail-header {
+		@apply mb-2 flex items-center gap-2;
+	}
+
+	.fail-icon {
+		font-size: 20px;
+	}
+
+	.fail-title {
+		@apply font-bold;
+		font-size: 14px;
 		color: #991b1b;
 	}
 
-	.order-dish {
+	.fail-order {
+		@apply flex items-center justify-between rounded-lg px-3 py-2;
+		background: linear-gradient(180deg, #dc2626 0%, #b91c1c 100%);
+		border: 2px solid #991b1b;
+		box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+	}
+
+	.fail-label {
 		@apply font-bold;
-		font-size: 14px;
-		color: #7f1d1d;
-	}
-
-	/* 탭 힌트 */
-	.tap-hint {
-		@apply font-medium;
 		font-size: 12px;
-		color: #9ca3af;
-		animation: tapPulse 1.5s ease-in-out infinite;
+		color: #fecaca;
 	}
 
-	@keyframes tapPulse {
-		0%,
-		100% {
-			opacity: 0.5;
-		}
-		50% {
-			opacity: 1;
-		}
+	.fail-dish {
+		@apply font-black;
+		font-size: 16px;
+		color: white;
+	}
+
+	/* 닫기 버튼 */
+	.close-btn {
+		@apply w-full rounded-xl py-3 font-bold;
+		font-size: 16px;
+		color: white;
+		background: linear-gradient(180deg, #9ca3af 0%, #6b7280 100%);
+		border: none;
+		border-bottom: 3px solid #4b5563;
+		box-shadow: 0 3px 0 #374151;
+		opacity: 0.6;
+		cursor: not-allowed;
+		transition: all 0.3s ease;
+	}
+
+	.close-btn.ready {
+		background: linear-gradient(180deg, #f87171 0%, #ef4444 100%);
+		border-bottom-color: #dc2626;
+		box-shadow: 0 3px 0 #b91c1c;
+		opacity: 1;
+		cursor: pointer;
+	}
+
+	.close-btn.ready:hover {
+		filter: brightness(1.05);
+	}
+
+	.close-btn.ready:active {
+		transform: translateY(2px);
+		box-shadow: 0 1px 0 #b91c1c;
 	}
 </style>
