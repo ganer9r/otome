@@ -2,49 +2,66 @@
 	import { onMount } from 'svelte';
 
 	interface Props {
-		duration?: number;
 		onComplete: () => void;
 	}
 
-	let { duration = 1000, onComplete }: Props = $props();
+	let { onComplete }: Props = $props();
 
-	let phase = $state<'flash' | 'pulse' | 'burst' | 'done'>('flash');
-
-	const pulseColor = '#ffffff';
+	// 펄스 단계: wait → pulse1 → pulse2 → pulse3 → done
+	let phase = $state<'wait' | 'pulse1' | 'pulse2' | 'pulse3' | 'done'>('wait');
 
 	onMount(() => {
-		// 1단계: 플래시 (0.3초)
+		// 0.5초 대기 후 첫 번째 펄스
 		setTimeout(() => {
-			phase = 'pulse';
-		}, 300);
+			phase = 'pulse1';
+		}, 500);
 
-		// 2단계: 펄스 (0.5초)
+		// 1.3초: 두 번째 펄스 (0.8초 갭)
 		setTimeout(() => {
-			phase = 'burst';
-		}, 800);
+			phase = 'pulse2';
+		}, 1300);
 
-		// 3단계: 버스트 후 완료
+		// 2.1초: 세 번째 펄스 (0.8초 갭)
+		setTimeout(() => {
+			phase = 'pulse3';
+		}, 2100);
+
+		// 2.6초: 완료
 		setTimeout(() => {
 			phase = 'done';
 			onComplete();
-		}, duration);
+		}, 2600);
 	});
 </script>
 
 {#if phase !== 'done'}
-	<div class="anticipation-overlay" class:flash={phase === 'flash'}>
+	<div
+		class="anticipation-overlay"
+		class:pulse1={phase === 'pulse1'}
+		class:pulse2={phase === 'pulse2'}
+		class:pulse3={phase === 'pulse3'}
+	>
 		<div class="pulse-container">
-			<!-- 퍼져나가는 파동 링 -->
-			<div class="pulse-ring ring-1" style="--pulse-color: {pulseColor}"></div>
-			<div class="pulse-ring ring-2" style="--pulse-color: {pulseColor}"></div>
-			<div class="pulse-ring ring-3" style="--pulse-color: {pulseColor}"></div>
-			<!-- 중앙 빛 -->
-			<div
-				class="center-glow"
-				class:active={phase === 'pulse' || phase === 'burst'}
-				class:burst={phase === 'burst'}
-				style="--glow-color: {pulseColor}"
-			></div>
+			<!-- 첫 번째 펄스: 링 1개 -->
+			{#if phase === 'pulse1' || phase === 'pulse2' || phase === 'pulse3'}
+				<div class="pulse-ring ring-1-1"></div>
+				<div class="center-glow glow-1"></div>
+			{/if}
+
+			<!-- 두 번째 펄스: 링 2개 -->
+			{#if phase === 'pulse2' || phase === 'pulse3'}
+				<div class="pulse-ring ring-2-1"></div>
+				<div class="pulse-ring ring-2-2"></div>
+				<div class="center-glow glow-2"></div>
+			{/if}
+
+			<!-- 세 번째 펄스: 링 3개 -->
+			{#if phase === 'pulse3'}
+				<div class="pulse-ring ring-3-1"></div>
+				<div class="pulse-ring ring-3-2"></div>
+				<div class="pulse-ring ring-3-3"></div>
+				<div class="center-glow glow-3"></div>
+			{/if}
 		</div>
 	</div>
 {/if}
@@ -55,55 +72,112 @@
 	.anticipation-overlay {
 		@apply fixed inset-0 z-[200];
 		@apply flex items-center justify-center;
-		background: rgba(0, 0, 0, 0.8);
-		animation: overlayFadeIn 0.3s ease-out forwards;
+		background: rgba(0, 0, 0, 0.7);
+		animation: fadeIn 0.4s ease-out forwards;
 	}
 
-	.anticipation-overlay.flash {
-		animation: flashWhite 0.3s ease-out forwards;
-	}
-
-	@keyframes flashWhite {
-		0% {
+	@keyframes fadeIn {
+		from {
 			background: rgba(0, 0, 0, 0);
 		}
-		40% {
-			background: rgba(255, 255, 255, 0.8);
+		to {
+			background: rgba(0, 0, 0, 0.7);
+		}
+	}
+
+	/* 펄스별 화면 플래시 */
+	.anticipation-overlay.pulse1 {
+		animation: flash1 0.35s ease-out forwards;
+	}
+
+	.anticipation-overlay.pulse2 {
+		animation: flash2 0.35s ease-out forwards;
+	}
+
+	.anticipation-overlay.pulse3 {
+		animation: flash3 0.4s ease-out forwards;
+	}
+
+	@keyframes flash1,
+	@keyframes flash2,
+	@keyframes flash3 {
+		0% {
+			background: rgba(0, 0, 0, 0.7);
+		}
+		30% {
+			background: rgba(255, 255, 255, 0.5);
 		}
 		100% {
-			background: rgba(0, 0, 0, 0.8);
+			background: rgba(0, 0, 0, 0.7);
 		}
 	}
 
 	.pulse-container {
 		@apply relative;
-		width: 200px;
-		height: 200px;
+		width: 300px;
+		height: 300px;
 	}
 
-	/* 펄스 링 */
+	/* 펄스 링 기본 */
 	.pulse-ring {
 		@apply absolute;
 		top: 50%;
 		left: 50%;
-		width: 40px;
-		height: 40px;
 		border-radius: 50%;
-		border: 4px solid var(--pulse-color);
+		border: 4px solid white;
 		transform: translate(-50%, -50%) scale(0);
 		opacity: 0;
 	}
 
-	.pulse-ring.ring-1 {
-		animation: pulseExpand 0.7s ease-out 0.2s forwards;
+	/* ===== 펄스 링 공통 ===== */
+	.pulse-ring.ring-1-1,
+	.pulse-ring.ring-1-2,
+	.pulse-ring.ring-1-3,
+	.pulse-ring.ring-2-1,
+	.pulse-ring.ring-2-2,
+	.pulse-ring.ring-2-3,
+	.pulse-ring.ring-3-1,
+	.pulse-ring.ring-3-2,
+	.pulse-ring.ring-3-3 {
+		width: 40px;
+		height: 40px;
 	}
 
-	.pulse-ring.ring-2 {
-		animation: pulseExpand 0.7s ease-out 0.35s forwards;
+	/* 1번째 펄스: 느리게 (0.5초) - 링 1개라서 천천히 */
+	.pulse-ring.ring-1-1 {
+		animation: pulseExpand 0.5s ease-out forwards;
 	}
 
-	.pulse-ring.ring-3 {
-		animation: pulseExpand 0.7s ease-out 0.5s forwards;
+	/* 2번째 펄스: 중간 (0.4초) - 링 2개 */
+	.pulse-ring.ring-2-1 {
+		animation: pulseExpandMedium 0.4s ease-out forwards;
+	}
+	.pulse-ring.ring-2-2 {
+		animation: pulseExpandMedium 0.4s ease-out 0.08s forwards;
+	}
+
+	/* 3번째 펄스: 원래대로 (0.5초) */
+	.pulse-ring.ring-3-1 {
+		animation: pulseExpand 0.5s ease-out forwards;
+	}
+	.pulse-ring.ring-3-2 {
+		animation: pulseExpand 0.5s ease-out 0.1s forwards;
+	}
+	.pulse-ring.ring-3-3 {
+		animation: pulseExpand 0.5s ease-out 0.2s forwards;
+	}
+
+	@keyframes pulseExpandMedium {
+		0% {
+			transform: translate(-50%, -50%) scale(0);
+			opacity: 1;
+			border-width: 6px;
+		}
+		100% {
+			transform: translate(-50%, -50%) scale(7);
+			opacity: 0;
+			border-width: 1px;
+		}
 	}
 
 	@keyframes pulseExpand {
@@ -113,54 +187,68 @@
 			border-width: 6px;
 		}
 		100% {
-			transform: translate(-50%, -50%) scale(8);
+			transform: translate(-50%, -50%) scale(7);
 			opacity: 0;
 			border-width: 1px;
 		}
 	}
 
-	/* 중앙 빛 */
+	/* ===== 중앙 빛 ===== */
 	.center-glow {
 		@apply absolute;
 		top: 50%;
 		left: 50%;
-		width: 30px;
-		height: 30px;
 		border-radius: 50%;
-		background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
+		background: radial-gradient(circle, white 0%, transparent 70%);
 		transform: translate(-50%, -50%) scale(0);
 		opacity: 0;
 	}
 
-	.center-glow.active {
-		animation: glowGrow 0.5s ease-out forwards;
+	.center-glow.glow-1,
+	.center-glow.glow-2,
+	.center-glow.glow-3 {
+		width: 30px;
+		height: 30px;
 	}
 
-	@keyframes glowGrow {
+	/* 1~2번째: 짧게 */
+	.center-glow.glow-1 {
+		animation: glowPulseShort 0.2s ease-out forwards;
+	}
+	.center-glow.glow-2 {
+		animation: glowPulseShort 0.25s ease-out forwards;
+	}
+	/* 3번째: 원래대로 */
+	.center-glow.glow-3 {
+		animation: glowPulse 0.4s ease-out forwards;
+	}
+
+	@keyframes glowPulseShort {
 		0% {
 			transform: translate(-50%, -50%) scale(0);
 			opacity: 0;
 		}
-		50% {
+		40% {
+			transform: translate(-50%, -50%) scale(4);
 			opacity: 1;
 		}
 		100% {
-			transform: translate(-50%, -50%) scale(5);
-			opacity: 1;
+			transform: translate(-50%, -50%) scale(7);
+			opacity: 0;
 		}
 	}
 
-	.center-glow.burst {
-		animation: glowBurst 0.2s ease-out forwards;
-	}
-
-	@keyframes glowBurst {
+	@keyframes glowPulse {
 		0% {
-			transform: translate(-50%, -50%) scale(5);
+			transform: translate(-50%, -50%) scale(0);
+			opacity: 0;
+		}
+		30% {
+			transform: translate(-50%, -50%) scale(4);
 			opacity: 1;
 		}
 		100% {
-			transform: translate(-50%, -50%) scale(20);
+			transform: translate(-50%, -50%) scale(7);
 			opacity: 0;
 		}
 	}
