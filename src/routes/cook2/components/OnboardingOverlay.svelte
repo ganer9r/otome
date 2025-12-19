@@ -155,16 +155,7 @@
 	{/if}
 {/if}
 
-<!-- 힌트 툴팁 (온보딩 완료 후에도 표시) -->
-{#if showHintTooltip && hintStep < 3}
-	<button class="hint-tooltip" onclick={dismissHintTooltip}>
-		<div class="hint-tooltip-content">
-			<span class="hint-tooltip-icon">{HINT_MESSAGES[hintStep].icon}</span>
-			<span class="hint-tooltip-text">{HINT_MESSAGES[hintStep].text}</span>
-		</div>
-		<span class="hint-tooltip-dismiss">탭하여 닫기</span>
-	</button>
-{/if}
+<!-- 힌트 툴팁 비활성화 -->
 
 <style lang="postcss">
 	@reference '$styles/app.css';

@@ -309,7 +309,7 @@
 		if (pendingCompleteModal) {
 			pendingCompleteModal = false;
 			pendingNewOrderModal = false; // 완료 모달 닫을 때 새 주문 모달이 자동으로 뜸
-			// showOrderCompleteModal은 이미 true로 설정되어 있음
+			customerStore.showOrderComplete(); // 조리대 복귀 시 모달 표시
 		} else if (pendingNewOrderModal) {
 			pendingNewOrderModal = false;
 			customerStore.showNewOrder();

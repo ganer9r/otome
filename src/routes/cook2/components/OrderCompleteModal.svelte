@@ -10,7 +10,7 @@
 		autoClose?: boolean;
 	}
 
-	let { order, onClose, autoClose = true }: Props = $props();
+	let { order, onClose, autoClose = false }: Props = $props();
 
 	// 기대감 연출 완료 여부
 	let showAnticipation = $state(true);

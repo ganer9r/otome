@@ -518,7 +518,7 @@ function createCustomerStore() {
 						completedOrders: state.completedOrders + 1,
 						stageCompletedOrders: state.stageCompletedOrders + 1,
 						totalBonus: state.totalBonus + bonus,
-						showOrderCompleteModal: true,
+						// showOrderCompleteModal은 조리대 복귀 시 표시 (showOrderComplete() 호출)
 						lastCompletedOrder: completedOrder
 					};
 				}
@@ -636,6 +636,19 @@ function createCustomerStore() {
 				...state,
 				showNewOrderModal: false
 			}));
+		},
+
+		/**
+		 * 주문 완료 모달 표시 (조리대 복귀 시 호출)
+		 */
+		showOrderComplete: () => {
+			updateAndSave((state) => {
+				if (!state.lastCompletedOrder) return state;
+				return {
+					...state,
+					showOrderCompleteModal: true
+				};
+			});
 		},
 
 		/**
