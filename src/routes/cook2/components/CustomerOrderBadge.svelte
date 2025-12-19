@@ -292,12 +292,6 @@
 				</div>
 			</div>
 		{/if}
-	{:else}
-		<!-- 주문 없음 -->
-		<div class="no-order-badge">
-			<span class="no-order-emoji">💤</span>
-			<span class="no-order-text">대기중</span>
-		</div>
 	{/if}
 </div>
 
@@ -779,26 +773,6 @@
 
 	.rv-text {
 		font-size: 11px;
-	}
-
-	/* 주문 없음 */
-	.no-order-badge {
-		@apply flex flex-col items-center;
-		@apply rounded-2xl;
-		@apply p-2;
-		width: 72px;
-		background: #f3f4f6;
-		border: 2px dashed #d1d5db;
-	}
-
-	.no-order-emoji {
-		font-size: 24px;
-		opacity: 0.5;
-	}
-
-	.no-order-text {
-		@apply text-xs;
-		color: #9ca3af;
 	}
 
 	/* 조합법 팝업 */

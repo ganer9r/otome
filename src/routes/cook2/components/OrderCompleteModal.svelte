@@ -41,7 +41,7 @@
 
 		// 자동 닫기 (3초 후)
 		const autoCloseTimer = setTimeout(() => {
-			onClose();
+			handleTap();
 		}, 3000);
 
 		return () => {

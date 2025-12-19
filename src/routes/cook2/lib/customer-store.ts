@@ -147,7 +147,7 @@ function calculateBonus(grade: IngredientGrade): number {
 /**
  * 주문 가능한 레시피 필터링
  * - 재료 2개 레시피만
- * - 내 재료 1개 + 모르는 재료 1개
+ * - 내 재료 1개 이상 보유
  */
 function getOrderableRecipes(unlockedIds: number[]): Recipe[] {
 	const dishRecipes = getDishRecipes();
@@ -161,8 +161,8 @@ function getOrderableRecipes(unlockedIds: number[]): Recipe[] {
 		const has1 = unlockedSet.has(id1);
 		const has2 = unlockedSet.has(id2);
 
-		// 하나만 가지고 있어야 함 (XOR)
-		return (has1 && !has2) || (!has1 && has2);
+		// 최소 1개 이상 가지고 있어야 함 (힌트 제공 가능)
+		return has1 || has2;
 	});
 }
 
@@ -210,11 +210,36 @@ function generateRandomOrder(currentTurn: number, _difficulty: number = 1): Cust
 		}
 	}
 
-	// 주문 가능한 레시피가 없으면 모든 요리 레시피에서 선택
+	// 주문 가능한 레시피가 없으면 해당 등급의 모든 요리에서 선택
 	if (orderableRecipes.length === 0) {
 		const allDishRecipes = getDishRecipes();
 		if (allDishRecipes.length === 0) return null;
-		orderableRecipes = allDishRecipes;
+
+		// 등급 필터링 적용
+		for (const grade of targetGrades) {
+			const filtered = filterByGrade(allDishRecipes, grade);
+			if (filtered.length > 0) {
+				orderableRecipes = filtered;
+				break;
+			}
+		}
+
+		// 그래도 없으면 F, E, D 순서로 시도
+		if (orderableRecipes.length === 0) {
+			const fallbackGrades: IngredientGrade[] = ['F', 'E', 'D', 'C'];
+			for (const grade of fallbackGrades) {
+				const filtered = filterByGrade(allDishRecipes, grade);
+				if (filtered.length > 0) {
+					orderableRecipes = filtered;
+					break;
+				}
+			}
+		}
+
+		// 최후의 수단: 아무 요리나
+		if (orderableRecipes.length === 0) {
+			orderableRecipes = allDishRecipes;
+		}
 	}
 
 	// 랜덤 선택
