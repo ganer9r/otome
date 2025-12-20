@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { getSoundManager } from '$lib/domain/sound';
 	import IngredientSelectScreen from '../components/IngredientSelectScreen.svelte';
 	import CookingScreen from '../components/CookingScreen.svelte';
 	import DishResultScreen from '../components/DishResultScreen.svelte';
@@ -344,6 +345,9 @@
 
 	// 런 시작 (페이지 진입 시)
 	onMount(() => {
+		// BGM 재생
+		getSoundManager().playBgm('cook');
+
 		if (!runState.isRunning) {
 			runStore.startRun();
 			// 손님 시스템 초기화 및 첫 주문 생성

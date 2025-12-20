@@ -6,6 +6,7 @@
 	import { runStore, upgradeStore } from '../lib/store';
 	import type { Ingredient } from '../lib/types';
 	import type { Snippet } from 'svelte';
+	import { getSoundManager } from '$lib/domain/sound';
 
 	interface Props {
 		/** 선택된 재료 ID 배열 (양방향 바인딩) */
@@ -100,6 +101,9 @@
 				runStore.earn(getDiscountedPrice(ingredient.buyPrice)); // 할인된 가격으로 환불
 			}
 			selectedIds = selectedIds.filter((_, i) => i !== slotIndex);
+
+			// 재료 제거 효과음
+			getSoundManager().playSfx('click');
 		}
 	}
 

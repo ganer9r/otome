@@ -12,6 +12,7 @@
 	import { GRADE_COLORS, GRADE_NAMES, GRADE_ORDER } from '../lib/types';
 	import type { IngredientGrade, Ingredient } from '../lib/types';
 	import { haptic } from '../lib/native-bridge';
+	import { getSoundManager } from '$lib/domain/sound';
 
 	interface Props {
 		/** 선택된 재료 ID 배열 (양방향 바인딩) */
@@ -123,7 +124,8 @@
 			// NEW 뱃지 제거
 			newIngredientsStore.markSeen(ingredient.id);
 
-			// 재료 선택 진동
+			// 재료 선택 효과음 + 진동
+			getSoundManager().playSfx('click');
 			haptic('light');
 		}
 	}

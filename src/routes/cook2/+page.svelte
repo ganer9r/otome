@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { unlockedIngredientsStore, unlockedDishesStore, runStore, starStore } from './lib/store';
 	import { customerStore } from './lib/customer-store';
+	import { getSoundManager } from '$lib/domain/sound';
 	// import { missionStore } from './lib/mission-store';
 	// import { DAILY_MISSIONS } from './lib/data/missions';
 	// import type { MissionProgress } from './lib/types';
@@ -64,6 +65,9 @@
 
 	onMount(() => {
 		greeting = getRandomDialogue('default');
+
+		// 홈에서는 BGM 정지
+		getSoundManager().stopBgm();
 
 		// 런 중인데 오더가 없으면 생성
 		if (runState.isRunning && !currentOrder) {

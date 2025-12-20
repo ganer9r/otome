@@ -13,7 +13,7 @@ import * as NavigationBar from 'expo-navigation-bar';
 import { useNotifications } from './src/hooks/useNotifications';
 import { useBridge, bridgeScript } from './src/bridge';
 
-const GAME_URL = __DEV__ ? 'http://192.168.0.53:5174/cook2' : 'https://otome.pages.dev/cook2';
+const GAME_URL = __DEV__ ? 'http://192.168.0.13:5174/cook2' : 'https://otome.pages.dev/cook2';
 
 export default function App() {
 	const webViewRef = useRef<WebView>(null);
@@ -29,10 +29,10 @@ export default function App() {
 		// Analytics: 앱 시작 이벤트
 		logEvent(analyticsInstance, 'app_open');
 
-		// Android: 네비게이션 바 투명 + edge-to-edge
+		// Android: 네비게이션 바 숨김 (immersive mode)
 		if (Platform.OS === 'android') {
-			NavigationBar.setBackgroundColorAsync('transparent');
-			NavigationBar.setPositionAsync('absolute');
+			NavigationBar.setVisibilityAsync('hidden');
+			NavigationBar.setBehaviorAsync('overlay-swipe');
 		}
 	}, []);
 
