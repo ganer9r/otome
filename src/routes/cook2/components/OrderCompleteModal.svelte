@@ -4,14 +4,18 @@
 	import { getCustomerImagePath } from '../lib/customer-store';
 	import AnticipationOverlay from './AnticipationOverlay.svelte';
 	import GameButton from './GameButton.svelte';
+	import CoinFlyEffect from './CoinFlyEffect.svelte';
 
 	interface Props {
 		order: CustomerOrder;
 		onClose: () => void;
 		autoClose?: boolean;
+		/** 코인 타겟 위치 (capital-badge) */
+		coinTargetX?: number;
+		coinTargetY?: number;
 	}
 
-	let { order, onClose, autoClose = false }: Props = $props();
+	let { order, onClose, autoClose = false, coinTargetX, coinTargetY }: Props = $props();
 
 	// 기대감 연출 완료 여부
 	let showAnticipation = $state(true);
@@ -63,14 +67,53 @@
 	}
 
 	let isExiting = $state(false);
+	let showCoinEffect = $state(false);
+	let coinStartX = $state(0);
+	let coinStartY = $state(0);
+	let actualTargetX = $state(0);
+	let actualTargetY = $state(0);
+	let bonusCardRef = $state<HTMLDivElement | null>(null);
 
 	function handleClose() {
 		if (canClose && !isExiting) {
-			isExiting = true;
-			setTimeout(() => {
-				onClose();
-			}, 300);
+			// 보너스 카드 위치에서 코인 시작
+			if (bonusCardRef) {
+				const rect = bonusCardRef.getBoundingClientRect();
+				coinStartX = rect.left + rect.width / 2;
+				coinStartY = rect.top + rect.height / 2;
+			}
+
+			// 타겟 위치 결정 (props 없으면 DOM에서 찾기)
+			if (coinTargetX && coinTargetY) {
+				actualTargetX = coinTargetX;
+				actualTargetY = coinTargetY;
+			} else {
+				const capitalBadge = document.querySelector('.capital-badge');
+				if (capitalBadge) {
+					const rect = capitalBadge.getBoundingClientRect();
+					actualTargetX = rect.left + rect.width / 2;
+					actualTargetY = rect.top + rect.height / 2;
+				} else {
+					// fallback: 화면 상단 좌측
+					actualTargetX = 80;
+					actualTargetY = 40;
+				}
+			}
+
+			// 코인 효과 시작 (모달은 유지)
+			showCoinEffect = true;
 		}
+	}
+
+	function onCoinComplete() {
+		// 코인 효과 완료 후 모달 exit
+		showCoinEffect = false;
+		isExiting = true;
+
+		// exit 애니메이션 후 onClose
+		setTimeout(() => {
+			onClose();
+		}, 300);
 	}
 </script>
 
@@ -97,7 +140,7 @@
 		<div class="customer-message">"{order.completeMessage}"</div>
 
 		<!-- 보너스 카드 -->
-		<div class="bonus-card">
+		<div class="bonus-card" bind:this={bonusCardRef}>
 			<div class="bonus-header">
 				<span class="bonus-icon">💰</span>
 				<span class="bonus-title">보너스를 받았어요!</span>
@@ -120,6 +163,18 @@
 		</GameButton>
 	</div>
 </div>
+
+<!-- 코인 날아가는 효과 -->
+{#if showCoinEffect}
+	<CoinFlyEffect
+		coinCount={15}
+		startX={coinStartX}
+		startY={coinStartY}
+		targetX={actualTargetX}
+		targetY={actualTargetY}
+		onComplete={onCoinComplete}
+	/>
+{/if}
 
 <style lang="postcss">
 	@reference '$styles/app.css';

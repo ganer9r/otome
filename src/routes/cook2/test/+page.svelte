@@ -15,7 +15,7 @@
 		customerId: 1,
 		recipe: testRecipe,
 		dish: testDish,
-		bonusAmount: 50,
+		bonusAmount: 150,
 		createdAtTurn: 0,
 		completed: false,
 		hintRevealed: false,
@@ -32,9 +32,20 @@
 	let showArrival = $state(false);
 	let showComplete = $state(false);
 	let showFail = $state(false);
+
+	// 테스트용 자본금
+	let testCapital = $state(1000);
 </script>
 
 <div class="test-container">
+	<!-- 상단 HUD (코인 타겟용) -->
+	<div class="test-hud">
+		<div class="capital-badge">
+			<span class="capital-icon">💰</span>
+			<span class="capital-value">{testCapital.toLocaleString()}원</span>
+		</div>
+	</div>
+
 	<h1>모달 테스트</h1>
 
 	<div class="button-group">
@@ -51,7 +62,14 @@
 {/if}
 
 {#if showComplete}
-	<OrderCompleteModal order={testOrder} onClose={() => (showComplete = false)} autoClose={false} />
+	<OrderCompleteModal
+		order={testOrder}
+		onClose={() => {
+			showComplete = false;
+			testCapital += testOrder.bonusAmount;
+		}}
+		autoClose={false}
+	/>
 {/if}
 
 {#if showFail}
@@ -66,6 +84,29 @@
 		@apply min-h-screen;
 		@apply p-8;
 		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
+	}
+
+	/* 테스트용 HUD */
+	.test-hud {
+		@apply fixed top-4 left-4 z-50;
+	}
+
+	.capital-badge {
+		@apply flex items-center gap-1;
+		@apply px-3 py-1.5;
+		@apply rounded-full;
+		background: linear-gradient(180deg, #3d3d3d 0%, #1a1a1a 100%);
+		border: 2px solid #5a5a5a;
+		box-shadow: 0 2px 0 #0d0d0d;
+	}
+
+	.capital-icon {
+		font-size: 14px;
+	}
+
+	.capital-value {
+		@apply font-bold text-white;
+		font-size: 14px;
 	}
 
 	h1 {
