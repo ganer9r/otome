@@ -2,6 +2,7 @@
 	import type { CustomerOrder } from '../lib/customer-store';
 	import { getCustomerImagePath } from '../lib/customer-store';
 	import AnticipationOverlay from './AnticipationOverlay.svelte';
+	import GameButton from './GameButton.svelte';
 
 	interface Props {
 		order: CustomerOrder;
@@ -99,9 +100,15 @@
 		{/if}
 
 		<!-- 닫기 버튼 -->
-		<button class="close-btn" class:ready={canClose} onclick={handleClose} disabled={!canClose}
-			>확인</button
+		<GameButton
+			variant="danger"
+			size="lg"
+			class="close-btn {canClose ? 'ready' : ''}"
+			onclick={handleClose}
+			disabled={!canClose}
 		>
+			확인
+		</GameButton>
 	</div>
 </div>
 
@@ -398,33 +405,13 @@
 	}
 
 	/* 닫기 버튼 */
-	.close-btn {
-		@apply w-full rounded-xl py-3 font-bold;
-		font-size: 16px;
-		color: white;
-		background: linear-gradient(180deg, #9ca3af 0%, #6b7280 100%);
-		border: none;
-		border-bottom: 3px solid #4b5563;
-		box-shadow: 0 3px 0 #374151;
+	:global(.close-btn) {
+		@apply w-full;
 		opacity: 0.6;
-		cursor: not-allowed;
 		transition: all 0.3s ease;
 	}
 
-	.close-btn.ready {
-		background: linear-gradient(180deg, #f87171 0%, #ef4444 100%);
-		border-bottom-color: #dc2626;
-		box-shadow: 0 3px 0 #b91c1c;
+	:global(.close-btn.ready) {
 		opacity: 1;
-		cursor: pointer;
-	}
-
-	.close-btn.ready:hover {
-		filter: brightness(1.05);
-	}
-
-	.close-btn.ready:active {
-		transform: translateY(2px);
-		box-shadow: 0 1px 0 #b91c1c;
 	}
 </style>

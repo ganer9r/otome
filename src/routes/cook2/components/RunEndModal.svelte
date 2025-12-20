@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getChefImage, getRandomDialogue, type ChefEmotion } from '../lib/chef-images';
+	import GameButton from './GameButton.svelte';
 
 	interface Props {
 		/** 파산 여부 */
@@ -67,7 +68,7 @@
 		</div>
 
 		<!-- 확인 버튼 -->
-		<button type="button" class="confirm-btn" onclick={onConfirm}> 확인 </button>
+		<GameButton variant="primary" size="lg" class="w-full" onclick={onConfirm}>확인</GameButton>
 	</div>
 </div>
 
@@ -185,26 +186,5 @@
 	.star-icon {
 		width: 22px;
 		height: 22px;
-	}
-
-	.confirm-btn {
-		@apply w-full;
-		@apply px-6 py-3;
-		@apply rounded-xl;
-		@apply font-bold;
-		@apply transition-all;
-		background: linear-gradient(to bottom, #ffb74d, #ff9800);
-		color: #5d4037;
-		border: 3px solid #f57c00;
-		box-shadow: 0 4px 0 #e65100;
-	}
-
-	.confirm-btn:hover {
-		filter: brightness(1.05);
-	}
-
-	.confirm-btn:active {
-		box-shadow: 0 2px 0 #e65100;
-		transform: translateY(2px) scale(0.95);
 	}
 </style>

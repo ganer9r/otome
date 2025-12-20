@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { RotateCcw, Sparkles } from 'lucide-svelte';
 	import type { ModalProps } from '$lib/stores/modal';
+	import GameButton from './GameButton.svelte';
 
 	export interface RestartModalProps extends ModalProps {}
 
@@ -26,26 +27,26 @@
 	</div>
 
 	<!-- 다시하기 버튼 (확인 버튼과 동일한 위치/크기) -->
-	<button type="button" class="btn btn-primary btn-lg btn-block restart-button" onclick={handleRestart}>
+	<GameButton size="lg" class="restart-button" onclick={handleRestart}>
 		<RotateCcw size={24} />
 		<span>다시하기</span>
-	</button>
+	</GameButton>
 </div>
 
 <style lang="postcss">
 	@reference '$styles/app.css';
 
 	.restart-modal {
-		@apply flex flex-col items-center w-full;
+		@apply flex w-full flex-col items-center;
 		@apply relative;
 		height: 65vh;
 	}
 
 	.content-card {
 		@apply flex flex-col items-center gap-4;
-		@apply w-full p-8 rounded-2xl;
-		@apply bg-gradient-to-br from-primary/5 to-secondary/5;
-		@apply border-4 border-primary/20;
+		@apply w-full rounded-2xl p-8;
+		@apply from-primary/5 to-secondary/5 bg-gradient-to-br;
+		@apply border-primary/20 border-4;
 		@apply shadow-2xl;
 		@apply flex-1 overflow-y-auto;
 		@apply mb-[76px];

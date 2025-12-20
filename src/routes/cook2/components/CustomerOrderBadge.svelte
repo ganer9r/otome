@@ -4,6 +4,7 @@
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { getUnlockedIngredients } from '../lib/usecase/unlockIngredient';
 	import { GRADE_COLORS } from '../lib/types';
+	import GameButton from './GameButton.svelte';
 
 	// Props
 	interface Props {
@@ -270,10 +271,10 @@
 
 						<!-- RV 버튼 (힌트 미공개 시) -->
 						{#if !allHintsRevealed}
-							<button class="rv-button" onclick={handleWatchAd}>
+							<GameButton size="sm" variant="secondary" class="rv-button" onclick={handleWatchAd}>
 								<span class="rv-icon">📺</span>
 								<span class="rv-text">광고 보고 힌트 보기</span>
-							</button>
+							</GameButton>
 						{/if}
 
 						<div class="info-row">

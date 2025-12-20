@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getChefImage, getRandomDialogue } from '../lib/chef-images';
+	import GameButton from './GameButton.svelte';
 
 	interface Props {
 		/** 재료비 손실 */
@@ -183,7 +184,9 @@
 					<div class="chef-bubble">{chefDialogue}</div>
 					<img src={chefImage} alt="셰프" class="chef-img" />
 				</div>
-				<button type="button" class="confirm-btn" onclick={handleConfirm}>확인</button>
+				<GameButton variant="secondary" size="lg" class="w-full max-w-xs" onclick={handleConfirm}>
+					확인
+				</GameButton>
 			</div>
 		</div>
 	{/if}
@@ -614,25 +617,6 @@
 		width: clamp(100px, 28vw, 140px);
 		height: auto;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-	}
-
-	.confirm-btn {
-		@apply w-full max-w-xs;
-		@apply py-4;
-		@apply rounded-2xl;
-		@apply font-bold;
-		font-size: clamp(18px, 4.5vw, 24px);
-		background: linear-gradient(180deg, #6b7280 0%, #4b5563 100%);
-		color: white;
-		border: none;
-		border-bottom: 5px solid #374151;
-		box-shadow: 0 4px 12px rgba(55, 65, 81, 0.3);
-		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	}
-
-	.confirm-btn:active {
-		border-bottom-width: 2px;
-		transform: translateY(3px);
 	}
 
 	/* 스킵 힌트 */

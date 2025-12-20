@@ -2,6 +2,7 @@
 	import { Flame, Coins, ChevronLeft } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import IngredientGrid from './IngredientGrid.svelte';
+	import GameButton from './GameButton.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { runStore, upgradeStore } from '../lib/store';
 	import type { Ingredient } from '../lib/types';
@@ -231,10 +232,10 @@
 			<div class="cost-display" class:bounce={costBounce}>
 				재료비: {totalCost > 0 ? `${totalCost}원` : '-'}
 			</div>
-			<button type="button" class="cook-button" disabled={!canCook} onclick={handleCook}>
+			<GameButton class="cook-button" disabled={!canCook} onclick={handleCook}>
 				<Flame size={20} class="flame-icon" />
 				<span class="button-text">요리하기</span>
-			</button>
+			</GameButton>
 		</div>
 	</div>
 

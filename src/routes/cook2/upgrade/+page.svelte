@@ -8,6 +8,7 @@
 		type UpgradeType
 	} from '../lib/store';
 	import GameHeader from '../components/GameHeader.svelte';
+	import GameButton from '../components/GameButton.svelte';
 
 	// 보유 스타
 	let totalStars = $derived($starStore);
@@ -74,17 +75,19 @@
 							<p class="upgrade-desc">{info.description}</p>
 						</div>
 						{#if isMaxLevel}
-							<button class="purchase-button max" disabled> MAX </button>
+							<GameButton size="sm" variant="secondary" class="purchase-button max" disabled>
+								MAX
+							</GameButton>
 						{:else}
-							<button
+							<GameButton
+								size="sm"
 								class="purchase-button"
-								class:disabled={!canAfford}
 								disabled={!canAfford}
 								onclick={() => handleUpgradePurchase(info.type)}
 							>
 								<img src="/imgs/ui/star.png" alt="star" class="button-star" />
 								<span>{cost}</span>
-							</button>
+							</GameButton>
 						{/if}
 					</div>
 

@@ -3,6 +3,7 @@
 	import type { Ingredient, CookResult } from '../lib/types';
 	import { GRADE_COLORS, GRADE_NAMES } from '../lib/types';
 	import { getChefImage, getRandomDialogue, type ChefEmotion } from '../lib/chef-images';
+	import GameButton from './GameButton.svelte';
 
 	interface Props {
 		resultIngredient: Ingredient;
@@ -327,9 +328,14 @@
 						<div class="chef-bubble" class:fail-bubble={isFail}>{chefDialogue}</div>
 						<img src={chefImage} alt="셰프" class="chef-img" />
 					</div>
-					<button type="button" class="confirm-btn" class:fail-btn={isFail} onclick={handleConfirm}>
+					<GameButton
+						variant={isFail ? 'secondary' : 'primary'}
+						size="lg"
+						class="w-full max-w-xs"
+						onclick={handleConfirm}
+					>
 						{isFail ? '다시 도전' : '확인'}
-					</button>
+					</GameButton>
 				</div>
 			{/if}
 		</div>
@@ -708,25 +714,6 @@
 		width: clamp(100px, 28vw, 140px);
 		height: auto;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-	}
-
-	.confirm-btn {
-		@apply w-full max-w-xs;
-		@apply py-4;
-		@apply rounded-2xl;
-		@apply font-bold;
-		font-size: clamp(18px, 4.5vw, 24px);
-		background: linear-gradient(180deg, #7cc576 0%, #4caf50 100%);
-		color: white;
-		border: none;
-		border-bottom: 5px solid #2d6b2f;
-		box-shadow: 0 4px 12px rgba(45, 107, 47, 0.3);
-		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	}
-
-	.confirm-btn:active {
-		border-bottom-width: 2px;
-		transform: translateY(3px);
 	}
 
 	/* 스킵 힌트 */

@@ -4,6 +4,7 @@
 	import { unlockedIngredientsStore, unlockedDishesStore, runStore, starStore } from './lib/store';
 	import { customerStore } from './lib/customer-store';
 	import { getSoundManager } from '$lib/domain/sound';
+	import GameButton from './components/GameButton.svelte';
 	// import { missionStore } from './lib/mission-store';
 	// import { DAILY_MISSIONS } from './lib/data/missions';
 	// import type { MissionProgress } from './lib/types';
@@ -205,15 +206,15 @@
 					<span class="order-dish">{currentOrder.dish.name}</span>
 				</div>
 			{/if}
-			<button class="play-button" onclick={continueGame}>
+			<GameButton size="lg" class="play-button" onclick={continueGame}>
 				<span class="play-icon">▶</span>
 				<span class="play-text">계속하기</span>
-			</button>
+			</GameButton>
 		{:else}
-			<button class="play-button" onclick={startGame}>
+			<GameButton size="lg" class="play-button" onclick={startGame}>
 				<span class="play-icon">▶</span>
 				<span class="play-text">요리 시작</span>
-			</button>
+			</GameButton>
 		{/if}
 	</div>
 

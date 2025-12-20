@@ -5,6 +5,7 @@
 	import { cubicOut, elasticOut } from 'svelte/easing';
 	import { battleStore } from '../lib/battle-store';
 	import { findIngredientById } from '../../lib/data/ingredients';
+	import GameButton from '../../components/GameButton.svelte';
 
 	// 대결 상태
 	let battleState = $derived($battleStore);
@@ -236,13 +237,10 @@
 							</div>
 							<span class="serve-name">{finalDish?.name ?? '???'}</span>
 						</div>
-						<button class="battle-button" onclick={goToBattle}>
-							<img src="/imgs/ui/button_rectangle_depth_gradient.png" alt="" class="btn-bg" />
-							<span class="btn-content">
-								<span class="btn-icon">⚔️</span>
-								<span class="btn-text">대결 출전!</span>
-							</span>
-						</button>
+						<GameButton size="lg" class="battle-button" onclick={goToBattle}>
+							<span class="btn-icon">⚔️</span>
+							<span class="btn-text">대결 출전!</span>
+						</GameButton>
 					</div>
 				{/if}
 			</div>

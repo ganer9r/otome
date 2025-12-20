@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getChefImage, getRandomDialogue } from '../lib/chef-images';
+	import GameButton from './GameButton.svelte';
 
 	interface Props {
 		taxAmount: number;
@@ -38,7 +39,7 @@
 			</div>
 		</div>
 
-		<button type="button" class="confirm-btn" onclick={onConfirm}>확인</button>
+		<GameButton variant="primary" size="lg" class="w-full" onclick={onConfirm}>확인</GameButton>
 	</div>
 </div>
 
@@ -145,26 +146,5 @@
 	.divider {
 		border-top: 2px solid #e8d4a8;
 		@apply my-2;
-	}
-
-	.confirm-btn {
-		@apply w-full;
-		@apply px-6 py-3;
-		@apply rounded-xl;
-		@apply font-bold;
-		@apply transition-all;
-		background: linear-gradient(to bottom, #64b5f6, #2196f3);
-		color: white;
-		border: 3px solid #1976d2;
-		box-shadow: 0 4px 0 #1565c0;
-	}
-
-	.confirm-btn:hover {
-		filter: brightness(1.05);
-	}
-
-	.confirm-btn:active {
-		box-shadow: 0 2px 0 #1565c0;
-		transform: translateY(2px) scale(0.95);
 	}
 </style>

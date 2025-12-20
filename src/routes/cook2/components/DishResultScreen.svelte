@@ -7,6 +7,7 @@
 	import { getChefImage, getRandomDialogue, type ChefEmotion } from '../lib/chef-images';
 	import ResultCard from './ResultCard.svelte';
 	import DishResult from './DishResult.svelte';
+	import GameButton from './GameButton.svelte';
 
 	interface Props {
 		resultIngredient: Ingredient;
@@ -305,11 +306,13 @@
 						<!-- 버튼 -->
 						<div class="button-row">
 							{#if onUseNow}
-								<button type="button" class="btn-secondary" onclick={handleUseNow}
-									>바로 써보기</button
-								>
+								<GameButton variant="secondary" size="lg" class="flex-1" onclick={handleUseNow}>
+									바로 써보기
+								</GameButton>
 							{/if}
-							<button type="button" class="btn-primary" onclick={handleConfirm}>확인</button>
+							<GameButton variant="primary" size="lg" class="flex-1" onclick={handleConfirm}>
+								확인
+							</GameButton>
 						</div>
 					</div>
 				{/if}
@@ -913,42 +916,5 @@
 		@apply flex gap-3;
 		@apply w-full;
 		max-width: 24rem;
-	}
-
-	.btn-primary {
-		@apply flex-1;
-		@apply py-4;
-		@apply rounded-2xl;
-		@apply font-bold;
-		font-size: clamp(16px, 4vw, 20px);
-		background: linear-gradient(180deg, #7cc576 0%, #4caf50 100%);
-		color: white;
-		border: none;
-		border-bottom: 5px solid #2d6b2f;
-		box-shadow: 0 4px 12px rgba(45, 107, 47, 0.3);
-		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	}
-
-	.btn-primary:active {
-		border-bottom-width: 2px;
-		transform: translateY(3px);
-	}
-
-	.btn-secondary {
-		@apply flex-1;
-		@apply py-4;
-		@apply rounded-2xl;
-		@apply font-bold;
-		font-size: clamp(14px, 3.5vw, 18px);
-		background: linear-gradient(180deg, #fff 0%, #f5f5f5 100%);
-		color: #5d4037;
-		border: 3px solid #8b7355;
-		border-bottom-width: 5px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	}
-
-	.btn-secondary:active {
-		border-bottom-width: 2px;
-		transform: translateY(3px);
 	}
 </style>

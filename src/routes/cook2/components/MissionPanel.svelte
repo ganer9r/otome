@@ -2,6 +2,7 @@
 	import { missionStore } from '../lib/mission-store';
 	import { DAILY_MISSIONS, ACHIEVEMENTS } from '../lib/data/missions';
 	import type { MissionDefinition, MissionProgress } from '../lib/types';
+	import GameButton from './GameButton.svelte';
 
 	interface Props {
 		/** 표시할 카테고리 */
@@ -64,9 +65,14 @@
 							{#if progress.claimed}
 								<span class="claimed-badge">완료</span>
 							{:else if progress.completed}
-								<button type="button" class="claim-btn" onclick={() => handleClaim(mission.id)}>
+								<GameButton
+									variant="primary"
+									size="sm"
+									class="claim-btn"
+									onclick={() => handleClaim(mission.id)}
+								>
 									+{mission.reward}
-								</button>
+								</GameButton>
 							{:else}
 								<span class="reward-preview">+{mission.reward}</span>
 							{/if}
@@ -100,9 +106,14 @@
 							</div>
 							<div class="mission-reward">
 								{#if progress.completed}
-									<button type="button" class="claim-btn" onclick={() => handleClaim(mission.id)}>
+									<GameButton
+										variant="primary"
+										size="sm"
+										class="claim-btn"
+										onclick={() => handleClaim(mission.id)}
+									>
 										+{mission.reward}
-									</button>
+									</GameButton>
 								{:else}
 									<span class="reward-preview">+{mission.reward}</span>
 								{/if}
@@ -193,19 +204,8 @@
 		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 	}
 
-	.claim-btn {
-		@apply rounded-lg px-3 py-2 font-bold;
-		background: linear-gradient(180deg, #ffd54f 0%, #ffb300 100%);
-		color: #5d4037;
-		border: 2px solid #ff8f00;
-		border-bottom-width: 4px;
-		font-size: 14px;
+	:global(.claim-btn) {
 		animation: pulse 1s ease-in-out infinite;
-	}
-
-	.claim-btn:active {
-		border-bottom-width: 2px;
-		transform: translateY(2px);
 	}
 
 	@keyframes pulse {

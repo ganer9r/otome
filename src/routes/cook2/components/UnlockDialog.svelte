@@ -5,6 +5,7 @@
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { getRequiredIngredients } from '../lib/data/recipes';
 	import { starStore, permanentUnlockStore, UNLOCK_COSTS } from '../lib/store';
+	import GameButton from './GameButton.svelte';
 
 	interface Props {
 		ingredient: Ingredient | null;
@@ -165,9 +166,10 @@
 						<span class="cost-amount">{totalCost}</span>
 					</div>
 
-					<button
-						class="unlock-btn"
-						class:disabled={!canAfford}
+					<GameButton
+						variant="primary"
+						size="lg"
+						class="unlock-btn w-full"
 						disabled={!canAfford}
 						onclick={handleUnlock}
 					>
@@ -176,7 +178,7 @@
 						{:else}
 							전체 해금하기
 						{/if}
-					</button>
+					</GameButton>
 
 					{#if !canAfford}
 						<p class="not-enough">스타가 부족합니다</p>
@@ -356,36 +358,6 @@
 	.cost-amount {
 		@apply text-2xl font-bold;
 		color: #e65100;
-	}
-
-	.unlock-btn {
-		@apply w-full;
-		@apply py-3;
-		@apply rounded-xl;
-		@apply font-bold;
-		@apply transition-all;
-		@apply active:scale-95;
-		background: linear-gradient(to bottom, #ab47bc, #7b1fa2);
-		color: white;
-		border: 3px solid #6a1b9a;
-		box-shadow: 0 4px 0 #4a148c;
-	}
-
-	.unlock-btn:hover:not(:disabled) {
-		filter: brightness(1.1);
-	}
-
-	.unlock-btn:active:not(:disabled) {
-		box-shadow: 0 2px 0 #4a148c;
-		transform: translateY(2px) scale(0.95);
-	}
-
-	.unlock-btn.disabled {
-		background: #e0d4c0;
-		color: #a1887f;
-		border-color: #bcaaa4;
-		box-shadow: 0 3px 0 #a1887f;
-		@apply cursor-not-allowed;
 	}
 
 	.not-enough {

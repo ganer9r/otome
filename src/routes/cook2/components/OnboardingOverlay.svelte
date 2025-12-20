@@ -28,6 +28,7 @@
 
 <script lang="ts">
 	import { browser as isBrowser } from '$app/environment';
+	import GameButton from './GameButton.svelte';
 
 	interface Props {
 		/** 현재 선택된 재료 개수 */
@@ -121,7 +122,9 @@
 					맛있는 요리를 만들어보세요!
 				</p>
 				<div class="buttons">
-					<button class="start-btn" onclick={startOnboarding}>시작하기</button>
+					<GameButton variant="primary" size="lg" class="w-full" onclick={startOnboarding}>
+						시작하기
+					</GameButton>
 					<button class="skip-btn" onclick={skipOnboarding}>건너뛰기</button>
 				</div>
 			</div>
@@ -224,28 +227,6 @@
 	.buttons {
 		@apply flex flex-col gap-3;
 		@apply w-full;
-	}
-
-	.start-btn {
-		@apply w-full py-3;
-		@apply rounded-xl;
-		@apply font-bold;
-		font-size: 16px;
-		color: white;
-		background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
-		border: none;
-		border-bottom: 4px solid #059669;
-		box-shadow: 0 4px 0 #047857;
-		transition: all 0.2s;
-	}
-
-	.start-btn:hover {
-		filter: brightness(1.05);
-	}
-
-	.start-btn:active {
-		transform: translateY(2px);
-		box-shadow: 0 2px 0 #047857;
 	}
 
 	.skip-btn {

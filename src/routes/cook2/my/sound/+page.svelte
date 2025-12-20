@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Volume2, VolumeX, Music, Sparkles, Play } from 'lucide-svelte';
 	import GameHeader from '../../components/GameHeader.svelte';
+	import GameButton from '../../components/GameButton.svelte';
 	import { getSoundManager } from '$lib/domain/sound';
 
 	// 사운드 설정
@@ -28,7 +29,7 @@
 
 	// SFX 테스트 재생
 	function testSfx() {
-		getSoundManager().playSfx('click');
+		getSoundManager().playSfx('button');
 	}
 
 	function handleBgmVolumeChange(e: Event) {
@@ -97,20 +98,24 @@
 		<section class="test-section">
 			<p class="test-title">테스트로 들어보기</p>
 			<div class="test-buttons">
-				<button class="test-btn" onclick={testBgm} disabled={isMuted}>
+				<GameButton class="test-btn" disabled={isMuted} onclick={testBgm}>
 					<Play size={18} />
 					<span>BGM</span>
-				</button>
-				<button class="test-btn" onclick={testSfx} disabled={isMuted}>
+				</GameButton>
+				<GameButton class="test-btn" disabled={isMuted} onclick={testSfx}>
 					<Play size={18} />
 					<span>효과음</span>
-				</button>
+				</GameButton>
 			</div>
 		</section>
 
 		<!-- 음소거 토글 -->
 		<section class="mute-section">
-			<button class="mute-button" class:muted={isMuted} onclick={toggleMute}>
+			<GameButton
+				variant={isMuted ? 'danger' : 'secondary'}
+				class="mute-button"
+				onclick={toggleMute}
+			>
 				{#if isMuted}
 					<VolumeX size={24} />
 					<div class="mute-text">
@@ -124,7 +129,7 @@
 						<span class="mute-desc">터치하여 음소거</span>
 					</div>
 				{/if}
-			</button>
+			</GameButton>
 		</section>
 	</div>
 </div>
@@ -219,28 +224,8 @@
 		@apply flex gap-3;
 	}
 
-	.test-btn {
+	:global(.test-btn) {
 		@apply flex-1;
-		@apply flex items-center justify-center gap-2;
-		@apply py-3;
-		@apply bg-primary;
-		@apply text-primary-content;
-		@apply rounded-xl;
-		@apply font-bold;
-		@apply transition-all;
-	}
-
-	.test-btn:hover {
-		@apply bg-primary/80;
-	}
-
-	.test-btn:active {
-		@apply scale-95;
-	}
-
-	.test-btn:disabled {
-		@apply opacity-40;
-		@apply cursor-not-allowed;
 	}
 
 	/* 음소거 */
@@ -248,22 +233,10 @@
 		@apply mt-auto;
 	}
 
-	.mute-button {
-		@apply flex items-center gap-4;
+	:global(.mute-button) {
 		@apply w-full;
+		@apply justify-start;
 		@apply p-5;
-		@apply bg-base-200;
-		@apply rounded-2xl;
-		@apply transition-all;
-	}
-
-	.mute-button:hover {
-		@apply bg-base-300;
-	}
-
-	.mute-button.muted {
-		@apply bg-error/20;
-		@apply text-error;
 	}
 
 	.mute-text {

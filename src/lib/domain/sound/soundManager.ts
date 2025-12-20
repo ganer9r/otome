@@ -1,7 +1,7 @@
 import { Howl, Howler } from 'howler';
 
 export type BgmKey = 'cook';
-export type SfxKey = 'click';
+export type SfxKey = 'button' | 'click';
 
 interface SoundConfig {
 	src: string;
@@ -13,6 +13,7 @@ const BGM_CONFIG: Record<BgmKey, SoundConfig> = {
 };
 
 const SFX_CONFIG: Record<SfxKey, SoundConfig> = {
+	button: { src: '/sounds/sfx/button.mp3' },
 	click: { src: '/sounds/sfx/click.mp3' }
 };
 

@@ -3,6 +3,7 @@
 	import type { CustomerOrder, OrderHint } from '../lib/customer-store';
 	import { getCustomerImagePath } from '../lib/customer-store';
 	import AnticipationOverlay from './AnticipationOverlay.svelte';
+	import GameButton from './GameButton.svelte';
 
 	interface Props {
 		order: CustomerOrder;
@@ -113,14 +114,15 @@
 		</div>
 
 		<!-- 확인 버튼 -->
-		<button
-			class="confirm-btn"
-			class:ready={animationPhase === 'ready'}
+		<GameButton
+			variant="primary"
+			size="lg"
+			class="confirm-btn {animationPhase === 'ready' ? 'ready' : ''}"
 			onclick={handleConfirm}
 			disabled={animationPhase !== 'ready'}
 		>
 			확인
-		</button>
+		</GameButton>
 	</div>
 </div>
 
@@ -360,33 +362,15 @@
 	}
 
 	/* 확인 버튼 */
-	.confirm-btn {
-		@apply w-full rounded-xl py-3 font-bold;
-		font-size: 16px;
-		color: white;
-		background: linear-gradient(180deg, #9ca3af 0%, #6b7280 100%);
-		border: none;
-		border-bottom: 3px solid #4b5563;
-		box-shadow: 0 3px 0 #374151;
+	:global(.confirm-btn) {
+		@apply w-full;
 		opacity: 0.6;
 		transform: scale(0.95);
 		transition: all 0.3s ease;
 	}
 
-	.confirm-btn.ready {
-		background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
-		border-bottom-color: #059669;
-		box-shadow: 0 3px 0 #047857;
+	:global(.confirm-btn.ready) {
 		opacity: 1;
 		transform: scale(1);
-	}
-
-	.confirm-btn.ready:hover {
-		filter: brightness(1.05);
-	}
-
-	.confirm-btn.ready:active {
-		transform: translateY(2px);
-		box-shadow: 0 1px 0 #047857;
 	}
 </style>

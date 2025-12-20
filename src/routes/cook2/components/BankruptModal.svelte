@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getChefImage, getRandomDialogue } from '../lib/chef-images';
+	import GameButton from './GameButton.svelte';
 
 	interface Props {
 		finalCapital: number;
@@ -29,7 +30,7 @@
 			</div>
 		</div>
 
-		<button type="button" class="confirm-btn" onclick={onConfirm}>다시 시작</button>
+		<GameButton variant="danger" size="lg" class="w-full" onclick={onConfirm}>다시 시작</GameButton>
 	</div>
 </div>
 
@@ -128,22 +129,5 @@
 	.value.negative {
 		@apply text-red-500;
 		font-size: 1.25rem;
-	}
-
-	.confirm-btn {
-		@apply w-full;
-		@apply px-6 py-3;
-		@apply bg-red-500 text-white;
-		@apply rounded-xl;
-		@apply font-bold;
-		@apply transition-all;
-	}
-
-	.confirm-btn:hover {
-		@apply bg-red-600;
-	}
-
-	.confirm-btn:active {
-		@apply scale-95;
 	}
 </style>
