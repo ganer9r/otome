@@ -26,11 +26,11 @@
 			phase = 'pulse3';
 		}, 2100);
 
-		// 2.6초: 완료
+		// 3초: 완료
 		setTimeout(() => {
 			phase = 'done';
 			onComplete();
-		}, 2600);
+		}, 3000);
 	});
 </script>
 
