@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { customerStore, getOrderHints } from '../lib/customer-store';
+	import { customerStore, getOrderHints, getCustomerImagePath } from '../lib/customer-store';
 	import { findRecipeByResult } from '../lib/data/recipes';
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { getUnlockedIngredients } from '../lib/usecase/unlockIngredient';
@@ -68,17 +68,17 @@
 		return 1; // 여유
 	});
 
-	// 손님 표정
-	let customerEmoji = $derived(() => {
-		if (order?.completed) return '😄';
-		switch (urgencyLevel()) {
-			case 3:
-				return '😰';
-			case 2:
-				return '😐';
-			default:
-				return '😊';
-		}
+	// 손님 표정 상태 (캐릭터 이미지용)
+	let customerImageState = $derived((): 'order' | 'success' | 'fail' => {
+		if (order?.completed) return 'success';
+		if (urgencyLevel() === 3) return 'fail'; // 긴급할 때 땀 흘리는 표정
+		return 'order';
+	});
+
+	// 손님 캐릭터 이미지 경로
+	let customerImagePath = $derived(() => {
+		if (!order) return '';
+		return getCustomerImagePath(order.customerId, customerImageState());
 	});
 
 	// 테두리 색상 (여유=초록, 보통=노랑, 긴급=빨강)
@@ -102,6 +102,17 @@
 
 	// 모든 힌트가 공개되었는지
 	let allHintsRevealed = $derived(hints.every((h) => h.revealed));
+
+	// 없는 재료(빨간색 힌트)가 있는지
+	let hasMissingIngredient = $derived(hints.some((h) => h.revealed && !h.owned));
+
+	// 힌트 말풍선 대사
+	let hintMessage = $derived(() => {
+		if (hasMissingIngredient) {
+			return '빨간 재료를 터치하면 조합법을 볼 수 있어요!';
+		}
+		return '이렇게 만들어주세요~';
+	});
 
 	function toggleExpand() {
 		expanded = !expanded;
@@ -212,7 +223,7 @@
 		>
 			<!-- 손님 얼굴 (박스 위로 튀어나옴) -->
 			<div class="customer-face">
-				<span class="face-emoji">{customerEmoji()}</span>
+				<img class="face-image" src={customerImagePath()} alt="손님" />
 			</div>
 
 			<!-- 요리 이름 박스 -->
@@ -228,7 +239,7 @@
 		{#if expanded}
 			<div class="expanded-panel" style="--border-color: {borderColor()}">
 				<div class="panel-header">
-					<span class="panel-emoji">{customerEmoji()}</span>
+					<img class="panel-face" src={customerImagePath()} alt="손님" />
 					<span class="panel-title">손님 주문</span>
 				</div>
 
@@ -243,7 +254,7 @@
 					{#if !order.completed}
 						<!-- 힌트 표시: 재료 + ??? = 요리 형태 -->
 						<div class="hint-section">
-							<span class="hint-label">조합 힌트</span>
+							<span class="hint-guide">{hintMessage()}</span>
 							<div class="hint-formula">
 								{#each hints as hint, i}
 									{#if hint.revealed}
@@ -516,9 +527,10 @@
 		z-index: 2;
 	}
 
-	.face-emoji {
-		font-size: 32px;
-		line-height: 1;
+	.face-image {
+		width: 36px;
+		height: 36px;
+		object-fit: contain;
 		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 	}
 
@@ -600,8 +612,10 @@
 		border-bottom: 2px solid var(--border-color);
 	}
 
-	.panel-emoji {
-		font-size: 20px;
+	.panel-face {
+		width: 24px;
+		height: 24px;
+		object-fit: contain;
 	}
 
 	.panel-title {
@@ -673,9 +687,10 @@
 		border: 1px solid #fcd34d;
 	}
 
-	.hint-label {
-		@apply text-xs font-medium;
+	.hint-guide {
+		@apply text-center text-xs font-medium;
 		color: #92400e;
+		margin-bottom: 2px;
 	}
 
 	.hint-formula {
