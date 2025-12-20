@@ -276,7 +276,24 @@ class SoundManager {
 // 싱글톤 인스턴스
 let instance: SoundManager | null = null;
 
+// Dummy SoundManager for SSR
+const dummySoundManager = {
+	playBgm: () => {},
+	stopBgm: () => {},
+	playSfx: () => {},
+	setBgmVolume: () => {},
+	setSfxVolume: () => {},
+	setMuted: () => {},
+	getBgmVolume: () => 100,
+	getSfxVolume: () => 100,
+	isMuted: () => false
+} as unknown as SoundManager;
+
 export function getSoundManager(): SoundManager {
+	// SSR에서는 dummy 반환
+	if (typeof window === 'undefined') {
+		return dummySoundManager;
+	}
 	if (!instance) {
 		instance = new SoundManager();
 	}

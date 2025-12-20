@@ -16,8 +16,9 @@
 
 	let { coinCount = 15, startX, startY, targetX, targetY, onComplete }: Props = $props();
 
-	// 사운드 재생 함수
+	// 사운드 재생 함수 (브라우저 전용)
 	function playSound(src: string, volume = 0.5) {
+		if (typeof window === 'undefined') return;
 		const audio = new Audio(src);
 		audio.volume = volume;
 		audio.play().catch(() => {});
