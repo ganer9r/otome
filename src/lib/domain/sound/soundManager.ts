@@ -1,4 +1,5 @@
-import { Howl, Howler } from 'howler';
+// Howler 타입만 import (런타임에는 영향 없음)
+import type { Howl as HowlType, HowlerGlobal } from 'howler';
 
 export type BgmKey = 'cook';
 export type SfxKey = 'button' | 'click';
@@ -37,18 +38,39 @@ const DEFAULT_SETTINGS: SoundSettings = {
 };
 
 class SoundManager {
-	private bgmSounds: Map<BgmKey, Howl> = new Map();
-	private sfxSounds: Map<SfxKey, Howl> = new Map();
+	private bgmSounds: Map<BgmKey, HowlType> = new Map();
+	private sfxSounds: Map<SfxKey, HowlType> = new Map();
 	private currentBgm: BgmKey | null = null;
 	private isUnlocked = false;
 	private pendingBgm: BgmKey | null = null;
 	private settings: SoundSettings;
+	private initialized = false;
+	private HowlClass: typeof HowlType | null = null;
+	private HowlerInstance: HowlerGlobal | null = null;
 
 	constructor() {
 		this.settings = this.loadSettings();
-		this.preloadAll();
-		this.setupUnlock();
-		this.applySettings();
+	}
+
+	/**
+	 * Howler 동적 로드 및 초기화
+	 */
+	private async init() {
+		if (this.initialized) return;
+		if (typeof window === 'undefined') return;
+
+		try {
+			const howlerModule = await import('howler');
+			this.HowlClass = howlerModule.Howl;
+			this.HowlerInstance = howlerModule.Howler;
+
+			this.preloadAll();
+			this.setupUnlock();
+			this.applySettings();
+			this.initialized = true;
+		} catch (e) {
+			console.error('[SoundManager] Failed to load howler:', e);
+		}
 	}
 
 	/**
@@ -85,7 +107,7 @@ class SoundManager {
 	private applySettings() {
 		this.applyBgmVolume();
 		this.applySfxVolume();
-		Howler.mute(this.settings.muted);
+		this.HowlerInstance?.mute(this.settings.muted);
 	}
 
 	/**
@@ -112,12 +134,14 @@ class SoundManager {
 	 * 모든 사운드 preload
 	 */
 	private preloadAll() {
+		if (!this.HowlClass) return;
+
 		const bgmRealVolume = (this.settings.bgmVolume / 100) * BGM_MAX_VOLUME;
 		const sfxRealVolume = (this.settings.sfxVolume / 100) * SFX_MAX_VOLUME;
 
 		// BGM preload
 		for (const [key, config] of Object.entries(BGM_CONFIG)) {
-			const howl = new Howl({
+			const howl = new this.HowlClass({
 				src: [config.src],
 				loop: config.loop ?? false,
 				volume: bgmRealVolume,
@@ -128,7 +152,7 @@ class SoundManager {
 
 		// SFX preload
 		for (const [key, config] of Object.entries(SFX_CONFIG)) {
-			const howl = new Howl({
+			const howl = new this.HowlClass({
 				src: [config.src],
 				loop: false,
 				volume: sfxRealVolume,
@@ -148,7 +172,7 @@ class SoundManager {
 			if (this.isUnlocked) return;
 
 			// Howler AudioContext resume
-			const ctx = Howler.ctx;
+			const ctx = this.HowlerInstance?.ctx;
 			if (ctx && ctx.state === 'suspended') {
 				ctx.resume();
 			}
@@ -174,7 +198,9 @@ class SoundManager {
 	/**
 	 * BGM 재생
 	 */
-	playBgm(key: BgmKey) {
+	async playBgm(key: BgmKey) {
+		await this.init();
+
 		// 아직 unlock 안 됨 → 대기
 		if (!this.isUnlocked) {
 			this.pendingBgm = key;
@@ -215,7 +241,8 @@ class SoundManager {
 	/**
 	 * 효과음 재생
 	 */
-	playSfx(key: SfxKey) {
+	async playSfx(key: SfxKey) {
+		await this.init();
 		if (!this.isUnlocked) return;
 
 		const sound = this.sfxSounds.get(key);
@@ -245,9 +272,10 @@ class SoundManager {
 	/**
 	 * 음소거 설정
 	 */
-	setMuted(muted: boolean) {
+	async setMuted(muted: boolean) {
+		await this.init();
 		this.settings.muted = muted;
-		Howler.mute(muted);
+		this.HowlerInstance?.mute(muted);
 		this.saveSettings();
 	}
 
@@ -278,12 +306,12 @@ let instance: SoundManager | null = null;
 
 // Dummy SoundManager for SSR
 const dummySoundManager = {
-	playBgm: () => {},
+	playBgm: async () => {},
 	stopBgm: () => {},
-	playSfx: () => {},
+	playSfx: async () => {},
 	setBgmVolume: () => {},
 	setSfxVolume: () => {},
-	setMuted: () => {},
+	setMuted: async () => {},
 	getBgmVolume: () => 100,
 	getSfxVolume: () => 100,
 	isMuted: () => false
