@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { dev } from '$app/environment';
-	import { Settings, RotateCcw, Info, Play, Film } from 'lucide-svelte';
+	import { goto } from '$app/navigation';
+	import { Settings, RotateCcw, Info, Play, Film, Volume2, ChevronRight } from 'lucide-svelte';
 	import {
 		unlockedIngredientsStore,
 		unlockedDishesStore,
@@ -16,6 +17,10 @@
 	let successCombinations = $derived(Object.keys($successCombinationsStore).length);
 
 	let showResetConfirm = $state(false);
+
+	function goSoundSettings() {
+		goto('/cook2/my/sound');
+	}
 
 	// 광고 테스트
 	let showAdResult = $state(false);
@@ -98,6 +103,11 @@
 		</h2>
 
 		<div class="settings-list">
+			<button class="setting-item" onclick={goSoundSettings}>
+				<Volume2 size={20} />
+				<span>사운드 설정</span>
+				<ChevronRight size={18} class="ml-auto opacity-50" />
+			</button>
 			<button class="setting-item danger" onclick={() => (showResetConfirm = true)}>
 				<RotateCcw size={20} />
 				<span>진행 상황 초기화</span>
