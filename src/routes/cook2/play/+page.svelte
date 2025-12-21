@@ -77,29 +77,26 @@
 	// 테스트용 긴급도 오버라이드
 	let testUrgency = $state<number | undefined>(undefined);
 
-	// 주문 모달 표시 여부
-	let showNewOrderModal = $derived(customerState.showNewOrderModal);
+	// 주문 상태 (customerStore에서 직접 가져옴)
+	let currentOrder = $derived(customerState.currentOrder);
+	let orderConfirmed = $derived(customerState.orderConfirmed);
 	let showOrderCompleteModal = $derived(customerState.showOrderCompleteModal);
 	let showOrderFailModal = $derived(customerState.showOrderFailModal);
-	let currentOrder = $derived(customerState.currentOrder);
 	let lastCompletedOrder = $derived(customerState.lastCompletedOrder);
 	let lastFailedOrder = $derived(customerState.lastFailedOrder);
+
+	// 새 주문 모달 표시 조건: 주문 있고 + 확인 안 됨 + 온보딩 완료
+	let onboardingDone = $state(isOnboardingComplete());
+	let showNewOrderModal = $derived(currentOrder && !orderConfirmed && onboardingDone);
+
+	// 뱃지 표시 조건: 주문 있고 + 확인됨
+	let showOrderBadge = $derived(currentOrder && orderConfirmed);
 
 	// 새 주문 모달용 힌트
 	let newOrderHints = $derived(getOrderHintsForModal(currentOrder));
 
-	// 첫 요리 완료 여부 (새 주문 모달 표시용)
-	let isFirstCookDone = $state(false);
-
-	// 주방 복귀 시 모달 표시를 위한 대기 상태
-	let pendingNewOrderModal = $state(false);
+	// 주문 완료 모달 대기 상태 (주방 복귀 시 표시)
 	let pendingCompleteModal = $state(false);
-
-	// 주문 뱃지 표시 여부 (모달 확인 후에만 표시)
-	let showOrderBadge = $state(false);
-
-	// 온보딩 완료 여부
-	let onboardingDone = $state(isOnboardingComplete());
 
 	// 조리 시작 (조리기구 선택 없이 바로)
 	function handleCookRequest() {
@@ -170,12 +167,6 @@
 			runStore.earn(earnedBonus);
 			// 주문 완료 모달 대기 (주방 복귀 시 표시)
 			pendingCompleteModal = true;
-		}
-
-		// 7. 첫 요리 완료 시 새 주문 모달 대기
-		if (!isFirstCookDone) {
-			isFirstCookDone = true;
-			pendingNewOrderModal = true;
 		}
 
 		// 8. 힌트 학습 단계 증가
@@ -305,34 +296,28 @@
 		currentIngredientCost = 0;
 		earnedBonus = 0;
 
-		// 주방 복귀 시 대기 중인 모달 표시
-		// 우선순위: 완료 모달 > 새 주문 모달
+		// 주방 복귀 시 주문 완료 모달 표시 (대기 중이었다면)
 		if (pendingCompleteModal) {
 			pendingCompleteModal = false;
-			pendingNewOrderModal = false; // 완료 모달 닫을 때 새 주문 모달이 자동으로 뜸
-			customerStore.showOrderComplete(); // 조리대 복귀 시 모달 표시
-		} else if (pendingNewOrderModal) {
-			pendingNewOrderModal = false;
-			customerStore.showNewOrder();
+			customerStore.showOrderComplete();
 		}
+		// 새 주문 모달은 자동으로 표시됨 (currentOrder && !orderConfirmed)
 	}
 
-	// 새 주문 모달 확인
+	// 새 주문 모달 확인 → 뱃지 표시
 	function handleNewOrderConfirm() {
-		customerStore.closeNewOrderModal();
-		showOrderBadge = true;
+		customerStore.confirmOrder();
 	}
 
 	// 주문 완료 모달 닫기
 	function handleOrderCompleteClose() {
-		// 주문 완료 상태 유지, 새 주문은 세금 시점에 생성
 		customerStore.closeOrderCompleteModal();
 	}
 
 	// 주문 실패 모달 닫기
 	function handleOrderFailClose() {
-		showOrderBadge = false; // 실패 후 새 주문 모달이 뜨므로 숨김
 		customerStore.closeOrderFailModal();
+		// orderConfirmed가 false로 유지되므로 새 주문 모달이 자동으로 표시됨
 	}
 
 	// 바로 써보기 (새 재료를 첫 번째 슬롯에 넣고 시작)
@@ -352,12 +337,10 @@
 			runStore.startRun();
 			// 손님 시스템 초기화 및 첫 주문 생성
 			customerStore.startRun(0);
-		} else {
-			// 이어하기: 이미 주문이 있고 모달이 닫혀있으면 뱃지 표시
-			if (currentOrder && !customerState.showNewOrderModal) {
-				showOrderBadge = true;
-			}
 		}
+		// 이어하기: 상태는 customerStore에서 자동으로 복원됨
+		// - currentOrder && orderConfirmed → 뱃지 표시
+		// - currentOrder && !orderConfirmed → 모달 표시
 	});
 </script>
 
@@ -453,7 +436,7 @@
 				{turnsUntilTax}
 			>
 				{#snippet customerBadge()}
-					<CustomerOrderBadge {turnsUntilTax} {testUrgency} visible={showOrderBadge} />
+					<CustomerOrderBadge {turnsUntilTax} {testUrgency} visible={!!showOrderBadge} />
 				{/snippet}
 			</IngredientSelectScreen>
 		{:else if step === 'cooking'}

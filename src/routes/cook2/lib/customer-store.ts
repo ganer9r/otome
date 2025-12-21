@@ -335,8 +335,10 @@ export function getOrderHintsForModal(order: CustomerOrder | null): OrderHint[] 
 }
 
 interface CustomerState {
-	/** 현재 주문 */
+	/** 현재 주문 (있으면 진행중, 없으면 주문 없음) */
 	currentOrder: CustomerOrder | null;
+	/** 주문 확인 여부 (모달을 봤는지) - true면 뱃지 표시, false면 모달 표시 */
+	orderConfirmed: boolean;
 	/** 난이도 (세금 생존 횟수에 따라 증가) = 스테이지 */
 	difficulty: number;
 	/** 총 완료한 주문 수 (전체) */
@@ -347,11 +349,9 @@ interface CustomerState {
 	stageCompletedOrders: number;
 	/** 현재 세금률 */
 	taxRate: number;
-	/** 새 주문 등장 플래그 (모달 표시용) */
-	showNewOrderModal: boolean;
-	/** 주문 완료 플래그 (모달 표시용) */
+	/** 주문 완료 모달 표시용 (임시) */
 	showOrderCompleteModal: boolean;
-	/** 주문 실패 플래그 (모달 표시용) */
+	/** 주문 실패 모달 표시용 (임시) */
 	showOrderFailModal: boolean;
 	/** 마지막 완료된 주문 (완료 모달용) */
 	lastCompletedOrder: CustomerOrder | null;
@@ -361,12 +361,12 @@ interface CustomerState {
 
 const initialState: CustomerState = {
 	currentOrder: null,
+	orderConfirmed: false,
 	difficulty: 1,
 	completedOrders: 0,
 	totalBonus: 0,
 	stageCompletedOrders: 0,
 	taxRate: STAGE_CONFIG.BASE_TAX_RATE,
-	showNewOrderModal: false,
 	showOrderCompleteModal: false,
 	showOrderFailModal: false,
 	lastCompletedOrder: null,
@@ -427,10 +427,14 @@ function getStoredCustomerState(): CustomerState {
 			}
 		}
 		// 새 필드들 기본값 보장
+		// 마이그레이션: 기존 데이터에서 orderConfirmed 결정
+		// - orderConfirmed가 이미 있으면 그대로 사용
+		// - 없으면: currentOrder가 있으면 이미 본 것으로 간주 (true)
+		const orderConfirmed = parsed.orderConfirmed ?? parsed.currentOrder !== null;
 		return {
 			...initialState,
 			...parsed,
-			showNewOrderModal: parsed.showNewOrderModal ?? false,
+			orderConfirmed,
 			showOrderCompleteModal: parsed.showOrderCompleteModal ?? false,
 			showOrderFailModal: parsed.showOrderFailModal ?? false,
 			lastFailedOrder: parsed.lastFailedOrder ?? null
@@ -488,13 +492,13 @@ function createCustomerStore() {
 		/**
 		 * 새 주문 생성
 		 */
-		generateOrder: (currentTurn: number, showModal: boolean = true) => {
+		generateOrder: (currentTurn: number) => {
 			updateAndSave((state) => {
 				const order = generateRandomOrder(currentTurn, state.difficulty);
 				return {
 					...state,
 					currentOrder: order,
-					showNewOrderModal: showModal
+					orderConfirmed: false // 새 주문이므로 확인 안 됨 → 모달 표시
 				};
 			});
 		},
@@ -586,10 +590,10 @@ function createCustomerStore() {
 				return {
 					...state,
 					currentOrder: order,
+					orderConfirmed: false, // 새 주문이므로 확인 안 됨
 					difficulty: newDifficulty,
 					stageCompletedOrders: 0, // 스테이지 주문 수 리셋
 					taxRate: newTaxRate,
-					showNewOrderModal: !orderFailed, // 실패 모달 후에 표시
 					showOrderFailModal: orderFailed,
 					lastFailedOrder: failedOrder
 				};
@@ -619,22 +623,12 @@ function createCustomerStore() {
 		},
 
 		/**
-		 * 새 주문 모달 표시
+		 * 주문 확인 (모달 닫기 → 뱃지 표시)
 		 */
-		showNewOrder: () => {
+		confirmOrder: () => {
 			updateAndSave((state) => ({
 				...state,
-				showNewOrderModal: true
-			}));
-		},
-
-		/**
-		 * 새 주문 모달 닫기
-		 */
-		closeNewOrderModal: () => {
-			updateAndSave((state) => ({
-				...state,
-				showNewOrderModal: false
+				orderConfirmed: true
 			}));
 		},
 
@@ -667,14 +661,14 @@ function createCustomerStore() {
 		},
 
 		/**
-		 * 주문 실패 모달 닫기 + 새 주문 모달 표시
+		 * 주문 실패 모달 닫기 (새 주문이 이미 생성되어 있음 → 모달 표시됨)
 		 */
 		closeOrderFailModal: () => {
 			updateAndSave((state) => ({
 				...state,
 				showOrderFailModal: false,
-				lastFailedOrder: null,
-				showNewOrderModal: true
+				lastFailedOrder: null
+				// orderConfirmed는 false 유지 → 새 주문 모달 표시
 			}));
 		},
 
@@ -692,12 +686,12 @@ function createCustomerStore() {
 			const order = generateRandomOrder(currentTurn, 1);
 			const newState: CustomerState = {
 				currentOrder: order,
+				orderConfirmed: false, // 첫 요리 완료 후 모달 표시
 				difficulty: 1,
 				completedOrders: 0,
 				totalBonus: 0,
 				stageCompletedOrders: 0,
 				taxRate: STAGE_CONFIG.BASE_TAX_RATE,
-				showNewOrderModal: false, // 첫 요리 완료 후 모달 표시
 				showOrderCompleteModal: false,
 				showOrderFailModal: false,
 				lastCompletedOrder: null,

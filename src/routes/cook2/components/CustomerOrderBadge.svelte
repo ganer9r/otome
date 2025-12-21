@@ -30,28 +30,6 @@
 	// 펼침 상태
 	let expanded = $state(false);
 
-	// 새 주문 알림 상태
-	let isNewOrder = $state(false);
-	let lastOrderId = $state<string | null>(null);
-	let isInitialMount = $state(true);
-
-	// 새 주문 감지 (초기 마운트 시에는 새 주문으로 취급하지 않음)
-	$effect(() => {
-		if (order && order.id !== lastOrderId) {
-			const wasNewOrder = !isInitialMount && lastOrderId !== null;
-			lastOrderId = order.id;
-			isInitialMount = false;
-
-			if (wasNewOrder) {
-				isNewOrder = true;
-				// 3초 후 알림 숨기기
-				setTimeout(() => {
-					isNewOrder = false;
-				}, 3000);
-			}
-		}
-	});
-
 	// 조합 트리 노드 타입
 	interface RecipeNode {
 		id: number;
@@ -209,20 +187,12 @@
 
 <div class="badge-container" class:visible>
 	{#if order && visible}
-		<!-- 새 주문 말풍선 -->
-		{#if isNewOrder}
-			<div class="speech-bubble">
-				<span>새 주문이요~!</span>
-			</div>
-		{/if}
-
 		<!-- 접힌 상태: 뱃지 -->
 		<button
 			class="order-badge"
 			class:completed={order.completed}
 			class:urgent={urgencyLevel() === 3 && !order.completed}
 			class:warning={urgencyLevel() === 2 && !order.completed}
-			class:new-order={isNewOrder}
 			style="--border-color: {borderColor()}"
 			onclick={toggleExpand}
 		>
@@ -372,7 +342,7 @@
 	}
 
 	/* 뱃지 등장 애니메이션은 warning/urgent가 아닐 때만 */
-	.badge-container.visible .order-badge:not(.warning):not(.urgent):not(.new-order) {
+	.badge-container.visible .order-badge:not(.warning):not(.urgent) {
 		animation: badgeAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 	}
 
@@ -384,66 +354,6 @@
 		100% {
 			transform: scale(1);
 			opacity: 1;
-		}
-	}
-
-	/* 새 주문 말풍선 */
-	.speech-bubble {
-		@apply absolute;
-		@apply rounded-xl px-3 py-1.5;
-		@apply text-sm font-bold;
-		left: 90px;
-		bottom: 30px;
-		background: white;
-		color: #78350f;
-		border: 2px solid #f59e0b;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-		white-space: nowrap;
-		animation:
-			bubbleIn 0.3s ease-out,
-			bubbleBounce 0.5s ease-in-out 0.3s infinite;
-		z-index: 10;
-	}
-
-	/* 말풍선 꼬리 */
-	.speech-bubble::after {
-		content: '';
-		@apply absolute;
-		left: -8px;
-		top: 50%;
-		transform: translateY(-50%);
-		border: 6px solid transparent;
-		border-right-color: white;
-	}
-
-	.speech-bubble::before {
-		content: '';
-		@apply absolute;
-		left: -11px;
-		top: 50%;
-		transform: translateY(-50%);
-		border: 7px solid transparent;
-		border-right-color: #f59e0b;
-	}
-
-	@keyframes bubbleIn {
-		from {
-			opacity: 0;
-			transform: scale(0.5) translateX(20px);
-		}
-		to {
-			opacity: 1;
-			transform: scale(1) translateX(0);
-		}
-	}
-
-	@keyframes bubbleBounce {
-		0%,
-		100% {
-			transform: translateY(0);
-		}
-		50% {
-			transform: translateY(-3px);
 		}
 	}
 
@@ -463,30 +373,6 @@
 
 	.order-badge:active {
 		transform: scale(0.98);
-	}
-
-	/* 새 주문 흔들림 */
-	.order-badge.new-order {
-		animation: newOrderShake 0.4s ease-in-out infinite;
-	}
-
-	@keyframes newOrderShake {
-		0%,
-		100% {
-			transform: rotate(0deg) scale(1);
-		}
-		20% {
-			transform: rotate(-8deg) scale(1.05);
-		}
-		40% {
-			transform: rotate(8deg) scale(1.05);
-		}
-		60% {
-			transform: rotate(-5deg) scale(1.02);
-		}
-		80% {
-			transform: rotate(5deg) scale(1.02);
-		}
 	}
 
 	.order-badge.warning {
