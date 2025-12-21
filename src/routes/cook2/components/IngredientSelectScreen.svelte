@@ -1,13 +1,19 @@
 <script lang="ts">
-	import { Flame, Coins, ChevronLeft } from 'lucide-svelte';
+	import { Flame, Coins, ChevronLeft, HelpCircle } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import IngredientGrid from './IngredientGrid.svelte';
 	import GameButton from './GameButton.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
-	import { runStore, upgradeStore } from '../lib/store';
+	import {
+		runStore,
+		upgradeStore,
+		triedCombinationsStore,
+		successCombinationsStore
+	} from '../lib/store';
 	import type { Ingredient } from '../lib/types';
 	import type { Snippet } from 'svelte';
 	import { getSoundManager } from '$lib/domain/sound';
+	import { GRADE_COLORS } from '../lib/types';
 
 	interface Props {
 		/** 선택된 재료 ID 배열 (양방향 바인딩) */
@@ -72,6 +78,29 @@
 	let totalCost = $derived(
 		ingredients.reduce((sum, ing) => sum + getDiscountedPrice(ing?.buyPrice ?? 0), 0)
 	);
+
+	// 결과 미리보기 (2개 선택 시)
+	let previewResult = $derived.by(() => {
+		if (selectedIds.length !== 2) return null;
+
+		const hasTried = triedCombinationsStore.hasTried(selectedIds);
+		if (!hasTried) {
+			return { type: 'unknown' as const };
+		}
+
+		// 성공한 조합인지 확인
+		const successMap = $successCombinationsStore;
+		const sortedIds = [...selectedIds].sort((a, b) => a - b);
+		const key = sortedIds.join(',');
+		const resultId = successMap[key];
+
+		if (resultId) {
+			const resultIngredient = findIngredientById(resultId);
+			return { type: 'success' as const, ingredient: resultIngredient };
+		}
+
+		return { type: 'failed' as const };
+	});
 
 	// 재료비 변경 애니메이션
 	let costBounce = $state(false);
@@ -233,7 +262,17 @@
 				재료비: {totalCost > 0 ? `${totalCost}원` : '-'}
 			</div>
 			<GameButton class="cook-button" disabled={!canCook} onclick={handleCook}>
-				<Flame size={20} class="flame-icon" />
+				{#if previewResult?.type === 'success' && previewResult.ingredient}
+					<img
+						src={previewResult.ingredient.imageUrl}
+						alt={previewResult.ingredient.name}
+						class="preview-image"
+					/>
+				{:else if previewResult?.type === 'failed'}
+					<span class="fail-icon">🚫</span>
+				{:else}
+					<Flame size={20} class="flame-icon" />
+				{/if}
 				<span class="button-text">요리하기</span>
 			</GameButton>
 		</div>
@@ -522,6 +561,18 @@
 
 	.button-text {
 		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+	}
+
+	.preview-image {
+		width: 20px;
+		height: 20px;
+		object-fit: contain;
+		filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
+	}
+
+	.fail-icon {
+		font-size: 18px;
+		line-height: 1;
 	}
 
 	.cook-button :global(.flame-icon) {
