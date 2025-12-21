@@ -3,7 +3,6 @@
 	import OrderCompleteModal from '../components/OrderCompleteModal.svelte';
 	import OrderFailModal from '../components/OrderFailModal.svelte';
 	import ExplosionFailScreen from '../components/ExplosionFailScreen.svelte';
-	import DishResult from '../components/DishResult.svelte';
 	import DishResultScreen from '../components/DishResultScreen.svelte';
 	import type { CustomerOrder } from '../lib/customer-store';
 	import type { CookResult, Ingredient, IngredientGrade, Recipe } from '../lib/types';
@@ -98,7 +97,7 @@
 			: null
 	);
 
-	// 테스트용 더미 레시피 (요리용)
+	// 테스트용 더미 레시피 (DishResultScreen에 필요)
 	let dummyRecipeForDish = $derived<Recipe | null>(
 		selectedDish
 			? {
@@ -110,7 +109,6 @@
 			: null
 	);
 
-	// 테스트용 더미 레시피 (재료용)
 	let dummyRecipeForMaterial = $derived<Recipe | null>(
 		selectedMaterial
 			? {
@@ -311,67 +309,67 @@
 {/if}
 
 <!-- 요리 실패 (확률 실패) -->
-{#if showCookingFail && selectedDish && dishResultFail}
-	<DishResult
+{#if showCookingFail && selectedDish && dishResultFail && dummyRecipeForDish}
+	<DishResultScreen
 		resultIngredient={selectedDish}
+		recipe={dummyRecipeForDish}
 		cookResult={dishResultFail}
-		sellPrice={0}
-		profit={-(selectedDish.buyPrice || 100)}
+		ingredientCost={selectedDish.buyPrice || 100}
 		onComplete={() => (showCookingFail = false)}
 	/>
 {/if}
 
 <!-- 요리 성공 -->
-{#if showCookingSuccess && selectedDish && dishResultSuccess}
-	<DishResult
+{#if showCookingSuccess && selectedDish && dishResultSuccess && dummyRecipeForDish}
+	<DishResultScreen
 		resultIngredient={selectedDish}
+		recipe={dummyRecipeForDish}
 		cookResult={dishResultSuccess}
-		sellPrice={selectedDish.sellPrice || 0}
-		profit={(selectedDish.sellPrice || 0) - (selectedDish.buyPrice || 100)}
+		ingredientCost={selectedDish.buyPrice || 100}
 		onComplete={() => (showCookingSuccess = false)}
 	/>
 {/if}
 
 <!-- 요리 대성공 -->
-{#if showCookingCritical && selectedDish && dishResultCritical}
-	<DishResult
+{#if showCookingCritical && selectedDish && dishResultCritical && dummyRecipeForDish}
+	<DishResultScreen
 		resultIngredient={selectedDish}
+		recipe={dummyRecipeForDish}
 		cookResult={dishResultCritical}
-		sellPrice={(selectedDish.sellPrice || 0) * 2}
-		profit={(selectedDish.sellPrice || 0) * 2 - (selectedDish.buyPrice || 100)}
+		ingredientCost={selectedDish.buyPrice || 100}
 		onComplete={() => (showCookingCritical = false)}
 	/>
 {/if}
 
 <!-- 재료 실패 -->
-{#if showMaterialFail && selectedMaterial && materialResultFail}
-	<DishResult
+{#if showMaterialFail && selectedMaterial && materialResultFail && dummyRecipeForMaterial}
+	<DishResultScreen
 		resultIngredient={selectedMaterial}
+		recipe={dummyRecipeForMaterial}
 		cookResult={materialResultFail}
-		sellPrice={0}
-		profit={-(selectedMaterial.buyPrice || 50)}
+		ingredientCost={selectedMaterial.buyPrice || 50}
 		onComplete={() => (showMaterialFail = false)}
 	/>
 {/if}
 
 <!-- 재료 성공 -->
-{#if showMaterialSuccess && selectedMaterial && materialResultSuccess}
-	<DishResult
+{#if showMaterialSuccess && selectedMaterial && materialResultSuccess && dummyRecipeForMaterial}
+	<DishResultScreen
 		resultIngredient={selectedMaterial}
+		recipe={dummyRecipeForMaterial}
 		cookResult={materialResultSuccess}
-		sellPrice={selectedMaterial.sellPrice || 0}
-		profit={(selectedMaterial.sellPrice || 0) - (selectedMaterial.buyPrice || 50)}
+		ingredientCost={selectedMaterial.buyPrice || 50}
 		onComplete={() => (showMaterialSuccess = false)}
 	/>
 {/if}
 
 <!-- 재료 대성공 -->
-{#if showMaterialCritical && selectedMaterial && materialResultCritical}
-	<DishResult
+{#if showMaterialCritical && selectedMaterial && materialResultCritical && dummyRecipeForMaterial}
+	<DishResultScreen
 		resultIngredient={selectedMaterial}
+		recipe={dummyRecipeForMaterial}
 		cookResult={materialResultCritical}
-		sellPrice={(selectedMaterial.sellPrice || 0) * 2}
-		profit={(selectedMaterial.sellPrice || 0) * 2 - (selectedMaterial.buyPrice || 50)}
+		ingredientCost={selectedMaterial.buyPrice || 50}
 		onComplete={() => (showMaterialCritical = false)}
 	/>
 {/if}
