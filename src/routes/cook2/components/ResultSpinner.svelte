@@ -3,19 +3,16 @@
 	import type { DishResultType } from '../lib/types';
 
 	interface Props {
-		/** 미리 결정된 결과 */
-		result: DishResultType;
 		/** 확률 (UI 영역 크기용) */
 		probabilities?: { success: number; fail: number; critical: number };
-		/** 스핀 완료 콜백 */
-		onComplete?: () => void;
+		/** 스핀 완료 콜백 - 멈춘 위치의 결과 전달 */
+		onComplete?: (result: DishResultType) => void;
 	}
 
-	let {
-		result,
-		probabilities = { success: 70, fail: 20, critical: 10 },
-		onComplete
-	}: Props = $props();
+	let { probabilities = { success: 70, fail: 20, critical: 10 }, onComplete }: Props = $props();
+
+	// 실제 결과 (멈춘 위치에서 결정)
+	let actualResult: DishResultType | null = $state(null);
 
 	// 상태
 	type SpinnerState = 'ready' | 'charging' | 'spinning' | 'stopping' | 'done';
@@ -133,21 +130,23 @@
 
 	const segments = generateSegments();
 
-	// 결과에 해당하는 세그먼트 중 랜덤하게 선택
-	function getTargetSegmentIndex(): number {
-		const targetType = result === 'total_fail' ? 'fail' : result;
-		const matchingIndices: number[] = [];
+	// 현재 휠 각도에서 포인터가 가리키는 세그먼트 찾기
+	function getResultAtCurrentPosition(): DishResultType {
+		// 포인터는 12시 방향(상단)에 있음
+		// wheelRotation이 0일 때, 0도 위치가 포인터에 있음
+		// wheelRotation이 증가하면 휠이 시계방향으로 회전
+		// 포인터가 가리키는 각도 = (360 - wheelRotation) % 360
+		const pointerAngle = (360 - (wheelRotation % 360) + 360) % 360;
 
-		for (let i = 0; i < segments.length; i++) {
-			if (segments[i].type === targetType) {
-				matchingIndices.push(i);
+		for (const segment of segments) {
+			const endAngle = segment.startAngle + segment.angle;
+			if (pointerAngle >= segment.startAngle && pointerAngle < endAngle) {
+				return segment.type === 'critical' ? 'critical' : segment.type;
 			}
 		}
 
-		if (matchingIndices.length === 0) return 0;
-
-		// 랜덤하게 하나 선택
-		return matchingIndices[Math.floor(Math.random() * matchingIndices.length)];
+		// 첫 번째 세그먼트 반환 (fallback)
+		return segments[0].type === 'critical' ? 'critical' : segments[0].type;
 	}
 
 	// 꾹 누르기 시작
@@ -177,94 +176,37 @@
 	// 스핀 시작
 	function startSpin() {
 		spinnerState = 'spinning';
+		actualResult = null;
 
-		const minSpins = 4;
-		const maxSpins = 8;
-		const totalSpins = minSpins + ((maxSpins - minSpins) * power) / 100;
-
-		// 결과에 해당하는 세그먼트의 중심 각도
-		const targetIndex = getTargetSegmentIndex();
-		const targetSegment = segments[targetIndex];
-		const segmentCenter = targetSegment.startAngle + targetSegment.angle / 2;
-		const targetRotation = 360 - segmentCenter;
-
-		// 세그먼트 내 랜덤 오프셋 (세그먼트 각도의 40% 범위 내)
-		const randomOffset = (Math.random() - 0.5) * (targetSegment.angle * 0.4);
-
-		// 최종 각도
-		const finalAngle = totalSpins * 360 + targetRotation + randomOffset;
-
-		// 물리 기반 스피너
-		let velocity = 30 + (power / 100) * 25; // 초기 속도 (30~55)
+		// 물리 기반 스피너 - 파워에 따라 초기 속도 결정
+		let velocity = (power / 100) * 65; // 초기 속도 (0~65)
 		const minVelocity = 0.02; // 멈춤 판정 속도
 
-		// 목표 각도 (0~360 범위로 정규화)
-		const targetNormalized = ((finalAngle % 360) + 360) % 360;
+		// 파워에 따라 감속 계수 달라짐 (파워 높으면 더 오래 굴러감)
+		// 파워 0%: k = 0.0003 (빨리 멈춤)
+		// 파워 100%: k = 0.0002 (오래 굴러감)
+		const k = 0.0003 - (power / 100) * 0.0001;
 
 		function animate() {
 			// 회전
 			wheelRotation += velocity;
 
-			// 속도에 따라 마찰 변화 (느릴수록 마찰 적게 = 더 밀림)
-			// 빠를 때: 0.99, 느릴 때: 0.997
-			const dynamicFriction = velocity > 5 ? 0.99 : 0.993 + (1 - velocity / 5) * 0.004;
-			velocity *= dynamicFriction;
-
-			// 느려졌을 때 목표 위치로 부드럽게 유도
-			if (velocity < 2 && velocity > minVelocity) {
-				const currentNormalized = ((wheelRotation % 360) + 360) % 360;
-				let diff = targetNormalized - currentNormalized;
-
-				// 최단 거리로 조정 (-180 ~ 180)
-				if (diff > 180) diff -= 360;
-				if (diff < -180) diff += 360;
-
-				// 아주 살짝 힘 조정
-				velocity += diff * 0.001;
-			}
+			// 속도² 비례 감속 (빠를 때 확 감속, 느릴 때 오래 미끄러짐)
+			// 최소 감속량 0.01 추가 (느린 속도에서도 확실히 멈추게)
+			const deceleration = Math.max(velocity * velocity * k, 0.01);
+			velocity -= deceleration;
 
 			if (velocity > minVelocity) {
 				requestAnimationFrame(animate);
 			} else {
-				// 최종 위치로 부드럽게 보정
-				smoothFinish();
+				// 멈춤 - 현재 위치에서 결과 확인
+				actualResult = getResultAtCurrentPosition();
+				spinnerState = 'stopping';
+				setTimeout(() => {
+					spinnerState = 'done';
+					onComplete?.(actualResult!);
+				}, 500);
 			}
-		}
-
-		// 부드러운 마무리 애니메이션
-		function smoothFinish() {
-			const currentNormalized = ((wheelRotation % 360) + 360) % 360;
-			let diff = targetNormalized - currentNormalized;
-
-			// 항상 앞으로만 (양수로만)
-			if (diff < 0) diff += 360;
-			// 너무 많이 돌아야 하면 그냥 멈춤
-			if (diff > 45) diff = 0;
-
-			const duration = 400; // 0.4초 동안 부드럽게
-			const startRotation = wheelRotation;
-			const startTime = performance.now();
-
-			function finishAnimate(currentTime: number) {
-				const elapsed = currentTime - startTime;
-				const progress = Math.min(elapsed / duration, 1);
-
-				// ease-out (쫀득하게)
-				const eased = 1 - Math.pow(1 - progress, 3);
-				wheelRotation = startRotation + diff * eased;
-
-				if (progress < 1) {
-					requestAnimationFrame(finishAnimate);
-				} else {
-					spinnerState = 'stopping';
-					setTimeout(() => {
-						spinnerState = 'done';
-						onComplete?.();
-					}, 500);
-				}
-			}
-
-			requestAnimationFrame(finishAnimate);
 		}
 
 		requestAnimationFrame(animate);
@@ -403,17 +345,17 @@
 		{/if}
 
 		<!-- 결과 -->
-		{#if spinnerState === 'done'}
+		{#if spinnerState === 'done' && actualResult}
 			<div
 				class="result-display"
-				class:success={result === 'success'}
-				class:fail={result === 'fail' || result === 'total_fail'}
-				class:critical={result === 'critical'}
+				class:success={actualResult === 'success'}
+				class:fail={actualResult === 'fail'}
+				class:critical={actualResult === 'critical'}
 			>
-				{#if result === 'critical'}
+				{#if actualResult === 'critical'}
 					<span class="result-icon">⭐</span>
 					<span class="result-label">대성공!</span>
-				{:else if result === 'success'}
+				{:else if actualResult === 'success'}
 					<span class="result-icon">✓</span>
 					<span class="result-label">성공!</span>
 				{:else}

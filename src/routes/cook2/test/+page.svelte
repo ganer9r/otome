@@ -164,22 +164,13 @@
 
 	// 스피너 테스트
 	let showSpinner = $state(false);
-	let spinnerResult = $state<DishResultType>('success');
-
-	// 확률 기반 결과 생성 (대성공 1%, 실패 30%, 성공 69%)
-	function rollSpinnerResult(): DishResultType {
-		const roll = Math.random() * 100;
-		if (roll < 1) return 'critical'; // 0~1: 대성공
-		if (roll < 31) return 'fail'; // 1~31: 실패
-		return 'success'; // 31~100: 성공
-	}
 
 	function openSpinner() {
-		spinnerResult = rollSpinnerResult();
 		showSpinner = true;
 	}
 
-	function handleSpinnerComplete() {
+	function handleSpinnerComplete(result: DishResultType) {
+		console.log('스피너 결과:', result);
 		// 결과 확인 후 자동으로 닫기 (2초 후)
 		setTimeout(() => {
 			showSpinner = false;
@@ -338,7 +329,6 @@
 <!-- 스피너 테스트 -->
 {#if showSpinner}
 	<ResultSpinner
-		result={spinnerResult}
 		probabilities={{ success: 69, fail: 30, critical: 1 }}
 		onComplete={handleSpinnerComplete}
 	/>
