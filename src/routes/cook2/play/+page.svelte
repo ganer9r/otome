@@ -120,9 +120,8 @@
 			return;
 		}
 
-		// 3. 성공한 조합 저장
+		// 3. 시도한 조합 저장 (성공 조합은 요리 결과 판정 후에 저장)
 		triedCombinationsStore.addTried(selectedIngredients);
-		successCombinationsStore.addSuccess(selectedIngredients, recipe.resultIngredientId);
 
 		// 4. 조리 시작 (cooking 화면 전환)
 		currentRecipe = recipe;
@@ -149,24 +148,30 @@
 		// 2. 요리 결과 판정 (critical/success/fail)
 		currentCookResult = cookDish(result);
 
-		// 3. 이미 발견한 레시피인지 확인
-		const alreadyDiscovered = $unlockedIngredientsStore.includes(currentRecipe.resultIngredientId);
+		// 요리 실패 시 (fail/total_fail) → 재료 해금, 성공 조합 저장 안 함
+		const isCookingFailed =
+			currentCookResult.resultType === 'fail' || currentCookResult.resultType === 'total_fail';
 
-		// 4. 재료 오픈
-		unlockedIngredientsStore.unlock(currentRecipe.resultIngredientId);
+		if (!isCookingFailed) {
+			// 3. 성공한 조합 저장 (성공/크리티컬일 때만)
+			successCombinationsStore.addSuccess(selectedIngredients, currentRecipe.resultIngredientId);
 
-		// 5. 재료인 경우 NEW 뱃지 추가
-		if (result.isIngredient) {
-			newIngredientsStore.add(currentRecipe.resultIngredientId);
-		}
+			// 4. 재료 오픈 (성공/크리티컬일 때만)
+			unlockedIngredientsStore.unlock(currentRecipe.resultIngredientId);
 
-		// 6. 손님 주문 체크 → 보너스 지급
-		earnedBonus = customerStore.checkOrder(currentRecipe.resultIngredientId);
-		if (earnedBonus > 0) {
-			// 보너스 금액 추가
-			runStore.earn(earnedBonus);
-			// 주문 완료 모달 대기 (주방 복귀 시 표시)
-			pendingCompleteModal = true;
+			// 5. 재료인 경우 NEW 뱃지 추가 (성공/크리티컬일 때만)
+			if (result.isIngredient) {
+				newIngredientsStore.add(currentRecipe.resultIngredientId);
+			}
+
+			// 6. 손님 주문 체크 → 보너스 지급 (성공/크리티컬일 때만)
+			earnedBonus = customerStore.checkOrder(currentRecipe.resultIngredientId);
+			if (earnedBonus > 0) {
+				// 보너스 금액 추가
+				runStore.earn(earnedBonus);
+				// 주문 완료 모달 대기 (주방 복귀 시 표시)
+				pendingCompleteModal = true;
+			}
 		}
 
 		// 8. 힌트 학습 단계 증가
