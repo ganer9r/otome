@@ -171,10 +171,10 @@
 
 	function handleSpinnerComplete(result: DishResultType) {
 		console.log('스피너 결과:', result);
-		// 결과 확인 후 자동으로 닫기 (2초 후)
-		setTimeout(() => {
-			showSpinner = false;
-		}, 2000);
+		// 자동 닫기 비활성화 - 테스트용
+		// setTimeout(() => {
+		// 	showSpinner = false;
+		// }, 2000);
 	}
 </script>
 

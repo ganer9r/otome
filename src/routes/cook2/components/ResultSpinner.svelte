@@ -25,6 +25,11 @@
 	// 휠 회전 각도
 	let wheelRotation = $state(0);
 
+	// 램프 상태: 'off' | 'chasing' | 'blinking'
+	type LampPhase = 'off' | 'chasing' | 'blinking';
+	let lampPhase: LampPhase = $state('off');
+	let lampBlinkInterval: ReturnType<typeof setInterval> | null = null;
+
 	// 스피너용 결과 타입
 	type SpinnerResultType = 'success' | 'fail' | 'critical';
 
@@ -178,6 +183,9 @@
 		spinnerState = 'spinning';
 		actualResult = null;
 
+		// 램프 순차 점등 시작
+		lampPhase = 'chasing';
+
 		// 물리 기반 스피너 - 파워에 따라 초기 속도 결정
 		let velocity = (power / 100) * 65; // 초기 속도 (0~65)
 		const minVelocity = 0.02; // 멈춤 판정 속도
@@ -201,6 +209,17 @@
 			} else {
 				// 멈춤 - 현재 위치에서 결과 확인
 				actualResult = getResultAtCurrentPosition();
+
+				// 성공/대성공: 깜빡임, 실패: 꺼짐
+				if (actualResult === 'success' || actualResult === 'critical') {
+					lampPhase = 'off';
+					requestAnimationFrame(() => {
+						lampPhase = 'blinking';
+					});
+				} else {
+					lampPhase = 'off';
+				}
+
 				spinnerState = 'stopping';
 				setTimeout(() => {
 					spinnerState = 'done';
@@ -244,7 +263,8 @@
 				{#each Array(12) as _, i}
 					<div
 						class="ring-light"
-						class:active={spinnerState === 'spinning' || spinnerState === 'stopping'}
+						class:chasing={lampPhase === 'chasing'}
+						class:blinking={lampPhase === 'blinking'}
 						style="--delay: {i * 0.1}s; --angle: {i * 30}deg"
 					></div>
 				{/each}
@@ -433,20 +453,37 @@
 		box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
 	}
 
-	.ring-light.active {
-		animation: lightBlink 0.3s ease-in-out infinite;
+	/* 순차 점등 (chasing) - delay로 하나씩 켜지고 유지 */
+	.ring-light.chasing {
+		animation: lightOn 0.1s ease-out forwards;
 		animation-delay: var(--delay);
+	}
+
+	@keyframes lightOn {
+		0% {
+			background: #666;
+			box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+		}
+		100% {
+			background: #fde047;
+			box-shadow: 0 0 15px #fde047;
+		}
+	}
+
+	/* 전체 동시 깜빡임 (blinking) */
+	.ring-light.blinking {
+		animation: lightBlink 0.3s ease-in-out infinite !important;
 	}
 
 	@keyframes lightBlink {
 		0%,
 		100% {
-			background: #fbbf24;
-			box-shadow: 0 0 10px #fbbf24;
+			background: #fde047;
+			box-shadow: 0 0 15px #fde047;
 		}
 		50% {
-			background: #fde047;
-			box-shadow: 0 0 20px #fde047;
+			background: #666;
+			box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
 		}
 	}
 
