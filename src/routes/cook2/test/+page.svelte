@@ -4,8 +4,9 @@
 	import OrderFailModal from '../components/OrderFailModal.svelte';
 	import ExplosionFailScreen from '../components/ExplosionFailScreen.svelte';
 	import DishResultScreen from '../components/DishResultScreen.svelte';
+	import ResultSpinner from '../components/ResultSpinner.svelte';
 	import type { CustomerOrder } from '../lib/customer-store';
-	import type { CookResult, Ingredient, IngredientGrade, Recipe } from '../lib/types';
+	import type { CookResult, DishResultType, IngredientGrade, Recipe } from '../lib/types';
 	import { GRADE_ORDER } from '../lib/types';
 	import { findIngredientById, INGREDIENTS } from '../lib/data/ingredients';
 	import { RECIPES } from '../lib/data/recipes';
@@ -160,6 +161,30 @@
 
 	// 테스트용 자본금
 	let testCapital = $state(1000);
+
+	// 스피너 테스트
+	let showSpinner = $state(false);
+	let spinnerResult = $state<DishResultType>('success');
+
+	// 확률 기반 결과 생성 (대성공 1%, 실패 30%, 성공 69%)
+	function rollSpinnerResult(): DishResultType {
+		const roll = Math.random() * 100;
+		if (roll < 1) return 'critical'; // 0~1: 대성공
+		if (roll < 31) return 'fail'; // 1~31: 실패
+		return 'success'; // 31~100: 성공
+	}
+
+	function openSpinner() {
+		spinnerResult = rollSpinnerResult();
+		showSpinner = true;
+	}
+
+	function handleSpinnerComplete() {
+		// 결과 확인 후 자동으로 닫기 (2초 후)
+		setTimeout(() => {
+			showSpinner = false;
+		}, 2000);
+	}
 </script>
 
 <div class="test-container">
@@ -282,6 +307,13 @@
 			<button class="test-btn fail" onclick={() => (showFail = true)}> 손님 떠남 모달 </button>
 		</div>
 	</div>
+
+	<!-- 스피너 테스트 섹션 -->
+	<div class="section">
+		<h2>스피너 테스트</h2>
+		<p class="spinner-desc">대성공 1% / 실패 30% / 성공 69%</p>
+		<button class="test-btn spinner" onclick={openSpinner}> 🎡 스피너 돌리기 </button>
+	</div>
 </div>
 
 {#if showArrival}
@@ -301,6 +333,15 @@
 
 {#if showFail}
 	<OrderFailModal order={testOrder} onClose={() => (showFail = false)} />
+{/if}
+
+<!-- 스피너 테스트 -->
+{#if showSpinner}
+	<ResultSpinner
+		result={spinnerResult}
+		probabilities={{ success: 69, fail: 30, critical: 1 }}
+		onComplete={handleSpinnerComplete}
+	/>
 {/if}
 
 <!-- 조합 실패 (레시피 없음) -->
@@ -565,5 +606,15 @@
 
 	.test-btn:disabled:hover {
 		transform: none;
+	}
+
+	/* 스피너 테스트 */
+	.spinner-desc {
+		@apply text-sm text-gray-600;
+		margin-bottom: 8px;
+	}
+
+	.test-btn.spinner {
+		background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%);
 	}
 </style>
