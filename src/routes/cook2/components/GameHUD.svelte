@@ -40,7 +40,7 @@
 	<!-- 상단: 자본금 + 스타 -->
 	<div class="hud-top">
 		<div class="capital-badge">
-			<span class="capital-icon">💰</span>
+			<img src="/imgs/ui/coin.png" alt="coin" class="capital-icon" />
 			<span class="capital-value">{capital.toLocaleString()}원</span>
 		</div>
 		<div class="star-badge">
@@ -101,7 +101,8 @@
 	}
 
 	.capital-icon {
-		font-size: 14px;
+		width: 16px;
+		height: 16px;
 	}
 
 	.capital-value {

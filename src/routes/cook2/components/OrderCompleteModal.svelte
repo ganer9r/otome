@@ -142,7 +142,7 @@
 		<!-- 보너스 카드 -->
 		<div class="bonus-card" bind:this={bonusCardRef}>
 			<div class="bonus-header">
-				<span class="bonus-icon">💰</span>
+				<img src="/imgs/ui/coin.png" alt="coin" class="bonus-icon" />
 				<span class="bonus-title">보너스를 받았어요!</span>
 			</div>
 			<div class="bonus-amount">
@@ -317,7 +317,8 @@
 	}
 
 	.bonus-icon {
-		font-size: 20px;
+		width: 24px;
+		height: 24px;
 	}
 
 	.bonus-title {

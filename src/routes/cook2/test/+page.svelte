@@ -41,7 +41,7 @@
 	<!-- 상단 HUD (코인 타겟용) -->
 	<div class="test-hud">
 		<div class="capital-badge">
-			<span class="capital-icon">💰</span>
+			<img src="/imgs/ui/coin.png" alt="coin" class="capital-icon" />
 			<span class="capital-value">{testCapital.toLocaleString()}원</span>
 		</div>
 	</div>
@@ -101,7 +101,8 @@
 	}
 
 	.capital-icon {
-		font-size: 14px;
+		width: 16px;
+		height: 16px;
 	}
 
 	.capital-value {

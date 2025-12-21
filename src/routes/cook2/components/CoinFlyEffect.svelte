@@ -120,7 +120,7 @@
 			"
 		>
 			<div class="coin-inner">
-				<span class="coin-icon">💰</span>
+				<img src="/imgs/ui/coin.png" alt="coin" class="coin-icon" />
 			</div>
 		</div>
 	{/each}
@@ -167,7 +167,8 @@
 	}
 
 	.coin-icon {
-		font-size: 42px;
+		width: 42px;
+		height: 42px;
 		filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
 	}
 

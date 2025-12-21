@@ -305,9 +305,14 @@
 				<div class="profit-section">
 					<div class="profit-main" class:counting={!countingComplete}>
 						{#if isFail}
-							<span class="coin-icon broken">💸</span>
+							<img src="/imgs/ui/coin.png" alt="coin" class="coin-icon broken" />
 						{:else}
-							<span class="coin-icon" class:bounce={countingComplete}>💰</span>
+							<img
+								src="/imgs/ui/coin.png"
+								alt="coin"
+								class="coin-icon"
+								class:bounce={countingComplete}
+							/>
 						{/if}
 						<span
 							class="profit-number"
@@ -597,7 +602,8 @@
 	}
 
 	.coin-icon {
-		font-size: clamp(32px, 8vw, 48px);
+		width: clamp(32px, 8vw, 48px);
+		height: clamp(32px, 8vw, 48px);
 		transition: transform 0.3s ease;
 	}
 
