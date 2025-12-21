@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
+	import { findRecipeByIngredients } from '../lib/data/recipes';
+	import { unlockedDishesStore } from '../lib/store';
 	import { haptic } from '../lib/native-bridge';
 
 	interface Props {
@@ -21,6 +23,11 @@
 	// 재료 정보
 	const ingredient1 = selectedIngredients[0] ? findIngredientById(selectedIngredients[0]) : null;
 	const ingredient2 = selectedIngredients[1] ? findIngredientById(selectedIngredients[1]) : null;
+
+	// 레시피 결과 (이미 발견한 요리만 이미지 표시)
+	const recipe = findRecipeByIngredients(selectedIngredients);
+	const resultIngredient = recipe ? findIngredientById(recipe.resultIngredientId) : null;
+	const isDiscovered = resultIngredient ? $unlockedDishesStore.has(resultIngredient.id) : false;
 
 	// 완료 시 터지는 파티클
 	const burstParticles = Array.from({ length: 12 }, (_, _i) => ({
@@ -76,7 +83,11 @@
 			{/if}
 			<span class="formula-arrow">→</span>
 			<div class="formula-result">
-				<span class="result-question">?</span>
+				{#if isDiscovered && resultIngredient}
+					<img src={resultIngredient.imageUrl} alt={resultIngredient.name} />
+				{:else}
+					<span class="result-question">?</span>
+				{/if}
 			</div>
 		</div>
 
@@ -195,6 +206,10 @@
 		font-size: 24px;
 		color: #fff;
 		text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+	}
+
+	.formula-result img {
+		@apply h-10 w-10 object-contain;
 	}
 
 	/* 프로그레스 섹션 (항상 공간 확보) */

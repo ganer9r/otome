@@ -352,6 +352,11 @@
 			runStore.startRun();
 			// 손님 시스템 초기화 및 첫 주문 생성
 			customerStore.startRun(0);
+		} else {
+			// 이어하기: 이미 주문이 있고 모달이 닫혀있으면 뱃지 표시
+			if (currentOrder && !customerState.showNewOrderModal) {
+				showOrderBadge = true;
+			}
 		}
 	});
 </script>

@@ -33,17 +33,22 @@
 	// 새 주문 알림 상태
 	let isNewOrder = $state(false);
 	let lastOrderId = $state<string | null>(null);
+	let isInitialMount = $state(true);
 
-	// 새 주문 감지
+	// 새 주문 감지 (초기 마운트 시에는 새 주문으로 취급하지 않음)
 	$effect(() => {
 		if (order && order.id !== lastOrderId) {
+			const wasNewOrder = !isInitialMount && lastOrderId !== null;
 			lastOrderId = order.id;
-			isNewOrder = true;
+			isInitialMount = false;
 
-			// 3초 후 알림 숨기기
-			setTimeout(() => {
-				isNewOrder = false;
-			}, 3000);
+			if (wasNewOrder) {
+				isNewOrder = true;
+				// 3초 후 알림 숨기기
+				setTimeout(() => {
+					isNewOrder = false;
+				}, 3000);
+			}
 		}
 	});
 
@@ -366,8 +371,8 @@
 		@apply relative z-50;
 	}
 
-	/* 뱃지 등장 애니메이션 (visible 클래스) */
-	.badge-container.visible .order-badge {
+	/* 뱃지 등장 애니메이션은 warning/urgent가 아닐 때만 */
+	.badge-container.visible .order-badge:not(.warning):not(.urgent):not(.new-order) {
 		animation: badgeAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 	}
 
