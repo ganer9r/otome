@@ -91,27 +91,31 @@
 		const coins: CoinState[] = [];
 
 		for (let i = 0; i < 16; i++) {
-			// 360도로 균등 분포
-			const baseAngle = (i / 16) * 360;
-			const angle = baseAngle + (Math.random() - 0.5) * 30;
-			const radian = (angle * Math.PI) / 180;
+			// X 속도: 왼쪽(-) 또는 오른쪽(+) 랜덤, 중앙 회피
+			const direction = Math.random() < 0.5 ? -1 : 1;
+			const minSpeed = 6; // 최소 속도 (중앙 회피)
+			const vxSpeed = minSpeed + Math.random() * 10; // 6~16
+			const finalVx = direction * vxSpeed;
 
-			// 초기 속도 (좁은 범위로 퍼짐)
-			const power = 4 + Math.random() * 4; // 바깥으로 퍼지는 힘 줄임
-			const upPower = 12 + Math.random() * 6; // 위로 솟구치는 힘
+			// 위로 솟구치는 힘
+			const upPower = 10 + Math.random() * 6;
+
+			console.log(
+				`코인 ${i}: vx=${finalVx.toFixed(2)}, direction=${direction}, speed=${vxSpeed.toFixed(2)}`
+			);
 
 			coins.push({
 				id: i,
 				x: 0,
 				y: 0,
-				vx: Math.cos(radian) * power,
+				vx: finalVx,
 				vy: -upPower, // 위로!
 				size: 24 + Math.random() * 12,
 				rotation: 0,
 				rotationSpeed: (Math.random() - 0.5) * 15,
 				landed: false,
 				floatPhase: Math.random() * Math.PI * 2,
-				groundY: -150 + Math.random() * 270 // 각 코인마다 다른 바닥 (-150 ~ 120)
+				groundY: Math.random() * 300 // 바닥: 0 ~ 300
 			});
 		}
 
@@ -146,6 +150,7 @@
 
 					// 각 코인의 고유 바닥에 착지
 					if (newY > coin.groundY) {
+						console.log(`코인 ${coin.id} 착지: x=${newX.toFixed(2)}`);
 						return {
 							...coin,
 							x: newX,
@@ -220,24 +225,24 @@
 			}, 1200)
 		);
 
-		// 3. 셰프 등장 (0.8초 후)
-		timers.push(
-			setTimeout(() => {
-				stage = 'chef';
-				showChef = true;
-				triggerShake();
-			}, 2000)
-		);
-
-		// 4. 금액 등장 (0.8초 후)
+		// 3. 금액 등장 (0.8초 후) - 쿵!
 		timers.push(
 			setTimeout(() => {
 				stage = 'money';
 				showMoney = true;
 				showCoins = true;
-				initCoins(); // 코인 물리 시뮬레이션 시작
+				initCoins();
 				triggerShake();
 				startCounting();
+			}, 2000)
+		);
+
+		// 4. 셰프 등장 (0.8초 후) - 쿵 없이 부드럽게
+		timers.push(
+			setTimeout(() => {
+				stage = 'chef';
+				showChef = true;
+				// triggerShake 없음
 			}, 2800)
 		);
 
@@ -439,25 +444,7 @@
 				</div>
 			</div>
 
-			<!-- 영역 2: 셰프 (고정 높이) -->
-			<div class="slot slot-chef">
-				<div
-					class="chef-content"
-					class:visible={showChef}
-					class:animate={showChef}
-					class:critical={isCritical}
-					class:fail={isFail}
-				>
-					<div class="chef-wrapper">
-						<img src={chefImage} alt="셰프" class="chef-image" />
-					</div>
-					<div class="speech-bubble" class:critical={isCritical} class:fail={isFail}>
-						<span>{chefDialogue}</span>
-					</div>
-				</div>
-			</div>
-
-			<!-- 영역 3: 금액 (고정 높이) -->
+			<!-- 영역 2: 금액 (고정 높이) -->
 			<div class="slot slot-money">
 				<!-- 코인 물리 시뮬레이션 -->
 				{#if showCoins && !isFail}
@@ -511,6 +498,24 @@
 					{:else if isCritical}
 						<div class="bonus-tag">대박!</div>
 					{/if}
+				</div>
+			</div>
+
+			<!-- 영역 3: 셰프 (고정 높이) -->
+			<div class="slot slot-chef">
+				<div
+					class="chef-content"
+					class:visible={showChef}
+					class:animate={showChef}
+					class:critical={isCritical}
+					class:fail={isFail}
+				>
+					<div class="chef-wrapper">
+						<img src={chefImage} alt="셰프" class="chef-image" />
+					</div>
+					<div class="speech-bubble" class:critical={isCritical} class:fail={isFail}>
+						<span>{chefDialogue}</span>
+					</div>
 				</div>
 			</div>
 
