@@ -237,8 +237,9 @@
 
 <div class="spinner-overlay">
 	<div class="spinner-container" class:spinning={spinnerState === 'spinning'}>
-		<!-- 외곽 장식 링 -->
+		<!-- 외곽 장식 링 + 휠 (중앙 정렬을 위해 휠을 링 안에 배치) -->
 		<div class="outer-ring">
+			<!-- 램프 -->
 			<div class="ring-lights">
 				{#each Array(12) as _, i}
 					<div
@@ -248,59 +249,59 @@
 					></div>
 				{/each}
 			</div>
-		</div>
 
-		<!-- 휠 -->
-		<div class="wheel-wrapper">
-			<!-- 포인터 -->
-			<div class="pointer">
-				<div class="pointer-arrow"></div>
-			</div>
+			<!-- 휠 -->
+			<div class="wheel-wrapper">
+				<!-- 포인터 -->
+				<div class="pointer">
+					<div class="pointer-arrow"></div>
+				</div>
 
-			<!-- 회전하는 휠 -->
-			<div class="wheel" style="transform: rotate({wheelRotation}deg)">
-				<svg viewBox="0 0 200 200" class="wheel-svg">
-					{#each segments as segment, i}
-						{@const startRad = ((segment.startAngle - 90) * Math.PI) / 180}
-						{@const endRad = ((segment.startAngle + segment.angle - 90) * Math.PI) / 180}
-						{@const x1 = 100 + 100 * Math.cos(startRad)}
-						{@const y1 = 100 + 100 * Math.sin(startRad)}
-						{@const x2 = 100 + 100 * Math.cos(endRad)}
-						{@const y2 = 100 + 100 * Math.sin(endRad)}
-						{@const largeArc = segment.angle > 180 ? 1 : 0}
-						{@const midRad = ((segment.startAngle + segment.angle / 2 - 90) * Math.PI) / 180}
-						{@const labelX = 100 + 60 * Math.cos(midRad)}
-						{@const labelY = 100 + 60 * Math.sin(midRad)}
-						{@const nextSegment = segments[(i + 1) % segments.length]}
-						{@const showBorder = segment.type !== nextSegment.type}
+				<!-- 회전하는 휠 -->
+				<div class="wheel" style="transform: rotate({wheelRotation}deg)">
+					<svg viewBox="0 0 200 200" class="wheel-svg">
+						{#each segments as segment, i}
+							{@const startRad = ((segment.startAngle - 90) * Math.PI) / 180}
+							{@const endRad = ((segment.startAngle + segment.angle - 90) * Math.PI) / 180}
+							{@const x1 = 100 + 100 * Math.cos(startRad)}
+							{@const y1 = 100 + 100 * Math.sin(startRad)}
+							{@const x2 = 100 + 100 * Math.cos(endRad)}
+							{@const y2 = 100 + 100 * Math.sin(endRad)}
+							{@const largeArc = segment.angle > 180 ? 1 : 0}
+							{@const midRad = ((segment.startAngle + segment.angle / 2 - 90) * Math.PI) / 180}
+							{@const labelX = 100 + 60 * Math.cos(midRad)}
+							{@const labelY = 100 + 60 * Math.sin(midRad)}
+							{@const nextSegment = segments[(i + 1) % segments.length]}
+							{@const showBorder = segment.type !== nextSegment.type}
 
-						<!-- 세그먼트 영역 -->
-						<path
-							d="M 100 100 L {x1} {y1} A 100 100 0 {largeArc} 1 {x2} {y2} Z"
-							fill={segment.color}
-						/>
-						<!-- 경계선 (다른 타입과 맞닿을 때만) -->
-						{#if showBorder}
-							<line x1="100" y1="100" {x2} {y2} stroke="white" stroke-width="1" />
-						{/if}
-						<text
-							x={labelX}
-							y={labelY}
-							text-anchor="middle"
-							dominant-baseline="middle"
-							fill="white"
-							font-size={segment.angle < 30 ? '10' : '14'}
-							font-weight="bold"
-							class="segment-text"
-						>
-							{segment.icon}
-						</text>
-					{/each}
-				</svg>
+							<!-- 세그먼트 영역 -->
+							<path
+								d="M 100 100 L {x1} {y1} A 100 100 0 {largeArc} 1 {x2} {y2} Z"
+								fill={segment.color}
+							/>
+							<!-- 경계선 (다른 타입과 맞닿을 때만) -->
+							{#if showBorder}
+								<line x1="100" y1="100" {x2} {y2} stroke="white" stroke-width="1" />
+							{/if}
+							<text
+								x={labelX}
+								y={labelY}
+								text-anchor="middle"
+								dominant-baseline="middle"
+								fill="white"
+								font-size={segment.angle < 30 ? '10' : '14'}
+								font-weight="bold"
+								class="segment-text"
+							>
+								{segment.icon}
+							</text>
+						{/each}
+					</svg>
 
-				<!-- 중심 원 -->
-				<div class="center-circle">
-					<div class="center-inner">🍳</div>
+					<!-- 중심 원 -->
+					<div class="center-circle">
+						<div class="center-inner">🍳</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -379,6 +380,12 @@
 	.spinner-container {
 		@apply relative flex flex-col items-center justify-center;
 		@apply h-full w-full;
+
+		/* 320px 기준 고정값 */
+		--ring-size: 320px;
+		--ring-padding: 20px;
+		--wheel-size: calc(var(--ring-size) - var(--ring-padding) * 2); /* 280px */
+		--lamp-radius: calc(var(--ring-size) / 2); /* 160px - 링 바깥 둘레 */
 	}
 
 	@keyframes tickShake {
@@ -391,21 +398,23 @@
 		}
 	}
 
-	/* 외곽 장식 링 */
+	/* 외곽 장식 링 - 320px 고정, flex로 휠 중앙 배치 */
 	.outer-ring {
-		@apply absolute;
-		width: clamp(280px, 75vw, 380px);
-		height: clamp(280px, 75vw, 380px);
+		@apply relative flex items-center justify-center;
+		width: var(--ring-size);
+		height: var(--ring-size);
 		border-radius: 50%;
 		background: linear-gradient(180deg, #5d4037 0%, #3e2723 100%);
-		padding: 8px;
+		padding: var(--ring-padding);
 		box-shadow:
 			0 0 30px rgba(251, 191, 36, 0.3),
 			inset 0 2px 4px rgba(255, 255, 255, 0.2);
 	}
 
 	.ring-lights {
-		@apply relative h-full w-full;
+		@apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+		width: var(--ring-size);
+		height: var(--ring-size);
 	}
 
 	.ring-light {
@@ -416,8 +425,11 @@
 		background: #666;
 		top: 50%;
 		left: 50%;
-		transform: rotate(var(--angle)) translateY(calc(-50% - clamp(130px, 35vw, 180px)));
-		transform-origin: center center;
+		/* 램프 중심을 링 중심에 맞추고(-6px), 반지름만큼 이동 */
+		margin-top: -6px;
+		margin-left: -6px;
+		transform: rotate(var(--angle)) translateY(calc(var(--lamp-radius) * -1));
+		transform-origin: 6px 6px; /* 램프 중심 기준으로 회전 */
 		box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
 	}
 
@@ -438,39 +450,25 @@
 		}
 	}
 
-	/* 휠 래퍼 */
+	/* 휠 래퍼 - outer-ring 중앙에 배치 */
 	.wheel-wrapper {
-		@apply relative;
-		width: clamp(240px, 65vw, 340px);
-		height: clamp(240px, 65vw, 340px);
+		@apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+		width: var(--wheel-size);
+		height: var(--wheel-size);
 	}
 
 	/* 포인터 */
 	.pointer {
 		@apply absolute left-1/2 z-20 -translate-x-1/2;
-		top: -15px;
+		top: -4px;
 	}
 
 	.pointer-arrow {
-		width: 0;
-		height: 0;
-		border-left: 20px solid transparent;
-		border-right: 20px solid transparent;
-		border-top: 35px solid #ffd700;
-		filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.5));
-		position: relative;
-	}
-
-	.pointer-arrow::after {
-		content: '';
-		position: absolute;
-		top: -32px;
-		left: -15px;
-		width: 0;
-		height: 0;
-		border-left: 15px solid transparent;
-		border-right: 15px solid transparent;
-		border-top: 28px solid #fff8dc;
+		width: 20px;
+		height: 18px;
+		background: linear-gradient(180deg, #fde047 0%, #f59e0b 100%);
+		clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+		filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
 	}
 
 	/* 휠 */
@@ -478,10 +476,7 @@
 		@apply relative h-full w-full;
 		border-radius: 50%;
 		overflow: hidden;
-		box-shadow:
-			0 0 0 6px #8b4513,
-			0 0 0 10px #5d4037,
-			0 8px 20px rgba(0, 0, 0, 0.5);
+		border: 6px solid #8b4513;
 	}
 
 	/* 세그먼트 - 8칸 (45도씩) */
