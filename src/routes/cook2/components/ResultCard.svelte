@@ -67,19 +67,6 @@
 			<div class="grade-badge" style="background-color: {GRADE_COLORS[ingredient.grade]}">
 				{ingredient.grade}등급 · {GRADE_NAMES[ingredient.grade]}
 			</div>
-
-			<!-- 재료 해금 표시 -->
-			{#if ingredient.isIngredient}
-				<div class="unlock-badge">
-					<span class="unlock-icon">🔓</span>
-					<span class="unlock-text">새로운 재료 해금!</span>
-				</div>
-			{:else}
-				<div class="dish-badge">
-					<span class="dish-icon">🍽️</span>
-					<span class="dish-text">요리 완성!</span>
-				</div>
-			{/if}
 		</div>
 	</div>
 </div>
@@ -87,9 +74,9 @@
 <style lang="postcss">
 	@reference '$styles/app.css';
 
-	/* 카드 컨테이너 - vh 기준 (화면 높이의 45%) */
+	/* 카드 컨테이너 - vh 기준 (화면 높이의 38%) */
 	.card-container {
-		--card-height: min(45vh, 340px);
+		--card-height: min(38vh, 280px);
 		--card-width: calc(var(--card-height) * 0.68);
 		--card-radius: calc(var(--card-height) * 0.04);
 		--card-padding: calc(var(--card-height) * 0.04);

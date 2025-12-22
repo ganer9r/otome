@@ -62,6 +62,9 @@
 	let cardShaking = $state(false);
 	let canSkip = $state(true);
 
+	// 화면 흔들림
+	let screenShake = $state(false);
+
 	// 대성공 여부
 	let isCritical = $derived(cookResult.resultType === 'critical');
 
@@ -84,6 +87,27 @@
 
 	$effect(() => {
 		chefDialogue = getRandomDialogue(chefEmotion());
+	});
+
+	// 재료 가이드 메시지
+	const INGREDIENT_GUIDE = {
+		normal: [
+			'다른 재료와 조합해보세요!',
+			'새로운 요리를 만들어보세요!',
+			'조합하면 요리가 완성돼요!',
+			'어떤 요리가 될까요?'
+		],
+		critical: ['완벽한 품질의 재료!', '최상급 재료 획득!', '대박! 조합해보세요!', '황금 재료 발견!']
+	};
+
+	function getIngredientGuide(): string {
+		const messages = isCritical ? INGREDIENT_GUIDE.critical : INGREDIENT_GUIDE.normal;
+		return messages[Math.floor(Math.random() * messages.length)];
+	}
+
+	let ingredientGuide = $state('');
+	$effect(() => {
+		ingredientGuide = getIngredientGuide();
 	});
 
 	let explosionTheme = $derived(() => {
@@ -128,6 +152,9 @@
 			timers.push(
 				setTimeout(() => {
 					stage = 'result';
+					// 재료 획득 카드 등장할 때 화면 흔들림
+					screenShake = true;
+					setTimeout(() => (screenShake = false), 400);
 				}, 4800)
 			);
 		} else {
@@ -141,6 +168,9 @@
 			timers.push(
 				setTimeout(() => {
 					stage = 'result';
+					// 재료 획득 카드 등장할 때 화면 흔들림
+					screenShake = true;
+					setTimeout(() => (screenShake = false), 300);
 				}, 3300)
 			);
 		}
@@ -196,6 +226,7 @@
 	<!-- 재료 성공/대성공: 카드 뒤집기 연출 -->
 	<div
 		class="result-screen"
+		class:shake={screenShake}
 		onclick={handleSkip}
 		onkeydown={(e) => e.key === 'Enter' && handleSkip()}
 		role="button"
@@ -299,28 +330,16 @@
 						</div>
 					</div>
 
-					<!-- 하단 정보 (심플) -->
+					<!-- 하단 정보: 설명 카드 -->
 					{#if stage === 'result'}
-						<div class="result-info">
-							<!-- 수익 표시 -->
-							{#if sellPrice > 0}
-								<div class="profit-display">
-									<span
-										class="profit-amount"
-										class:positive={profit >= 0}
-										class:negative={profit < 0}
-									>
-										{profit >= 0 ? '+' : ''}{profit.toLocaleString()}원
-									</span>
-								</div>
+						<div class="ingredient-card" class:critical={isCritical}>
+							{#if isCritical}
+								<div class="ingredient-card-badge">대성공!</div>
 							{/if}
-
-							<!-- 진행률 -->
-							<div class="progress-display">
-								<span class="progress-text" style="color: {GRADE_COLORS[resultIngredient.grade]}">
-									{resultIngredient.grade}등급 {gradeProgress.discovered}/{gradeProgress.total}
-								</span>
-							</div>
+							<div class="ingredient-card-header">재료 획득</div>
+							<div class="ingredient-card-name">{resultIngredient.name}</div>
+							<div class="ingredient-card-divider"></div>
+							<div class="ingredient-card-guide">다른 재료와 조합해서 요리를 만들어보세요!</div>
 						</div>
 					{/if}
 				</div>
@@ -364,6 +383,42 @@
 		@apply flex items-center justify-center;
 		@apply cursor-pointer overflow-hidden;
 		@apply bg-gradient-to-br from-orange-100 via-amber-100 to-orange-200;
+	}
+
+	/* 화면 흔들림 */
+	.result-screen.shake {
+		animation: screenShake 0.3s ease-out;
+	}
+
+	@keyframes screenShake {
+		0%,
+		100% {
+			transform: translate(0, 0);
+		}
+		10% {
+			transform: translate(-8px, -4px);
+		}
+		20% {
+			transform: translate(8px, 4px);
+		}
+		30% {
+			transform: translate(-6px, 2px);
+		}
+		40% {
+			transform: translate(6px, -2px);
+		}
+		50% {
+			transform: translate(-4px, 4px);
+		}
+		60% {
+			transform: translate(4px, -4px);
+		}
+		70% {
+			transform: translate(-2px, 2px);
+		}
+		80% {
+			transform: translate(2px, -2px);
+		}
 	}
 
 	/* 1단계: 두근두근 */
@@ -934,6 +989,161 @@
 		50% {
 			opacity: 1;
 			transform: translateX(-50%) scale(1.1);
+		}
+	}
+
+	/* ===== 재료 설명 카드 (DishResult success 스타일과 동일) ===== */
+	.ingredient-card {
+		@apply relative flex flex-col items-center gap-1;
+		@apply rounded-2xl px-6 py-4;
+		@apply text-center;
+		margin-top: 12px;
+		min-width: 240px;
+		max-width: 300px;
+		background: rgba(255, 255, 255, 0.9);
+		border: 2px solid rgba(22, 101, 52, 0.7);
+		border-radius: 12px;
+		box-shadow: 0 4px 16px rgba(22, 101, 52, 0.15);
+		animation: cardDropIn 0.6s ease-out forwards;
+	}
+
+	.ingredient-card.critical {
+		background: rgba(255, 255, 255, 0.9);
+		border: 2px solid rgba(217, 119, 6, 0.8);
+		box-shadow: 0 4px 16px rgba(217, 119, 6, 0.2);
+	}
+
+	/* 대성공 뱃지 */
+	.ingredient-card-badge {
+		@apply absolute -top-3 left-1/2 -translate-x-1/2;
+		@apply rounded-full px-3 py-1;
+		@apply font-black;
+		font-size: clamp(11px, 2.5vw, 13px);
+		background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+		color: #fff;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+		white-space: nowrap;
+	}
+
+	.ingredient-card-header {
+		@apply font-black;
+		font-size: clamp(14px, 3.5vw, 18px);
+		color: rgba(22, 101, 52, 0.7);
+	}
+
+	.ingredient-card.critical .ingredient-card-header {
+		color: rgba(217, 119, 6, 0.8);
+	}
+
+	.ingredient-card-name {
+		@apply font-bold;
+		font-size: clamp(18px, 4.5vw, 24px);
+		color: #166534;
+	}
+
+	.ingredient-card.critical .ingredient-card-name {
+		color: #b45309;
+	}
+
+	.ingredient-card-divider {
+		display: none;
+	}
+
+	.ingredient-card-guide {
+		@apply text-center;
+		font-size: clamp(11px, 2.8vw, 13px);
+		margin-top: 8px;
+		padding-top: 8px;
+		border-top: 1px solid rgba(128, 128, 128, 0.2);
+		color: rgba(22, 101, 52, 0.6);
+	}
+
+	.ingredient-card.critical .ingredient-card-guide {
+		color: rgba(180, 83, 9, 0.7);
+		border-top-color: rgba(217, 119, 6, 0.3);
+	}
+
+	/* 대성공 뱃지 */
+	.ingredient-card-badge {
+		@apply absolute -top-3 left-1/2 -translate-x-1/2;
+		@apply rounded-full px-3 py-1;
+		@apply font-black;
+		font-size: clamp(11px, 2.5vw, 13px);
+		background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+		color: #fff;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+		white-space: nowrap;
+	}
+
+	.ingredient-card-header {
+		@apply font-medium;
+		font-size: clamp(12px, 3vw, 14px);
+		color: #888;
+		letter-spacing: 0.5px;
+		margin-bottom: 2px;
+	}
+
+	.ingredient-card-name {
+		@apply font-bold;
+		font-size: clamp(22px, 5.5vw, 28px);
+		color: #333;
+		margin-bottom: 8px;
+	}
+
+	.ingredient-card.critical .ingredient-card-name {
+		color: #92400e;
+	}
+
+	.ingredient-card-divider {
+		width: 60%;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
+		margin: 4px 0 8px;
+	}
+
+	.ingredient-card-guide {
+		@apply text-center;
+		font-size: clamp(12px, 3vw, 14px);
+		color: #666;
+		line-height: 1.4;
+	}
+
+	.ingredient-card.critical .ingredient-card-guide {
+		color: #b45309;
+	}
+
+	/* 쿵! 크게에서 작아지는 임팩트 효과 */
+	@keyframes cardDropIn {
+		0% {
+			opacity: 0;
+			transform: scale(2.5);
+		}
+		40% {
+			opacity: 1;
+			transform: scale(0.9);
+		}
+		60% {
+			transform: scale(1.08);
+		}
+		80% {
+			transform: scale(0.97);
+		}
+		100% {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	@keyframes cardFadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
 		}
 	}
 
