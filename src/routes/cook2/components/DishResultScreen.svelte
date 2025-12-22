@@ -244,7 +244,12 @@
 				</div>
 			</div>
 		{:else}
-			<div class="stage-card">
+			<div class="stage-card" class:critical={isCritical}>
+				<!-- 대성공 배경 플래시 -->
+				{#if isCritical && cardFlipped}
+					<div class="critical-flash"></div>
+				{/if}
+
 				<div class="card-result-container">
 					<!-- 카드 영역 -->
 					<div class="card-chef-area">
@@ -252,19 +257,45 @@
 						{#if cardShaking}
 							<div class="shake-text">두근두근...</div>
 						{/if}
+						<!-- 대성공 배너 -->
+						{#if isCritical && cardFlipped}
+							<div class="critical-banner">대성공!</div>
+						{/if}
 						<!-- 카드 -->
 						<div
 							class="card-wrapper"
 							class:card-entered={stage === 'card' || stage === 'result'}
 							class:card-shaking={cardShaking}
+							class:critical={isCritical && cardFlipped}
 						>
+							<!-- 대성공 글로우 -->
+							{#if isCritical && cardFlipped}
+								<div class="card-glow"></div>
+							{/if}
 							<div
 								class="sunburst-wrapper"
 								class:card-entered={stage === 'card' || stage === 'result'}
+								class:critical={isCritical && cardFlipped}
 							>
 								<img src="/imgs/bg-sunburst.png" alt="" class="sunburst-img" />
 							</div>
 							<ResultCard ingredient={resultIngredient} flipped={cardFlipped} />
+							<!-- 대성공 반짝이 -->
+							{#if isCritical && cardFlipped}
+								<!-- 별 모양 -->
+								<div class="sparkle sparkle-star sparkle-1"></div>
+								<div class="sparkle sparkle-star sparkle-2"></div>
+								<div class="sparkle sparkle-star sparkle-3"></div>
+								<!-- 원형 글로우 -->
+								<div class="sparkle sparkle-circle sparkle-4"></div>
+								<div class="sparkle sparkle-circle sparkle-5"></div>
+								<div class="sparkle sparkle-circle sparkle-6"></div>
+								<!-- 이모지 -->
+								<div class="sparkle sparkle-emoji sparkle-7">✨</div>
+								<div class="sparkle sparkle-emoji sparkle-8">⭐</div>
+								<div class="sparkle sparkle-emoji sparkle-9">💫</div>
+								<div class="sparkle sparkle-emoji sparkle-10">🌟</div>
+							{/if}
 						</div>
 					</div>
 
@@ -298,8 +329,8 @@
 				{#if stage === 'result'}
 					<div class="bottom-area">
 						<!-- 캐릭터 -->
-						<div class="chef-section">
-							<div class="chef-bubble">{chefDialogue}</div>
+						<div class="chef-section" class:critical={isCritical}>
+							<div class="chef-bubble" class:critical={isCritical}>{chefDialogue}</div>
 							<img src={chefImage} alt="셰프" class="chef-img" />
 						</div>
 
@@ -613,6 +644,277 @@
 		}
 	}
 
+	/* 대성공 카드 글로우 */
+	.card-wrapper.critical {
+		filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6));
+	}
+
+	.card-glow {
+		@apply pointer-events-none absolute;
+		top: -20px;
+		left: -20px;
+		right: -20px;
+		bottom: -20px;
+		background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, transparent 70%);
+		animation: cardGlowPulse 1.5s ease-in-out infinite;
+		z-index: -1;
+	}
+
+	@keyframes cardGlowPulse {
+		0%,
+		100% {
+			opacity: 0.5;
+			transform: scale(1);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.1);
+		}
+	}
+
+	/* 대성공 배너 */
+	.critical-banner {
+		@apply absolute left-1/2 -translate-x-1/2;
+		top: -50px;
+		@apply font-black;
+		font-size: clamp(28px, 7vw, 40px);
+		background: linear-gradient(135deg, #ffd700 0%, #ffb300 50%, #ffd700 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		filter: drop-shadow(0 2px 4px rgba(255, 180, 0, 0.5));
+		animation: bannerPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+		z-index: 30;
+	}
+
+	@keyframes bannerPop {
+		0% {
+			transform: translateX(-50%) scale(0);
+			opacity: 0;
+		}
+		60% {
+			transform: translateX(-50%) scale(1.2);
+		}
+		100% {
+			transform: translateX(-50%) scale(1);
+			opacity: 1;
+		}
+	}
+
+	/* 대성공 배경 플래시 */
+	.critical-flash {
+		@apply pointer-events-none absolute inset-0;
+		background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+		animation: flashPulse 0.5s ease-out forwards;
+		z-index: 1;
+	}
+
+	@keyframes flashPulse {
+		0% {
+			opacity: 1;
+			transform: scale(0.5);
+		}
+		100% {
+			opacity: 0;
+			transform: scale(2);
+		}
+	}
+
+	/* 대성공 후광 강화 */
+	.sunburst-wrapper.critical {
+		opacity: 0.9;
+	}
+
+	.sunburst-wrapper.critical .sunburst-img {
+		animation: sunburstRotate 8s linear infinite;
+		filter: brightness(1.2) saturate(1.3);
+	}
+
+	/* 대성공 반짝이 파티클 */
+	.sparkle {
+		@apply pointer-events-none absolute;
+		z-index: 30;
+	}
+
+	/* ===== 별 모양 (큰 별 blur + 작은 별 선명 겹치기) ===== */
+	.sparkle-star {
+		background: transparent;
+	}
+
+	.sparkle-star::before {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 180%;
+		height: 180%;
+		background: rgba(255, 215, 0, 0.9);
+		clip-path: polygon(
+			50% 0%,
+			61% 35%,
+			98% 35%,
+			68% 57%,
+			79% 91%,
+			50% 70%,
+			21% 91%,
+			32% 57%,
+			2% 35%,
+			39% 35%
+		);
+		filter: blur(6px);
+	}
+
+	.sparkle-star::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 100%;
+		height: 100%;
+		background: #fff;
+		clip-path: polygon(
+			50% 0%,
+			61% 35%,
+			98% 35%,
+			68% 57%,
+			79% 91%,
+			50% 70%,
+			21% 91%,
+			32% 57%,
+			2% 35%,
+			39% 35%
+		);
+	}
+
+	.sparkle-1 {
+		width: 26px;
+		height: 26px;
+		top: -15px;
+		right: -15px;
+		animation: sparkleFlash 0.8s ease-in-out infinite;
+	}
+
+	.sparkle-2 {
+		width: 20px;
+		height: 20px;
+		top: 20%;
+		left: -18px;
+		animation: sparkleFlash 1s ease-in-out 0.3s infinite;
+	}
+
+	.sparkle-3 {
+		width: 22px;
+		height: 22px;
+		bottom: -10px;
+		right: 20%;
+		animation: sparkleFlash 0.9s ease-in-out 0.6s infinite;
+	}
+
+	/* ===== 원형 글로우 ===== */
+	.sparkle-circle {
+		border-radius: 50%;
+		background: #fff;
+		box-shadow:
+			0 0 8px 4px #fff,
+			0 0 16px 8px rgba(255, 215, 0, 0.7),
+			0 0 24px 12px rgba(255, 215, 0, 0.4);
+	}
+
+	.sparkle-4 {
+		width: 12px;
+		height: 12px;
+		top: -8px;
+		left: 25%;
+		animation: sparkleGlow 1s ease-in-out infinite;
+	}
+
+	.sparkle-5 {
+		width: 10px;
+		height: 10px;
+		bottom: 15%;
+		left: -12px;
+		animation: sparkleGlow 0.8s ease-in-out 0.4s infinite;
+	}
+
+	.sparkle-6 {
+		width: 8px;
+		height: 8px;
+		top: 40%;
+		right: -10px;
+		animation: sparkleGlow 0.9s ease-in-out 0.7s infinite;
+	}
+
+	/* ===== 이모지 파티클 ===== */
+	.sparkle-emoji {
+		font-size: 20px;
+		filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.8));
+	}
+
+	.sparkle-7 {
+		top: -20px;
+		left: 10%;
+		animation: emojiFloat 1.2s ease-in-out infinite;
+	}
+
+	.sparkle-8 {
+		bottom: -15px;
+		left: -5px;
+		font-size: 18px;
+		animation: emojiFloat 1s ease-in-out 0.2s infinite;
+	}
+
+	.sparkle-9 {
+		top: 30%;
+		right: -20px;
+		font-size: 16px;
+		animation: emojiFloat 1.1s ease-in-out 0.5s infinite;
+	}
+
+	.sparkle-10 {
+		bottom: 20%;
+		right: -15px;
+		font-size: 22px;
+		animation: emojiFloat 1.3s ease-in-out 0.8s infinite;
+	}
+
+	@keyframes sparkleFlash {
+		0%,
+		100% {
+			opacity: 0.4;
+			transform: scale(0.6);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.3);
+		}
+	}
+
+	@keyframes sparkleGlow {
+		0%,
+		100% {
+			opacity: 0.5;
+			transform: scale(0.5);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.5);
+		}
+	}
+
+	@keyframes emojiFloat {
+		0%,
+		100% {
+			opacity: 0.6;
+			transform: translateY(0) scale(0.8) rotate(-10deg);
+		}
+		50% {
+			opacity: 1;
+			transform: translateY(-8px) scale(1.1) rotate(10deg);
+		}
+	}
+
 	/* 대성공 두근두근 텍스트 */
 	.shake-text {
 		@apply absolute -top-12 left-1/2 -translate-x-1/2;
@@ -832,9 +1134,41 @@
 	}
 
 	.chef-img {
-		width: clamp(120px, 35vw, 180px);
+		width: clamp(160px, 45vw, 240px);
 		height: auto;
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+		animation: chefBounce 1.5s ease-in-out infinite;
+	}
+
+	@keyframes chefBounce {
+		0%,
+		100% {
+			transform: translateY(0) scale(1);
+		}
+		50% {
+			transform: translateY(-8px) scale(1.02);
+		}
+	}
+
+	/* 대성공 시 더 역동적인 애니메이션 */
+	.chef-section.critical .chef-img {
+		animation: chefJump 0.6s ease-in-out infinite;
+	}
+
+	@keyframes chefJump {
+		0%,
+		100% {
+			transform: translateY(0) scale(1) rotate(0deg);
+		}
+		25% {
+			transform: translateY(-15px) scale(1.05) rotate(-3deg);
+		}
+		50% {
+			transform: translateY(0) scale(1) rotate(0deg);
+		}
+		75% {
+			transform: translateY(-15px) scale(1.05) rotate(3deg);
+		}
 	}
 
 	.chef-bubble {
@@ -847,8 +1181,17 @@
 		color: #5d4037;
 		box-shadow: 0 2px 0 #3e2723;
 		margin-bottom: 4px;
-		max-width: 140px;
+		max-width: 160px;
 		text-align: center;
+	}
+
+	.chef-bubble.critical {
+		background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+		border-color: #f59e0b;
+		color: #92400e;
+		box-shadow:
+			0 2px 0 #d97706,
+			0 0 15px rgba(251, 191, 36, 0.4);
 	}
 
 	/* ===== 하단 결과 정보 (심플) ===== */
