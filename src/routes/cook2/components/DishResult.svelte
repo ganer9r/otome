@@ -83,53 +83,56 @@
 	let coinAnimationId: number | null = null;
 
 	// 코인 초기화
+	// 코인 ID 카운터
+	let coinIdCounter = 0;
+	let coinIntervalId: ReturnType<typeof setInterval> | null = null;
+
 	function initCoins() {
-		const gravity = 0.5; // 중력 (높이면 빨리 떨어짐)
-		const coins: CoinState[] = [];
-
-		for (let i = 0; i < 16; i++) {
-			// X 속도: 왼쪽(-) 또는 오른쪽(+) 랜덤, 중앙 회피
-			const direction = Math.random() < 0.5 ? -1 : 1;
-			const minSpeed = 6; // 최소 속도 (중앙 회피)
-			const vxSpeed = minSpeed + Math.random() * 10; // 6~16
-			const finalVx = direction * vxSpeed;
-
-			// 위로 솟구치는 힘
-			const upPower = 10 + Math.random() * 6;
-
-			coins.push({
-				id: i,
-				x: 0,
-				y: 0,
-				vx: finalVx,
-				vy: -upPower,
-				size: 24 + Math.random() * 12,
-				rotation: 0,
-				rotationSpeed: (Math.random() - 0.5) * 15,
-				groundY: 500 // 화면 밖으로 떨어짐
-			});
+		if (isCritical) {
+			// 대박: 폭발 이펙트 반복
+			startCriticalCoins();
+		} else {
+			// 일반 성공: 띠용띠용 하나씩
+			startNormalCoins();
 		}
+	}
 
-		coinStates = coins;
+	// 대박: 코인 폭발 반복
+	function startCriticalCoins() {
+		function burstCoins() {
+			const gravity = 0.5;
+			const newCoins: CoinState[] = [];
 
-		// 물리 시뮬레이션 시작
-		const startTime = performance.now();
-		const duration = 1200; // 1.2초
+			for (let i = 0; i < 12; i++) {
+				// X 속도: -12 ~ 12 (가운데 포함)
+				const vx = (Math.random() - 0.5) * 24;
 
-		function simulate(currentTime: number) {
-			const elapsed = currentTime - startTime;
+				newCoins.push({
+					id: coinIdCounter++,
+					x: 0,
+					y: 0,
+					vx: vx,
+					vy: -(10 + Math.random() * 8),
+					size: 24 + Math.random() * 12,
+					rotation: 0,
+					rotationSpeed: (Math.random() - 0.5) * 15,
+					groundY: 500
+				});
+			}
 
-			if (elapsed < duration && coinStates.length > 0) {
+			coinStates = [...coinStates, ...newCoins];
+
+			// 물리 시뮬레이션
+			function simulate() {
+				if (coinStates.length === 0) return;
+
 				coinStates = coinStates
 					.map((coin) => {
-						// 중력 적용
 						const newVy = coin.vy + gravity;
 						let newX = coin.x + coin.vx;
 						const newY = coin.y + newVy;
-						const newRotation = coin.rotation + coin.rotationSpeed;
 						let newVx = coin.vx;
 
-						// X 범위 제한 (-180 ~ 180)
 						if (newX < -180) {
 							newX = -180;
 							newVx = -newVx * 0.3;
@@ -138,33 +141,107 @@
 							newVx = -newVx * 0.3;
 						}
 
-						// 화면 밖으로 나가면 제거
 						if (newY > coin.groundY) {
 							return null;
 						}
-
-						// 공기 저항
-						const drag = 0.98;
 
 						return {
 							...coin,
 							x: newX,
 							y: newY,
-							vx: newVx * drag,
+							vx: newVx * 0.98,
 							vy: newVy,
-							rotation: newRotation
+							rotation: coin.rotation + coin.rotationSpeed
 						};
 					})
 					.filter((coin): coin is CoinState => coin !== null);
 
-				coinAnimationId = requestAnimationFrame(simulate);
-			} else {
-				// 애니메이션 완료 - 코인 모두 제거
-				coinStates = [];
+				if (coinStates.length > 0) {
+					coinAnimationId = requestAnimationFrame(simulate);
+				}
 			}
+
+			coinAnimationId = requestAnimationFrame(simulate);
 		}
 
+		// 첫 폭발
+		burstCoins();
+
+		// 1초마다 반복
+		coinIntervalId = setInterval(burstCoins, 1000);
+	}
+
+	// 일반 성공: 코인 하나씩 띠용띠용
+	function startNormalCoins() {
+		const gravity = 0.3;
+
+		function spawnCoin() {
+			const direction = Math.random() < 0.5 ? -1 : 1;
+
+			const newCoin: CoinState = {
+				id: coinIdCounter++,
+				x: (Math.random() - 0.5) * 60, // 약간 랜덤 위치
+				y: 0,
+				vx: direction * (2 + Math.random() * 3),
+				vy: -(8 + Math.random() * 4), // 위로 띠용
+				size: 28 + Math.random() * 8,
+				rotation: 0,
+				rotationSpeed: (Math.random() - 0.5) * 10,
+				groundY: 400
+			};
+
+			coinStates = [...coinStates, newCoin];
+		}
+
+		// 물리 시뮬레이션 (계속 실행)
+		function simulate() {
+			if (coinStates.length > 0) {
+				coinStates = coinStates
+					.map((coin) => {
+						const newVy = coin.vy + gravity;
+						const newX = coin.x + coin.vx;
+						const newY = coin.y + newVy;
+
+						if (newY > coin.groundY) {
+							return null;
+						}
+
+						return {
+							...coin,
+							x: newX,
+							y: newY,
+							vx: coin.vx * 0.99,
+							vy: newVy,
+							rotation: coin.rotation + coin.rotationSpeed
+						};
+					})
+					.filter((coin): coin is CoinState => coin !== null);
+			}
+
+			coinAnimationId = requestAnimationFrame(simulate);
+		}
+
+		// 시뮬레이션 시작
 		coinAnimationId = requestAnimationFrame(simulate);
+
+		// 1초마다 코인 하나씩 생성
+		coinIntervalId = setInterval(spawnCoin, 1000);
+
+		// 첫 코인은 0.5초 후
+		setTimeout(spawnCoin, 500);
+	}
+
+	// 코인 애니메이션 정리
+	function stopCoins() {
+		if (coinAnimationId) {
+			cancelAnimationFrame(coinAnimationId);
+			coinAnimationId = null;
+		}
+		if (coinIntervalId) {
+			clearInterval(coinIntervalId);
+			coinIntervalId = null;
+		}
+		coinStates = [];
 	}
 
 	// 화면 흔들림 트리거
@@ -250,6 +327,7 @@
 	}
 
 	function handleConfirm() {
+		stopCoins();
 		onComplete?.();
 	}
 
@@ -585,10 +663,9 @@
 	}
 
 	.slot-dish {
-		@apply relative flex items-start justify-center;
+		@apply relative flex items-center justify-center;
 		flex: 1;
 		min-height: 200px;
-		padding-top: 20px;
 	}
 
 	.bottom-section {
@@ -1068,6 +1145,7 @@
 		width: 400px;
 		height: 300px;
 		transform: translate(-50%, -50%);
+		z-index: 10;
 	}
 
 	.coin-wrapper {
