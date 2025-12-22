@@ -57,6 +57,35 @@
 		}
 	});
 
+	// 게임 가이드 메시지
+	const GUIDE_MESSAGES = {
+		fail: [
+			'운이 없었네요! 다시 도전해보세요',
+			'같은 레시피로 다시 도전!',
+			'포기하지 마세요! 한 번 더!',
+			'다음엔 분명 성공할 거예요!'
+		],
+		success: [
+			'맛있는 요리 완성!',
+			'손님이 좋아할 거예요!',
+			'요리 실력이 늘고 있어요!',
+			'좋은 요리네요!'
+		],
+		critical: ['대박! 보너스 획득!', '완벽한 요리!', '오늘 운수 대통!', '전설의 요리사!']
+	};
+
+	function getRandomGuide(type: 'fail' | 'success' | 'critical'): string {
+		const messages = GUIDE_MESSAGES[type];
+		return messages[Math.floor(Math.random() * messages.length)];
+	}
+
+	// 결과 타입에 따른 가이드 메시지
+	let guideMessage = $derived(() => {
+		if (isFail) return getRandomGuide('fail');
+		if (isCritical) return getRandomGuide('critical');
+		return getRandomGuide('success');
+	});
+
 	// 김 파티클
 	const steamParticles = Array.from({ length: 8 }, (_, i) => ({
 		id: i,
@@ -420,36 +449,54 @@
 								/>
 							</div>
 						</div>
-						<h2 class="dish-name fail">{displayName || '요리 실패...'}</h2>
-					{:else}
-						<div class="dish-glow" class:critical={isCritical}></div>
-						<div class="dish-image-container" class:critical={isCritical}>
-							<div class="dish-image-wrapper" class:critical={isCritical}>
+						<!-- 실패 설명 카드 -->
+						<div class="result-card fail">
+							<div class="result-card-header">요리 실패</div>
+							<div class="result-card-name">{displayName}</div>
+							<div class="result-card-guide">{guideMessage()}</div>
+						</div>
+					{:else if isCritical}
+						<div class="dish-glow critical"></div>
+						<div class="dish-image-container critical">
+							<div class="dish-image-wrapper critical">
 								<img
 									src={resultIngredient.imageUrl}
 									alt={resultIngredient.name}
 									class="dish-image"
 								/>
-								{#if isCritical}
-									<div class="dish-shimmer"></div>
-								{/if}
+								<div class="dish-shimmer"></div>
 							</div>
-							<!-- 반짝이 파티클 (wrapper 밖, container 안) -->
-							{#if isCritical}
-								<div class="sparkle sparkle-1"></div>
-								<div class="sparkle sparkle-2"></div>
-								<div class="sparkle sparkle-3"></div>
-								<div class="sparkle sparkle-4"></div>
-								<div class="sparkle sparkle-5"></div>
-								<div class="sparkle sparkle-6"></div>
-							{/if}
+							<!-- 반짝이 파티클 -->
+							<div class="sparkle sparkle-1"></div>
+							<div class="sparkle sparkle-2"></div>
+							<div class="sparkle sparkle-3"></div>
+							<div class="sparkle sparkle-4"></div>
+							<div class="sparkle sparkle-5"></div>
+							<div class="sparkle sparkle-6"></div>
 						</div>
-						<h2 class="dish-name" class:critical={isCritical}>{resultIngredient.name}</h2>
-						<div
-							class="dish-grade"
-							style="background-color: {GRADE_COLORS[resultIngredient.grade]}"
-						>
-							{resultIngredient.grade}등급 · {GRADE_NAMES[resultIngredient.grade]}
+						<!-- 대성공 설명 카드 -->
+						<div class="result-card critical">
+							<div class="result-card-header">대성공!</div>
+							<div class="result-card-name">{displayName}</div>
+							<div class="result-card-guide">{guideMessage()}</div>
+						</div>
+					{:else}
+						<!-- 일반 성공 -->
+						<div class="dish-glow"></div>
+						<div class="dish-image-container">
+							<div class="dish-image-wrapper">
+								<img
+									src={resultIngredient.imageUrl}
+									alt={resultIngredient.name}
+									class="dish-image"
+								/>
+							</div>
+						</div>
+						<!-- 성공 설명 카드 -->
+						<div class="result-card success">
+							<div class="result-card-header">요리 완성!</div>
+							<div class="result-card-name">{resultIngredient.name}</div>
+							<div class="result-card-guide">{guideMessage()}</div>
 						</div>
 					{/if}
 				</div>
@@ -923,6 +970,131 @@
 		@apply font-bold text-white;
 		font-size: clamp(12px, 3vw, 16px);
 		box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+	}
+
+	/* ===== 결과 설명 카드 ===== */
+	.result-card {
+		@apply flex flex-col items-center gap-1;
+		@apply rounded-2xl px-6 py-4;
+		@apply text-center;
+		margin-top: 12px;
+		min-width: 200px;
+		max-width: 280px;
+	}
+
+	.result-card.fail {
+		background: rgba(0, 0, 0, 0.6);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		border-radius: 12px;
+		backdrop-filter: blur(8px);
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+	}
+
+	.result-card.critical {
+		background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+		border: 3px solid #fbbf24;
+		box-shadow:
+			0 4px 0 #f59e0b,
+			0 8px 20px rgba(251, 191, 36, 0.3),
+			0 0 30px rgba(255, 215, 0, 0.2);
+		animation: criticalCardPulse 2s ease-in-out infinite;
+	}
+
+	@keyframes criticalCardPulse {
+		0%,
+		100% {
+			box-shadow:
+				0 4px 0 #f59e0b,
+				0 8px 20px rgba(251, 191, 36, 0.3),
+				0 0 30px rgba(255, 215, 0, 0.2);
+		}
+		50% {
+			box-shadow:
+				0 4px 0 #f59e0b,
+				0 8px 20px rgba(251, 191, 36, 0.5),
+				0 0 50px rgba(255, 215, 0, 0.4);
+		}
+	}
+
+	.result-card-header {
+		@apply font-black;
+		font-size: clamp(14px, 3.5vw, 18px);
+	}
+
+	.result-card.fail .result-card-header {
+		color: #fca5a5;
+	}
+
+	.result-card.critical .result-card-header {
+		background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.result-card-name {
+		@apply font-bold text-gray-800;
+		font-size: clamp(18px, 4.5vw, 24px);
+	}
+
+	.result-card.fail .result-card-name {
+		color: #fff;
+	}
+
+	.result-card.critical .result-card-name {
+		color: #92400e;
+	}
+
+	.result-card-desc {
+		@apply text-gray-600;
+		font-size: clamp(12px, 3vw, 14px);
+		margin-top: 4px;
+	}
+
+	.result-card.fail .result-card-desc {
+		color: rgba(255, 255, 255, 0.7);
+	}
+
+	.result-card.critical .result-card-desc {
+		color: #a16207;
+	}
+
+	/* 성공 카드 */
+	.result-card.success {
+		background: rgba(255, 255, 255, 0.9);
+		border: 2px solid rgba(22, 101, 52, 0.7);
+		border-radius: 12px;
+		box-shadow: 0 4px 16px rgba(22, 101, 52, 0.15);
+	}
+
+	.result-card.success .result-card-header {
+		color: rgba(22, 101, 52, 0.7);
+	}
+
+	.result-card.success .result-card-name {
+		color: #166534;
+	}
+
+	/* 게임 가이드 메시지 */
+	.result-card-guide {
+		@apply text-center;
+		font-size: clamp(11px, 2.8vw, 13px);
+		margin-top: 8px;
+		padding-top: 8px;
+		border-top: 1px solid rgba(128, 128, 128, 0.2);
+	}
+
+	.result-card.fail .result-card-guide {
+		color: rgba(255, 255, 255, 0.6);
+		border-top-color: rgba(255, 255, 255, 0.15);
+	}
+
+	.result-card.success .result-card-guide {
+		color: rgba(22, 101, 52, 0.6);
+	}
+
+	.result-card.critical .result-card-guide {
+		color: #fbbf24;
 	}
 
 	/* 검은 덩어리 */
