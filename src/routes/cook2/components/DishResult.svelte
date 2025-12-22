@@ -410,13 +410,17 @@
 
 				<div class="dish-content" class:visible={showDish} class:animate={showDish}>
 					{#if isFail}
-						<div class="black-blob">
-							<div class="blob-body">
-								<div class="blob-eye left"></div>
-								<div class="blob-eye right"></div>
+						<!-- 실패: 흑백 요리 이미지 -->
+						<div class="dish-image-container fail">
+							<div class="dish-image-wrapper fail">
+								<img
+									src={resultIngredient.imageUrl}
+									alt={resultIngredient.name}
+									class="dish-image"
+								/>
 							</div>
 						</div>
-						<h2 class="dish-name fail">{displayName || '미확인 물체'}</h2>
+						<h2 class="dish-name fail">{displayName || '요리 실패...'}</h2>
 					{:else}
 						<div class="dish-glow" class:critical={isCritical}></div>
 						<div class="dish-image-container" class:critical={isCritical}>
@@ -460,12 +464,14 @@
 					class:fail={isFail}
 				>
 					<div class="chef-wrapper" class:animate={showChef} class:idle={showBubble}>
-						<!-- 집중선 효과 (셰프 뒤) -->
-						<div class="chef-focus-lines" class:visible={showChef} class:critical={isCritical}>
-							{#each Array(12) as _, i}
-								<div class="focus-line" style="--i: {i}"></div>
-							{/each}
-						</div>
+						<!-- 집중선 효과 (셰프 뒤, 실패 시 안 보임) -->
+						{#if !isFail}
+							<div class="chef-focus-lines" class:visible={showChef} class:critical={isCritical}>
+								{#each Array(12) as _, i}
+									<div class="focus-line" style="--i: {i}"></div>
+								{/each}
+							</div>
+						{/if}
 						<img src={chefImage} alt="셰프" class="chef-image" />
 					</div>
 					<div
@@ -786,6 +792,57 @@
 	.dish-image-wrapper.critical {
 		animation: criticalPulse 2s ease-in-out infinite;
 		filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6));
+	}
+
+	/* 실패: 흑백 + 어둡게 */
+	.dish-image-wrapper.fail {
+		filter: grayscale(100%) brightness(0.6);
+		opacity: 0.8;
+	}
+
+	.dish-image-container.fail {
+		animation: failShake 0.5s ease-in-out;
+	}
+
+	@keyframes failShake {
+		0%,
+		100% {
+			transform: rotate(0deg);
+		}
+		20% {
+			transform: rotate(-5deg);
+		}
+		40% {
+			transform: rotate(5deg);
+		}
+		60% {
+			transform: rotate(-3deg);
+		}
+		80% {
+			transform: rotate(3deg);
+		}
+	}
+
+	/* 금이 간 효과 오버레이 */
+	.crack-overlay {
+		@apply pointer-events-none absolute inset-0 z-20;
+		background: 
+			/* 대각선 금 */
+			linear-gradient(
+				45deg,
+				transparent 45%,
+				rgba(0, 0, 0, 0.3) 45%,
+				rgba(0, 0, 0, 0.3) 55%,
+				transparent 55%
+			),
+			linear-gradient(
+				-45deg,
+				transparent 45%,
+				rgba(0, 0, 0, 0.2) 45%,
+				rgba(0, 0, 0, 0.2) 55%,
+				transparent 55%
+			);
+		border-radius: 50%;
 	}
 
 	@keyframes criticalPulse {

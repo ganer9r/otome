@@ -10,6 +10,11 @@
 	import { GRADE_ORDER } from '../lib/types';
 	import { findIngredientById, INGREDIENTS } from '../lib/data/ingredients';
 	import { RECIPES } from '../lib/data/recipes';
+	import {
+		getFailName,
+		getRandomFailDescription,
+		getRandomCriticalDescription
+	} from '../lib/data/dishes';
 
 	// 등급 선택
 	let selectedGrade = $state<IngredientGrade>('E');
@@ -31,8 +36,8 @@
 					resultType: 'fail',
 					ingredient: selectedDish,
 					sellPrice: 0,
-					displayName: '검게 탄 덩어리',
-					description: '이게 뭐야... 탔잖아!'
+					displayName: getFailName(selectedDish.id),
+					description: getRandomFailDescription()
 				}
 			: null
 	);
@@ -44,7 +49,7 @@
 					ingredient: selectedDish,
 					sellPrice: selectedDish.sellPrice || 0,
 					displayName: selectedDish.name,
-					description: '맛있게 잘 됐어!'
+					description: ''
 				}
 			: null
 	);
@@ -56,7 +61,7 @@
 					ingredient: selectedDish,
 					sellPrice: (selectedDish.sellPrice || 0) * 2,
 					displayName: `완벽한 ${selectedDish.name}`,
-					description: '이건 예술이야!'
+					description: getRandomCriticalDescription()
 				}
 			: null
 	);
@@ -68,8 +73,8 @@
 					resultType: 'fail',
 					ingredient: selectedMaterial,
 					sellPrice: 0,
-					displayName: '이상한 덩어리',
-					description: '뭔가 잘못됐어...'
+					displayName: getFailName(selectedMaterial.id),
+					description: getRandomFailDescription()
 				}
 			: null
 	);
@@ -81,7 +86,7 @@
 					ingredient: selectedMaterial,
 					sellPrice: selectedMaterial.sellPrice || 0,
 					displayName: selectedMaterial.name,
-					description: '좋은 재료가 만들어졌어!'
+					description: ''
 				}
 			: null
 	);
@@ -93,7 +98,7 @@
 					ingredient: selectedMaterial,
 					sellPrice: (selectedMaterial.sellPrice || 0) * 2,
 					displayName: `최상급 ${selectedMaterial.name}`,
-					description: '완벽한 품질이야!'
+					description: getRandomCriticalDescription()
 				}
 			: null
 	);
