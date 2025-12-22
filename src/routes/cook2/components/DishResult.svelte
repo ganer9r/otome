@@ -99,8 +99,10 @@
 
 	// 대박: 코인 폭발 반복
 	function startCriticalCoins() {
-		function burstCoins() {
-			const gravity = 0.5;
+		const gravity = 0.5;
+
+		// 코인 추가 함수 (시뮬레이션과 분리)
+		function addBurstCoins() {
 			const newCoins: CoinState[] = [];
 
 			for (let i = 0; i < 12; i++) {
@@ -121,54 +123,51 @@
 			}
 
 			coinStates = [...coinStates, ...newCoins];
+		}
 
-			// 물리 시뮬레이션
-			function simulate() {
-				if (coinStates.length === 0) return;
+		// 물리 시뮬레이션 (한 번만 실행)
+		function simulate() {
+			coinStates = coinStates
+				.map((coin) => {
+					const newVy = coin.vy + gravity;
+					let newX = coin.x + coin.vx;
+					const newY = coin.y + newVy;
+					let newVx = coin.vx;
 
-				coinStates = coinStates
-					.map((coin) => {
-						const newVy = coin.vy + gravity;
-						let newX = coin.x + coin.vx;
-						const newY = coin.y + newVy;
-						let newVx = coin.vx;
+					if (newX < -180) {
+						newX = -180;
+						newVx = -newVx * 0.3;
+					} else if (newX > 180) {
+						newX = 180;
+						newVx = -newVx * 0.3;
+					}
 
-						if (newX < -180) {
-							newX = -180;
-							newVx = -newVx * 0.3;
-						} else if (newX > 180) {
-							newX = 180;
-							newVx = -newVx * 0.3;
-						}
+					if (newY > coin.groundY) {
+						return null;
+					}
 
-						if (newY > coin.groundY) {
-							return null;
-						}
-
-						return {
-							...coin,
-							x: newX,
-							y: newY,
-							vx: newVx * 0.98,
-							vy: newVy,
-							rotation: coin.rotation + coin.rotationSpeed
-						};
-					})
-					.filter((coin): coin is CoinState => coin !== null);
-
-				if (coinStates.length > 0) {
-					coinAnimationId = requestAnimationFrame(simulate);
-				}
-			}
+					return {
+						...coin,
+						x: newX,
+						y: newY,
+						vx: newVx * 0.98,
+						vy: newVy,
+						rotation: coin.rotation + coin.rotationSpeed
+					};
+				})
+				.filter((coin): coin is CoinState => coin !== null);
 
 			coinAnimationId = requestAnimationFrame(simulate);
 		}
 
-		// 첫 폭발
-		burstCoins();
+		// 시뮬레이션 시작 (한 번만)
+		coinAnimationId = requestAnimationFrame(simulate);
 
-		// 1초마다 반복
-		coinIntervalId = setInterval(burstCoins, 1000);
+		// 첫 폭발
+		addBurstCoins();
+
+		// 2초마다 코인 추가
+		coinIntervalId = setInterval(addBurstCoins, 2000);
 	}
 
 	// 일반 성공: 코인 하나씩 띠용띠용
@@ -419,9 +418,29 @@
 						</div>
 						<h2 class="dish-name fail">{displayName || '미확인 물체'}</h2>
 					{:else}
-						<div class="dish-glow"></div>
-						<img src={resultIngredient.imageUrl} alt={resultIngredient.name} class="dish-image" />
-						<h2 class="dish-name">{resultIngredient.name}</h2>
+						<div class="dish-glow" class:critical={isCritical}></div>
+						<div class="dish-image-container" class:critical={isCritical}>
+							<div class="dish-image-wrapper" class:critical={isCritical}>
+								<img
+									src={resultIngredient.imageUrl}
+									alt={resultIngredient.name}
+									class="dish-image"
+								/>
+								{#if isCritical}
+									<div class="dish-shimmer"></div>
+								{/if}
+							</div>
+							<!-- 반짝이 파티클 (wrapper 밖, container 안) -->
+							{#if isCritical}
+								<div class="sparkle sparkle-1"></div>
+								<div class="sparkle sparkle-2"></div>
+								<div class="sparkle sparkle-3"></div>
+								<div class="sparkle sparkle-4"></div>
+								<div class="sparkle sparkle-5"></div>
+								<div class="sparkle sparkle-6"></div>
+							{/if}
+						</div>
+						<h2 class="dish-name" class:critical={isCritical}>{resultIngredient.name}</h2>
 						<div
 							class="dish-grade"
 							style="background-color: {GRADE_COLORS[resultIngredient.grade]}"
@@ -714,6 +733,18 @@
 		animation: dishGlow 2s ease-in-out infinite;
 	}
 
+	.dish-glow.critical {
+		width: 280px;
+		height: 280px;
+		background: radial-gradient(
+			circle,
+			rgba(255, 215, 0, 0.6) 0%,
+			rgba(255, 180, 0, 0.3) 40%,
+			transparent 70%
+		);
+		animation: dishGlowCritical 1.5s ease-in-out infinite;
+	}
+
 	@keyframes dishGlow {
 		0%,
 		100% {
@@ -726,18 +757,103 @@
 		}
 	}
 
-	.dish-image {
-		@apply relative z-10;
+	@keyframes dishGlowCritical {
+		0%,
+		100% {
+			opacity: 0.6;
+			transform: scale(1);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.2);
+		}
+	}
+
+	/* 요리 이미지 컨테이너 (sparkle용, overflow visible) */
+	.dish-image-container {
+		@apply relative;
 		width: clamp(140px, 38vw, 180px);
 		height: clamp(140px, 38vw, 180px);
+	}
+
+	/* 요리 이미지 래퍼 (쉬머 효과용) */
+	.dish-image-wrapper {
+		@apply relative overflow-hidden rounded-full;
+		width: 100%;
+		height: 100%;
+	}
+
+	.dish-image-wrapper.critical {
+		animation: criticalPulse 2s ease-in-out infinite;
+		filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6));
+	}
+
+	@keyframes criticalPulse {
+		0%,
+		100% {
+			filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.5));
+		}
+		50% {
+			filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.8));
+		}
+	}
+
+	.dish-image {
+		@apply relative z-10;
+		width: 100%;
+		height: 100%;
 		@apply object-contain;
 		filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.25));
+	}
+
+	/* 쉬머 효과 (대각선 빛이 지나감) */
+	.dish-shimmer {
+		@apply pointer-events-none absolute inset-0 z-20;
+		background: linear-gradient(
+			120deg,
+			transparent 0%,
+			transparent 40%,
+			rgba(255, 255, 255, 0.4) 45%,
+			rgba(255, 255, 255, 0.8) 50%,
+			rgba(255, 255, 255, 0.4) 55%,
+			transparent 60%,
+			transparent 100%
+		);
+		animation: shimmer 2.5s ease-in-out infinite;
+	}
+
+	@keyframes shimmer {
+		0% {
+			transform: translateX(-150%) rotate(0deg);
+		}
+		100% {
+			transform: translateX(150%) rotate(0deg);
+		}
 	}
 
 	.dish-name {
 		@apply font-black text-gray-800;
 		font-size: clamp(24px, 6vw, 36px);
 		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.dish-name.critical {
+		background: linear-gradient(135deg, #ffd700 0%, #ffb300 50%, #ffd700 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		filter: drop-shadow(0 2px 4px rgba(255, 180, 0, 0.5));
+		animation: goldText 2s ease-in-out infinite;
+	}
+
+	@keyframes goldText {
+		0%,
+		100% {
+			filter: drop-shadow(0 2px 4px rgba(255, 180, 0, 0.5));
+		}
+		50% {
+			filter: drop-shadow(0 4px 8px rgba(255, 180, 0, 0.8));
+		}
 	}
 
 	.dish-name.fail {
@@ -1210,6 +1326,138 @@
 		}
 		50% {
 			opacity: 0.8;
+		}
+	}
+
+	/* ===== 반짝이 파티클 (대성공) ===== */
+	.sparkle {
+		@apply pointer-events-none absolute;
+		z-index: 30;
+	}
+
+	/* 4각 별 모양 (골드) */
+	.sparkle-1,
+	.sparkle-4 {
+		width: 28px;
+		height: 28px;
+		background: #ffd700;
+		clip-path: polygon(
+			50% 0%,
+			61% 35%,
+			98% 35%,
+			68% 57%,
+			79% 91%,
+			50% 70%,
+			21% 91%,
+			32% 57%,
+			2% 35%,
+			39% 35%
+		);
+		filter: drop-shadow(0 0 8px #ffd700) drop-shadow(0 0 16px rgba(255, 215, 0, 0.6));
+	}
+
+	.sparkle-1 {
+		top: -5%;
+		right: -5%;
+		animation: sparkleFlash 0.8s ease-in-out infinite;
+	}
+
+	.sparkle-4 {
+		bottom: 5%;
+		left: -8%;
+		width: 22px;
+		height: 22px;
+		background: #fff;
+		filter: drop-shadow(0 0 6px #fff) drop-shadow(0 0 12px rgba(255, 215, 0, 0.8));
+		animation: sparkleFlash 1s ease-in-out 0.4s infinite;
+	}
+
+	/* 원형 글로우 (흰색+골드) */
+	.sparkle-2,
+	.sparkle-5 {
+		border-radius: 50%;
+		background: #fff;
+		box-shadow:
+			0 0 8px 4px #fff,
+			0 0 16px 8px rgba(255, 215, 0, 0.7);
+	}
+
+	.sparkle-2 {
+		width: 12px;
+		height: 12px;
+		top: -8%;
+		left: 5%;
+		animation: sparkleGlow 1s ease-in-out infinite;
+	}
+
+	.sparkle-5 {
+		width: 10px;
+		height: 10px;
+		bottom: 0%;
+		right: 5%;
+		animation: sparkleGlow 0.8s ease-in-out 0.3s infinite;
+	}
+
+	/* 다이아몬드 (골드+흰색) */
+	.sparkle-3 {
+		width: 16px;
+		height: 16px;
+		top: 20%;
+		left: -12%;
+		background: #ffd700;
+		transform: rotate(45deg);
+		box-shadow:
+			0 0 8px 2px #ffd700,
+			0 0 16px 4px rgba(255, 215, 0, 0.5);
+		animation: sparkleSpin 1.2s ease-in-out infinite;
+	}
+
+	.sparkle-6 {
+		width: 12px;
+		height: 12px;
+		bottom: 20%;
+		right: -10%;
+		background: #fff;
+		transform: rotate(45deg);
+		box-shadow:
+			0 0 6px 2px #fff,
+			0 0 12px 4px rgba(255, 215, 0, 0.6);
+		animation: sparkleSpin 1s ease-in-out 0.5s infinite;
+	}
+
+	@keyframes sparkleFlash {
+		0%,
+		100% {
+			opacity: 0.4;
+			transform: scale(0.6);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.3);
+		}
+	}
+
+	@keyframes sparkleGlow {
+		0%,
+		100% {
+			opacity: 0.5;
+			transform: scale(0.5);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.5);
+		}
+	}
+
+	@keyframes sparkleSpin {
+		0%,
+		100% {
+			opacity: 0.5;
+			transform: rotate(45deg) scale(0.6);
+		}
+		50% {
+			opacity: 1;
+			transform: rotate(45deg) scale(1.2);
 		}
 	}
 </style>
