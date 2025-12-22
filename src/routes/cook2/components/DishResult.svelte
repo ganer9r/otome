@@ -991,29 +991,10 @@
 	}
 
 	.result-card.critical {
-		background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-		border: 3px solid #fbbf24;
-		box-shadow:
-			0 4px 0 #f59e0b,
-			0 8px 20px rgba(251, 191, 36, 0.3),
-			0 0 30px rgba(255, 215, 0, 0.2);
-		animation: criticalCardPulse 2s ease-in-out infinite;
-	}
-
-	@keyframes criticalCardPulse {
-		0%,
-		100% {
-			box-shadow:
-				0 4px 0 #f59e0b,
-				0 8px 20px rgba(251, 191, 36, 0.3),
-				0 0 30px rgba(255, 215, 0, 0.2);
-		}
-		50% {
-			box-shadow:
-				0 4px 0 #f59e0b,
-				0 8px 20px rgba(251, 191, 36, 0.5),
-				0 0 50px rgba(255, 215, 0, 0.4);
-		}
+		background: rgba(255, 255, 255, 0.9);
+		border: 2px solid rgba(217, 119, 6, 0.8);
+		border-radius: 12px;
+		box-shadow: 0 4px 16px rgba(217, 119, 6, 0.2);
 	}
 
 	.result-card-header {
@@ -1026,10 +1007,7 @@
 	}
 
 	.result-card.critical .result-card-header {
-		background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
+		color: rgba(217, 119, 6, 0.8);
 	}
 
 	.result-card-name {
@@ -1042,7 +1020,7 @@
 	}
 
 	.result-card.critical .result-card-name {
-		color: #92400e;
+		color: #b45309;
 	}
 
 	.result-card-desc {
@@ -1094,7 +1072,8 @@
 	}
 
 	.result-card.critical .result-card-guide {
-		color: #fbbf24;
+		color: rgba(180, 83, 9, 0.7);
+		border-top-color: rgba(217, 119, 6, 0.3);
 	}
 
 	/* 검은 덩어리 */
