@@ -4,7 +4,7 @@ export default {
 	expo: {
 		name: IS_DEV ? '[DEV] 흑백의 쉐프' : '흑백의 쉐프',
 		slug: 'otome-cooking',
-		version: '1.0.0',
+		version: '1.0.1',
 		orientation: 'portrait',
 		icon: IS_DEV ? './assets/icon-dev.png' : './assets/icon.png',
 		userInterfaceStyle: 'light',
@@ -19,6 +19,7 @@ export default {
 			bundleIdentifier: IS_DEV ? 'com.ganer.cooking.dev' : 'com.ganer.cooking'
 		},
 		android: {
+			versionCode: 2,
 			adaptiveIcon: {
 				foregroundImage: IS_DEV ? './assets/adaptive-icon-dev.png' : './assets/adaptive-icon.png',
 				backgroundColor: IS_DEV ? '#ffcccc' : '#fff8e1'

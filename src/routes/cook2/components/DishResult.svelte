@@ -28,16 +28,15 @@
 	// 각 영역 표시 상태 (한번 true가 되면 유지)
 	let showDish = $state(false);
 	let showChef = $state(false);
-	let showMoney = $state(false);
+	let showBubble = $state(false);
+	let showCoins = $state(false);
 	let showButton = $state(false);
+
+	// 버튼 숫자 카운트업
+	let displayedProfit = $state(0);
 
 	// 화면 흔들림
 	let screenShake = $state(false);
-
-	// 코인 애니메이션 상태
-	let showCoins = $state(false);
-	let coinsCollecting = $state(false);
-	let displayedProfit = $state(0);
 
 	const potImage = '/imgs/cw_pot.webp';
 
@@ -72,14 +71,12 @@
 		id: number;
 		x: number;
 		y: number;
-		vx: number; // x 속도
-		vy: number; // y 속도
+		vx: number;
+		vy: number;
 		size: number;
 		rotation: number;
 		rotationSpeed: number;
-		landed: boolean;
-		floatPhase: number;
-		groundY: number; // 각 코인마다 다른 바닥 높이
+		groundY: number;
 	}
 
 	let coinStates = $state<CoinState[]>([]);
@@ -100,22 +97,16 @@
 			// 위로 솟구치는 힘
 			const upPower = 10 + Math.random() * 6;
 
-			console.log(
-				`코인 ${i}: vx=${finalVx.toFixed(2)}, direction=${direction}, speed=${vxSpeed.toFixed(2)}`
-			);
-
 			coins.push({
 				id: i,
 				x: 0,
 				y: 0,
 				vx: finalVx,
-				vy: -upPower, // 위로!
+				vy: -upPower,
 				size: 24 + Math.random() * 12,
 				rotation: 0,
 				rotationSpeed: (Math.random() - 0.5) * 15,
-				landed: false,
-				floatPhase: Math.random() * Math.PI * 2,
-				groundY: Math.random() * 300 // 바닥: 0 ~ 300
+				groundY: 500 // 화면 밖으로 떨어짐
 			});
 		}
 
@@ -128,81 +119,53 @@
 		function simulate(currentTime: number) {
 			const elapsed = currentTime - startTime;
 
-			if (elapsed < duration) {
-				coinStates = coinStates.map((coin) => {
-					if (coin.landed) return coin;
+			if (elapsed < duration && coinStates.length > 0) {
+				coinStates = coinStates
+					.map((coin) => {
+						// 중력 적용
+						const newVy = coin.vy + gravity;
+						let newX = coin.x + coin.vx;
+						const newY = coin.y + newVy;
+						const newRotation = coin.rotation + coin.rotationSpeed;
+						let newVx = coin.vx;
 
-					// 중력 적용
-					const newVy = coin.vy + gravity;
-					let newX = coin.x + coin.vx;
-					const newY = coin.y + newVy;
-					const newRotation = coin.rotation + coin.rotationSpeed;
-					let newVx = coin.vx;
+						// X 범위 제한 (-180 ~ 180)
+						if (newX < -180) {
+							newX = -180;
+							newVx = -newVx * 0.3;
+						} else if (newX > 180) {
+							newX = 180;
+							newVx = -newVx * 0.3;
+						}
 
-					// X 범위 제한 (-180 ~ 180)
-					if (newX < -180) {
-						newX = -180;
-						newVx = -newVx * 0.3; // 벽에 튕김
-					} else if (newX > 180) {
-						newX = 180;
-						newVx = -newVx * 0.3;
-					}
+						// 화면 밖으로 나가면 제거
+						if (newY > coin.groundY) {
+							return null;
+						}
 
-					// 각 코인의 고유 바닥에 착지
-					if (newY > coin.groundY) {
-						console.log(`코인 ${coin.id} 착지: x=${newX.toFixed(2)}`);
+						// 공기 저항
+						const drag = 0.98;
+
 						return {
 							...coin,
 							x: newX,
-							y: coin.groundY,
-							vy: 0,
-							vx: 0,
-							rotation: newRotation,
-							landed: true
+							y: newY,
+							vx: newVx * drag,
+							vy: newVy,
+							rotation: newRotation
 						};
-					}
-
-					// 공기 저항
-					const drag = 0.98;
-
-					return {
-						...coin,
-						x: newX,
-						y: newY,
-						vx: newVx * drag,
-						vy: newVy,
-						rotation: newRotation
-					};
-				});
+					})
+					.filter((coin): coin is CoinState => coin !== null);
 
 				coinAnimationId = requestAnimationFrame(simulate);
 			} else {
-				// 애니메이션 완료 - 모든 코인 착지
-				coinStates = coinStates.map((coin) => ({
-					...coin,
-					landed: true,
-					vy: 0,
-					vx: 0
-				}));
+				// 애니메이션 완료 - 코인 모두 제거
+				coinStates = [];
 			}
 		}
 
 		coinAnimationId = requestAnimationFrame(simulate);
 	}
-
-	// 둥둥 떠다니기 (착지 후)
-	$effect(() => {
-		if (!showCoins || coinsCollecting) return;
-
-		const floatInterval = setInterval(() => {
-			coinStates = coinStates.map((coin) => ({
-				...coin,
-				floatPhase: coin.floatPhase + 0.08
-			}));
-		}, 30);
-
-		return () => clearInterval(floatInterval);
-	});
 
 	// 화면 흔들림 트리거
 	function triggerShake() {
@@ -221,58 +184,54 @@
 			setTimeout(() => {
 				stage = 'dish';
 				showDish = true;
-				triggerShake();
 			}, 1200)
 		);
 
-		// 3. 금액 등장 (0.8초 후) - 쿵!
-		timers.push(
-			setTimeout(() => {
-				stage = 'money';
-				showMoney = true;
-				showCoins = true;
-				initCoins();
-				triggerShake();
-				startCounting();
-			}, 2000)
-		);
-
-		// 4. 셰프 등장 (0.8초 후) - 쿵 없이 부드럽게
-		timers.push(
-			setTimeout(() => {
-				stage = 'chef';
-				showChef = true;
-				// triggerShake 없음
-			}, 2800)
-		);
-
-		// 5. 버튼 등장 (0.6초 후)
+		// 3. 셰프 등장 (0.8초 후)
 		timers.push(
 			setTimeout(() => {
 				stage = 'complete';
+				showChef = true;
+			}, 2000)
+		);
+
+		// 4. 말풍선 등장 (0.5초 후)
+		timers.push(
+			setTimeout(() => {
+				showBubble = true;
+			}, 2500)
+		);
+
+		// 5. 코인 + 버튼 등장 (0.5초 후)
+		timers.push(
+			setTimeout(() => {
+				showCoins = true;
 				showButton = true;
-			}, 3400)
+				initCoins();
+				startProfitCounting();
+			}, 3000)
 		);
 
 		return () => timers.forEach((t) => clearTimeout(t));
 	});
 
-	// 수익 카운팅 애니메이션
-	function startCounting() {
-		const duration = 600;
+	// 버튼 숫자 카운트업 애니메이션
+	function startProfitCounting() {
+		const duration = 1500; // 1.5초
 		const startTime = performance.now();
-		const targetProfit = profit;
+		const target = profit;
 
 		function animate(currentTime: number) {
 			const elapsed = currentTime - startTime;
 			const progress = Math.min(elapsed / duration, 1);
-			const eased = 1 - (1 - progress) * (1 - progress);
-			displayedProfit = Math.round(targetProfit * eased);
+			// easeOutCubic - 자연스럽게 감속
+			const eased = 1 - Math.pow(1 - progress, 3);
+			displayedProfit = Math.round(target * eased);
 
 			if (progress < 1) {
 				requestAnimationFrame(animate);
 			} else {
-				displayedProfit = targetProfit;
+				displayedProfit = target;
 			}
 		}
 		requestAnimationFrame(animate);
@@ -283,7 +242,7 @@
 			stage = 'complete';
 			showDish = true;
 			showChef = true;
-			showMoney = true;
+			showBubble = true;
 			showCoins = true;
 			showButton = true;
 			displayedProfit = profit;
@@ -291,76 +250,7 @@
 	}
 
 	function handleConfirm() {
-		if (isFail) {
-			onComplete?.();
-			return;
-		}
-
-		// 코인 수집 애니메이션 - 지갑으로 빨려들어감
-		coinsCollecting = true;
-
-		const startTime = performance.now();
-		const duration = 800;
-
-		// 지갑과 coin-burst의 실제 위치 계산
-		let walletX = 250;
-		let walletY = -350;
-
-		if (walletEl && coinBurstEl) {
-			const walletRect = walletEl.getBoundingClientRect();
-			const burstRect = coinBurstEl.getBoundingClientRect();
-
-			// coin-burst 중심 기준 지갑 상대 위치
-			const burstCenterX = burstRect.left + burstRect.width / 2;
-			const burstCenterY = burstRect.top + burstRect.height / 2;
-			const walletCenterX = walletRect.left + walletRect.width / 2;
-			const walletCenterY = walletRect.top + walletRect.height / 2;
-
-			walletX = walletCenterX - burstCenterX;
-			walletY = walletCenterY - burstCenterY;
-		}
-
-		// 각 코인의 시작 상태 저장
-		const startStates = coinStates.map((coin) => ({
-			x: coin.x,
-			y: coin.y,
-			size: coin.size,
-			rotation: coin.rotation
-		}));
-
-		function animateCollect(currentTime: number) {
-			const elapsed = currentTime - startTime;
-			const progress = Math.min(elapsed / duration, 1);
-
-			coinStates = coinStates.map((coin, i) => {
-				const start = startStates[i];
-				// 시간차 두기
-				const delay = i * 0.03;
-				const coinProgress = Math.max(0, Math.min(1, (progress - delay) / (1 - delay)));
-				// easeInCubic - 점점 빨라짐
-				const coinEased = coinProgress * coinProgress * coinProgress;
-
-				return {
-					...coin,
-					x: start.x + (walletX - start.x) * coinEased,
-					y: start.y + (walletY - start.y) * coinEased,
-					rotation: start.rotation + coinEased * 720,
-					size: start.size * (1 - coinEased * 0.8) // 마지막에 작아짐
-				};
-			});
-
-			if (progress < 1) {
-				requestAnimationFrame(animateCollect);
-			} else {
-				// 코인 다 들어감 - 지갑 펄스 후 완료
-				coinStates = [];
-				setTimeout(() => {
-					onComplete?.();
-				}, 300);
-			}
-		}
-
-		requestAnimationFrame(animateCollect);
+		onComplete?.();
 	}
 
 	// 미사용 변수 처리
@@ -381,7 +271,7 @@
 	tabindex="0"
 >
 	<!-- 지갑 아이콘 (우상단) -->
-	<div class="wallet-icon" class:pulse={coinsCollecting} bind:this={walletEl}>
+	<div class="wallet-icon" bind:this={walletEl}>
 		<img src="/imgs/ui/coin.png" alt="지갑" />
 	</div>
 
@@ -421,6 +311,26 @@
 		<div class="result-layout">
 			<!-- 영역 1: 요리 (고정 높이) -->
 			<div class="slot slot-dish">
+				<!-- 코인 물리 시뮬레이션 (요리 중앙에서 터짐) -->
+				{#if showCoins && !isFail}
+					<div class="coin-burst" bind:this={coinBurstEl}>
+						{#each coinStates as coin (coin.id)}
+							<div class="coin-wrapper" style="transform: translate({coin.x}px, {coin.y}px);">
+								<img
+									src="/imgs/ui/coin.png"
+									alt=""
+									class="coin-particle"
+									style="
+										width: {coin.size}px;
+										height: {coin.size}px;
+										transform: rotate({coin.rotation}deg);
+									"
+								/>
+							</div>
+						{/each}
+					</div>
+				{/if}
+
 				<div class="dish-content" class:visible={showDish} class:animate={showDish}>
 					{#if isFail}
 						<div class="black-blob">
@@ -444,86 +354,36 @@
 				</div>
 			</div>
 
-			<!-- 영역 2: 금액 (고정 높이) -->
-			<div class="slot slot-money">
-				<!-- 코인 물리 시뮬레이션 -->
-				{#if showCoins && !isFail}
-					<div class="coin-burst" class:collecting={coinsCollecting} bind:this={coinBurstEl}>
-						{#each coinStates as coin (coin.id)}
-							{@const floatY = coin.landed ? Math.sin(coin.floatPhase) * 6 : 0}
-							<div
-								class="coin-wrapper"
-								class:collecting={coinsCollecting}
-								class:landed={coin.landed}
-								style="
-									transform: translate({coin.x}px, {coin.y + floatY}px);
-								"
-							>
-								<img
-									src="/imgs/ui/coin.png"
-									alt=""
-									class="coin-particle"
-									style="
-										width: {coin.size}px;
-										height: {coin.size}px;
-										transform: rotate({coin.rotation}deg) scale({coin.landed ? 1 : 1.1});
-									"
-								/>
-								<div
-									class="coin-shadow"
-									style="
-										width: {coin.size * 0.6}px;
-										opacity: {coin.landed ? 0.4 : 0.2};
-										transform: translateX(-50%) scale({coin.landed ? 1 : 0.5});
-									"
-								></div>
-							</div>
-						{/each}
-					</div>
-				{/if}
-
-				<div class="money-content" class:visible={showMoney} class:animate={showMoney}>
-					<div class="profit-display">
-						<img src="/imgs/ui/coin.png" alt="coin" class="profit-coin" />
-						<span
-							class="profit-number"
-							class:positive={displayedProfit >= 0}
-							class:negative={displayedProfit < 0}
-						>
-							{displayedProfit >= 0 ? '+' : ''}{displayedProfit.toLocaleString()}원
-						</span>
-					</div>
-					{#if isFail}
-						<div class="fail-tag">재료비 날림!</div>
-					{:else if isCritical}
-						<div class="bonus-tag">대박!</div>
-					{/if}
-				</div>
-			</div>
-
-			<!-- 영역 3: 셰프 (고정 높이) -->
-			<div class="slot slot-chef">
+			<!-- 하단 영역: 셰프 + 버튼 -->
+			<div class="bottom-section">
 				<div
 					class="chef-content"
 					class:visible={showChef}
-					class:animate={showChef}
 					class:critical={isCritical}
 					class:fail={isFail}
 				>
-					<div class="chef-wrapper">
+					<div class="chef-wrapper" class:animate={showChef} class:idle={showBubble}>
+						<!-- 집중선 효과 (셰프 뒤) -->
+						<div class="chef-focus-lines" class:visible={showChef} class:critical={isCritical}>
+							{#each Array(12) as _, i}
+								<div class="focus-line" style="--i: {i}"></div>
+							{/each}
+						</div>
 						<img src={chefImage} alt="셰프" class="chef-image" />
 					</div>
-					<div class="speech-bubble" class:critical={isCritical} class:fail={isFail}>
+					<div
+						class="speech-bubble"
+						class:visible={showBubble}
+						class:critical={isCritical}
+						class:fail={isFail}
+					>
 						<span>{chefDialogue}</span>
 					</div>
 				</div>
-			</div>
 
-			<!-- 영역 4: 버튼 (고정 높이) -->
-			<div class="slot slot-button">
 				<div class="button-content" class:visible={showButton}>
 					<GameButton variant={isFail ? 'secondary' : 'primary'} size="lg" onclick={handleConfirm}>
-						{isFail ? '다시 도전!' : '획득하기'}
+						{isFail ? '다시 도전!' : `+${displayedProfit.toLocaleString()}원 획득하기`}
 					</GameButton>
 				</div>
 			</div>
@@ -715,8 +575,8 @@
 		@apply flex flex-col items-center;
 		@apply h-full w-full;
 		@apply px-4;
-		padding-top: 60px;
-		padding-bottom: 40px;
+		padding-top: 40px;
+		padding-bottom: 32px;
 	}
 
 	.slot {
@@ -725,27 +585,17 @@
 	}
 
 	.slot-dish {
-		flex: 0 0 auto;
+		@apply relative flex items-start justify-center;
+		flex: 1;
 		min-height: 200px;
+		padding-top: 20px;
 	}
 
-	.slot-chef {
+	.bottom-section {
+		@apply relative flex flex-col items-center gap-3;
+		@apply w-full;
 		flex: 0 0 auto;
-		min-height: 100px;
-		margin-top: 8px;
-	}
-
-	.slot-money {
-		@apply relative;
-		flex: 0 0 auto;
-		min-height: 100px;
-		margin-top: 12px;
-	}
-
-	.slot-button {
-		flex: 0 0 auto;
-		min-height: 60px;
-		margin-top: 16px;
+		padding: 0 16px;
 	}
 
 	/* ===== 요리 영역 ===== */
@@ -884,90 +734,160 @@
 
 	/* ===== 셰프 영역 ===== */
 	.chef-content {
-		@apply flex items-center gap-3;
+		@apply relative flex items-center gap-4;
 		opacity: 0;
-		transform: translateX(-50px);
-		transition: none;
+		transition: opacity 0.3s ease;
 	}
 
 	.chef-content.visible {
 		opacity: 1;
-		transform: translateX(0);
 	}
 
-	.chef-content.animate {
-		animation: chefAppear 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+	/* 집중선 효과 */
+	.chef-focus-lines {
+		@apply pointer-events-none absolute;
+		width: 300px;
+		height: 300px;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		opacity: 0;
+	}
+
+	.chef-focus-lines.visible {
+		opacity: 1;
+		animation: focusLinesSpin 10s linear infinite;
+	}
+
+	.chef-focus-lines.critical {
+		opacity: 1;
+		animation: focusLinesSpin 4s linear infinite;
+	}
+
+	@keyframes focusLinesSpin {
+		from {
+			transform: translate(-50%, -50%) rotate(0deg);
+		}
+		to {
+			transform: translate(-50%, -50%) rotate(360deg);
+		}
+	}
+
+	.focus-line {
+		@apply absolute;
+		left: 50%;
+		top: 50%;
+		width: 6px;
+		height: 120px;
+		background: linear-gradient(to top, rgba(255, 193, 7, 0.9) 0%, rgba(255, 193, 7, 0) 100%);
+		transform-origin: bottom center;
+		transform: translateX(-50%) translateY(-100%) rotate(calc(var(--i) * 30deg));
+		border-radius: 3px;
+	}
+
+	.chef-wrapper {
+		@apply relative flex-shrink-0;
+		overflow: visible;
+		width: clamp(140px, 40vw, 220px);
+		height: clamp(140px, 40vw, 220px);
+		transform: scale(0);
+	}
+
+	.chef-wrapper.animate {
+		animation: chefAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+	}
+
+	/* 등장 후 idle 애니메이션 - 통통 튀기 */
+	.chef-wrapper.idle {
+		animation:
+			chefAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+			chefIdle 1.5s ease-in-out 0.5s infinite;
 	}
 
 	@keyframes chefAppear {
 		0% {
+			transform: scale(2);
 			opacity: 0;
-			transform: translateX(-80px) scale(0.5);
-		}
-		60% {
-			transform: translateX(10px) scale(1.05);
 		}
 		100% {
+			transform: scale(1);
 			opacity: 1;
-			transform: translateX(0) scale(1);
 		}
 	}
 
-	.chef-wrapper {
-		@apply flex-shrink-0;
-		width: clamp(80px, 22vw, 110px);
-		height: clamp(80px, 22vw, 110px);
+	@keyframes chefIdle {
+		0%,
+		100% {
+			transform: scale(1) translateY(0);
+		}
+		50% {
+			transform: scale(1.02) translateY(-5px);
+		}
 	}
 
 	.chef-image {
 		@apply h-full w-full object-contain;
-		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
 	}
 
-	.chef-content.critical .chef-wrapper {
-		animation: chefJump 0.6s ease-out 0.3s;
+	/* 대박: 깡충깡충 점프 */
+	.chef-content.critical .chef-wrapper.idle {
+		animation:
+			chefAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+			chefJump 0.6s ease-in-out 0.5s infinite;
 	}
 
 	@keyframes chefJump {
 		0%,
 		100% {
-			transform: translateY(0);
+			transform: scale(1) translateY(0) rotate(0deg);
 		}
-		30% {
-			transform: translateY(-15px) rotate(-5deg);
+		25% {
+			transform: scale(1.05) translateY(-15px) rotate(-3deg);
 		}
-		60% {
-			transform: translateY(-8px) rotate(3deg);
+		50% {
+			transform: scale(1) translateY(0) rotate(0deg);
+		}
+		75% {
+			transform: scale(1.05) translateY(-15px) rotate(3deg);
 		}
 	}
 
-	.chef-content.fail .chef-wrapper {
-		animation: chefSad 0.5s ease-out 0.3s;
+	/* 실패: 고개 떨구기 */
+	.chef-content.fail .chef-wrapper.idle {
+		animation:
+			chefAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+			chefSad 2s ease-in-out 0.5s infinite;
 	}
 
 	@keyframes chefSad {
 		0%,
 		100% {
-			transform: translateY(0);
+			transform: scale(1) translateY(0) rotate(0deg);
 		}
 		50% {
-			transform: translateY(5px) rotate(-3deg);
+			transform: scale(0.95) translateY(5px) rotate(-5deg);
 		}
 	}
 
 	/* 말풍선 */
 	.speech-bubble {
 		@apply relative;
-		@apply px-4 py-2.5;
+		@apply px-5 py-3;
 		@apply rounded-2xl;
-		@apply font-bold;
-		font-size: clamp(14px, 3.5vw, 20px);
+		@apply font-black;
+		font-size: clamp(16px, 4vw, 24px);
 		background: white;
-		border: 3px solid #5d4037;
+		border: 4px solid #5d4037;
 		color: #5d4037;
-		box-shadow: 0 3px 0 #3e2723;
-		max-width: clamp(160px, 45vw, 240px);
-		animation: bubblePop 0.3s ease-out 0.2s both;
+		box-shadow: 0 4px 0 #3e2723;
+		max-width: clamp(180px, 50vw, 280px);
+		opacity: 0;
+		transform: scale(0);
+	}
+
+	.speech-bubble.visible {
+		animation: bubblePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 	}
 
 	.speech-bubble::before {
