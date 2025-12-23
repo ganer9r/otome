@@ -712,8 +712,8 @@ function createCustomerStore() {
 			let newCustomerArrived = false;
 
 			updateAndSave((state) => {
-				// 이미 손님이 있으면 아무것도 안 함
-				if (state.currentOrder && !state.currentOrder.completed) {
+				// 주문이 있으면 스킵 (완료 여부 상관없이)
+				if (state.currentOrder) {
 					return state;
 				}
 
