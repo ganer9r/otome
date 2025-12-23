@@ -35,8 +35,32 @@
 	import CustomerOrderBadge from '../components/CustomerOrderBadge.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { modalStore } from '$lib/stores/modal';
+	import { showInterstitialAd } from '../lib/native-bridge';
 	import type { Recipe, Ingredient } from '../lib/types';
 	import type { TaxResult } from '../lib/store';
+
+	// 인터스티셜 광고 타이밍 관리 (3~5분 랜덤 간격)
+	const AD_MIN_INTERVAL = 3 * 60 * 1000; // 3분
+	const AD_MAX_INTERVAL = 5 * 60 * 1000; // 5분
+	let lastAdTime = Date.now(); // 런 시작 시점 기준
+	let nextAdInterval = getRandomAdInterval();
+
+	function getRandomAdInterval(): number {
+		return AD_MIN_INTERVAL + Math.random() * (AD_MAX_INTERVAL - AD_MIN_INTERVAL);
+	}
+
+	function shouldShowInterstitialAd(): boolean {
+		const elapsed = Date.now() - lastAdTime;
+		return elapsed >= nextAdInterval;
+	}
+
+	async function tryShowInterstitialAd(): Promise<void> {
+		if (shouldShowInterstitialAd()) {
+			await showInterstitialAd();
+			lastAdTime = Date.now();
+			nextAdInterval = getRandomAdInterval();
+		}
+	}
 
 	// 런 상태
 	let runState = $derived($runStore);
@@ -223,6 +247,9 @@
 			return; // 모달 닫힌 후 계속 진행
 		}
 
+		// 인터스티셜 광고 (3~5분 간격)
+		await tryShowInterstitialAd();
+
 		// 다시하기 모달 표시
 		await modalStore.open({
 			component: RestartModal,
@@ -257,6 +284,9 @@
 			step = 'ingredient';
 			return;
 		}
+
+		// 인터스티셜 광고 (3~5분 간격)
+		await tryShowInterstitialAd();
 
 		// 다시하기 모달 표시
 		await modalStore.open({
