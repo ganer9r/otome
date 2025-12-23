@@ -2,7 +2,7 @@
 import type { Howl as HowlType, HowlerGlobal } from 'howler';
 
 export type BgmKey = 'cook';
-export type SfxKey = 'button' | 'click';
+export type SfxKey = 'button' | 'click' | 'coin' | 'coinBurst';
 
 interface SoundConfig {
 	src: string;
@@ -15,7 +15,9 @@ const BGM_CONFIG: Record<BgmKey, SoundConfig> = {
 
 const SFX_CONFIG: Record<SfxKey, SoundConfig> = {
 	button: { src: '/sounds/sfx/button.mp3' },
-	click: { src: '/sounds/sfx/click.mp3' }
+	click: { src: '/sounds/sfx/click.mp3' },
+	coin: { src: '/sounds/sfx/coin_collect.mp3' },
+	coinBurst: { src: '/sounds/sfx/coin_brust.mp3' }
 };
 
 // 볼륨 최대값 (유저 100% 설정 시 실제 볼륨)

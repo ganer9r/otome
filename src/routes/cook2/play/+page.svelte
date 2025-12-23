@@ -207,6 +207,9 @@
 		// 턴 증가 + 세금 체크 (세금률 전달)
 		const taxResult = runStore.nextTurn(taxRate);
 
+		// 손님 시스템: 턴 종료 처리 (휴식턴 감소, 새 손님 생성)
+		customerStore.onTurnEnd(runState.turn);
+
 		if (taxResult.collected) {
 			lastTaxResult = taxResult;
 
@@ -238,6 +241,9 @@
 
 		// 턴 증가 + 세금 체크 (세금률 전달)
 		const taxResult = runStore.nextTurn(taxRate);
+
+		// 손님 시스템: 턴 종료 처리 (휴식턴 감소, 새 손님 생성)
+		customerStore.onTurnEnd(runState.turn);
 
 		if (taxResult.collected) {
 			lastTaxResult = taxResult;

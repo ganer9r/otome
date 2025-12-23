@@ -4,6 +4,7 @@
 	import { GRADE_COLORS, GRADE_NAMES } from '../lib/types';
 	import { getChefImage, getRandomDialogue, type ChefEmotion } from '../lib/chef-images';
 	import GameButton from './GameButton.svelte';
+	import { getSoundManager } from '$lib/domain/sound';
 
 	interface Props {
 		resultIngredient: Ingredient;
@@ -152,6 +153,9 @@
 			}
 
 			coinStates = [...coinStates, ...newCoins];
+
+			// 폭발 사운드
+			getSoundManager().playSfx('coinBurst');
 		}
 
 		// 물리 시뮬레이션 (한 번만 실행)
@@ -219,6 +223,9 @@
 			};
 
 			coinStates = [...coinStates, newCoin];
+
+			// 코인 생성 시 사운드
+			getSoundManager().playSfx('coin');
 		}
 
 		// 물리 시뮬레이션 (계속 실행)

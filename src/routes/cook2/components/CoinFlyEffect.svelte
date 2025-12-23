@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { getSoundManager } from '$lib/domain/sound';
 
 	interface Props {
 		/** 코인 개수 */
@@ -15,14 +16,6 @@
 	}
 
 	let { coinCount = 15, startX, startY, targetX, targetY, onComplete }: Props = $props();
-
-	// 사운드 재생 함수 (브라우저 전용)
-	function playSound(src: string, volume = 0.5) {
-		if (typeof window === 'undefined') return;
-		const audio = new Audio(src);
-		audio.volume = volume;
-		audio.play().catch(() => {});
-	}
 
 	interface Coin {
 		id: number;
@@ -63,7 +56,7 @@
 		// Phase 1: Explosion (등장 + 퍼지기) - 더 천천히
 		setTimeout(() => {
 			// 폭발 사운드 재생
-			playSound('/sounds/sfx/coin_brust.mp3', 0.6);
+			getSoundManager().playSfx('coinBurst');
 
 			coins = coins.map((coin) => ({
 				...coin,
@@ -82,7 +75,7 @@
 			// 각 코인 도착 시 사운드 재생 (순차적으로)
 			coins.forEach((_, i) => {
 				setTimeout(() => {
-					playSound('/sounds/sfx/coin_collect.mp3', 0.5);
+					getSoundManager().playSfx('coin');
 				}, i * 50); // 각 코인 delay와 동일하게
 			});
 

@@ -357,6 +357,26 @@ interface CustomerState {
 	lastCompletedOrder: CustomerOrder | null;
 	/** 마지막 실패한 주문 (실패 모달용) */
 	lastFailedOrder: CustomerOrder | null;
+	/** 다음 손님까지 남은 휴식 턴 (0이면 손님 등장 가능) */
+	cooldownTurns: number;
+}
+
+/** 휴식턴 설정 */
+export const COOLDOWN_CONFIG = {
+	/** 게임 시작 시 휴식턴 (1이면 첫 턴 끝나고 손님 등장) */
+	INITIAL: 1,
+	/** 주문 완료/실패 후 최소 휴식턴 */
+	MIN: 2,
+	/** 주문 완료/실패 후 최대 휴식턴 */
+	MAX: 5
+} as const;
+
+/** 랜덤 휴식턴 생성 (MIN ~ MAX) */
+function getRandomCooldown(): number {
+	return (
+		Math.floor(Math.random() * (COOLDOWN_CONFIG.MAX - COOLDOWN_CONFIG.MIN + 1)) +
+		COOLDOWN_CONFIG.MIN
+	);
 }
 
 const initialState: CustomerState = {
@@ -370,7 +390,8 @@ const initialState: CustomerState = {
 	showOrderCompleteModal: false,
 	showOrderFailModal: false,
 	lastCompletedOrder: null,
-	lastFailedOrder: null
+	lastFailedOrder: null,
+	cooldownTurns: COOLDOWN_CONFIG.INITIAL
 };
 
 /**
@@ -431,13 +452,21 @@ function getStoredCustomerState(): CustomerState {
 		// - orderConfirmed가 이미 있으면 그대로 사용
 		// - 없으면: currentOrder가 있으면 이미 본 것으로 간주 (true)
 		const orderConfirmed = parsed.orderConfirmed ?? parsed.currentOrder !== null;
+
+		// 마이그레이션: cooldownTurns 필드 추가
+		// - 이미 손님이 있으면 0 (휴식 필요 없음)
+		// - 손님이 없으면 INITIAL (곧 손님 등장)
+		const cooldownTurns =
+			parsed.cooldownTurns ?? (parsed.currentOrder ? 0 : COOLDOWN_CONFIG.INITIAL);
+
 		return {
 			...initialState,
 			...parsed,
 			orderConfirmed,
 			showOrderCompleteModal: parsed.showOrderCompleteModal ?? false,
 			showOrderFailModal: parsed.showOrderFailModal ?? false,
-			lastFailedOrder: parsed.lastFailedOrder ?? null
+			lastFailedOrder: parsed.lastFailedOrder ?? null,
+			cooldownTurns
 		};
 	} catch {
 		return initialState;
@@ -546,12 +575,13 @@ function createCustomerStore() {
 		},
 
 		/**
-		 * 세금 주기 종료 시 호출 (주문 리셋 + 난이도 조절 + 세금률 조절)
+		 * 세금 주기 종료 시 호출 (난이도 조절 + 세금률 조절 + 미완료 주문 실패 처리)
+		 * 손님 생성은 onTurnEnd에서 휴식턴 기반으로 처리됨
 		 * @returns 스테이지 결과 { success: boolean, newTaxRate: number, orderFailed: boolean }
 		 */
 		onTaxPeriodEnd: (
 			survived: boolean,
-			currentTurn: number
+			_currentTurn: number
 		): {
 			success: boolean;
 			newTaxRate: number;
@@ -583,19 +613,20 @@ function createCustomerStore() {
 				}
 
 				const newDifficulty = survived ? state.difficulty + 1 : state.difficulty;
-				const order = generateRandomOrder(currentTurn, newDifficulty);
 
 				result = { success: stageSuccess, newTaxRate, orderFailed, failedOrder };
 
 				return {
 					...state,
-					currentOrder: order,
-					orderConfirmed: false, // 새 주문이므로 확인 안 됨
+					// 미완료 주문은 제거하고 휴식턴 설정 (새 손님은 onTurnEnd에서 생성)
+					currentOrder: null,
+					orderConfirmed: false,
 					difficulty: newDifficulty,
 					stageCompletedOrders: 0, // 스테이지 주문 수 리셋
 					taxRate: newTaxRate,
 					showOrderFailModal: orderFailed,
-					lastFailedOrder: failedOrder
+					lastFailedOrder: failedOrder,
+					cooldownTurns: orderFailed ? getRandomCooldown() : state.cooldownTurns
 				};
 			});
 
@@ -646,7 +677,7 @@ function createCustomerStore() {
 		},
 
 		/**
-		 * 주문 완료 모달 닫기 (새 주문은 세금 시점에 생성)
+		 * 주문 완료 모달 닫기 (휴식턴 설정, 휴식 후 새 손님 등장)
 		 */
 		closeOrderCompleteModal: () => {
 			updateAndSave((state) => {
@@ -654,22 +685,62 @@ function createCustomerStore() {
 					...state,
 					currentOrder: null, // 완료된 주문 제거
 					showOrderCompleteModal: false,
-					lastCompletedOrder: null
-					// 새 주문은 세금 시점(onTaxPeriodEnd)에서 생성
+					lastCompletedOrder: null,
+					cooldownTurns: getRandomCooldown() // 2~5턴 휴식 후 새 손님
 				};
 			});
 		},
 
 		/**
-		 * 주문 실패 모달 닫기 (새 주문이 이미 생성되어 있음 → 모달 표시됨)
+		 * 주문 실패 모달 닫기 (휴식턴 설정, 휴식 후 새 손님 등장)
 		 */
 		closeOrderFailModal: () => {
 			updateAndSave((state) => ({
 				...state,
+				currentOrder: null, // 실패한 주문 제거
 				showOrderFailModal: false,
-				lastFailedOrder: null
-				// orderConfirmed는 false 유지 → 새 주문 모달 표시
+				lastFailedOrder: null,
+				cooldownTurns: getRandomCooldown() // 2~5턴 휴식 후 새 손님
 			}));
+		},
+
+		/**
+		 * 턴 종료 시 호출 (휴식턴 감소, 0이면 새 손님 생성)
+		 * @returns 새 손님이 등장했는지 여부
+		 */
+		onTurnEnd: (currentTurn: number): boolean => {
+			let newCustomerArrived = false;
+
+			updateAndSave((state) => {
+				// 이미 손님이 있으면 아무것도 안 함
+				if (state.currentOrder && !state.currentOrder.completed) {
+					return state;
+				}
+
+				// 휴식턴 감소
+				const newCooldown = Math.max(0, state.cooldownTurns - 1);
+
+				// 휴식턴이 0이면 새 손님 생성
+				if (newCooldown === 0) {
+					const order = generateRandomOrder(currentTurn, state.difficulty);
+					if (order) {
+						newCustomerArrived = true;
+						return {
+							...state,
+							currentOrder: order,
+							orderConfirmed: false,
+							cooldownTurns: 0
+						};
+					}
+				}
+
+				return {
+					...state,
+					cooldownTurns: newCooldown
+				};
+			});
+
+			return newCustomerArrived;
 		},
 
 		/**
@@ -680,13 +751,12 @@ function createCustomerStore() {
 		},
 
 		/**
-		 * 런 시작 시 초기화
+		 * 런 시작 시 초기화 (손님 없이 시작, 휴식턴 후 첫 손님 등장)
 		 */
-		startRun: (currentTurn: number = 0) => {
-			const order = generateRandomOrder(currentTurn, 1);
+		startRun: (_currentTurn: number = 0) => {
 			const newState: CustomerState = {
-				currentOrder: order,
-				orderConfirmed: false, // 첫 요리 완료 후 모달 표시
+				currentOrder: null, // 시작 시 손님 없음
+				orderConfirmed: false,
 				difficulty: 1,
 				completedOrders: 0,
 				totalBonus: 0,
@@ -695,7 +765,8 @@ function createCustomerStore() {
 				showOrderCompleteModal: false,
 				showOrderFailModal: false,
 				lastCompletedOrder: null,
-				lastFailedOrder: null
+				lastFailedOrder: null,
+				cooldownTurns: COOLDOWN_CONFIG.INITIAL // 첫 턴 끝나면 손님 등장
 			};
 			saveCustomerState(newState);
 			set(newState);
