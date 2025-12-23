@@ -179,10 +179,13 @@ function filterByGrade(recipes: Recipe[], grade: IngredientGrade): Recipe[] {
 /**
  * 랜덤 주문 생성
  * - 내 재료 기반으로 주문 가능한 레시피 선택
- *
- * TODO: 테스트 끝나면 원복 필요
+ * - 이전 주문과 다른 레시피 선택 (연속 중복 방지)
  */
-function generateRandomOrder(currentTurn: number, _difficulty: number = 1): CustomerOrder | null {
+function generateRandomOrder(
+	currentTurn: number,
+	_difficulty: number = 1,
+	lastRecipeId: number | null = null
+): CustomerOrder | null {
 	const unlockedIds = getUnlockedIngredients();
 
 	// 난이도에 따라 등급 선택
@@ -240,6 +243,11 @@ function generateRandomOrder(currentTurn: number, _difficulty: number = 1): Cust
 		if (orderableRecipes.length === 0) {
 			orderableRecipes = allDishRecipes;
 		}
+	}
+
+	// 연속 중복 방지: 이전 레시피 제외 (2개 이상일 때만)
+	if (lastRecipeId !== null && orderableRecipes.length > 1) {
+		orderableRecipes = orderableRecipes.filter((r) => r.id !== lastRecipeId);
 	}
 
 	// 랜덤 선택
@@ -359,6 +367,8 @@ interface CustomerState {
 	lastFailedOrder: CustomerOrder | null;
 	/** 다음 손님까지 남은 휴식 턴 (0이면 손님 등장 가능) */
 	cooldownTurns: number;
+	/** 이전 주문 레시피 ID (연속 중복 방지용) */
+	lastRecipeId: number | null;
 }
 
 /** 휴식턴 설정 */
@@ -391,7 +401,8 @@ const initialState: CustomerState = {
 	showOrderFailModal: false,
 	lastCompletedOrder: null,
 	lastFailedOrder: null,
-	cooldownTurns: COOLDOWN_CONFIG.INITIAL
+	cooldownTurns: COOLDOWN_CONFIG.INITIAL,
+	lastRecipeId: null
 };
 
 /**
@@ -523,11 +534,12 @@ function createCustomerStore() {
 		 */
 		generateOrder: (currentTurn: number) => {
 			updateAndSave((state) => {
-				const order = generateRandomOrder(currentTurn, state.difficulty);
+				const order = generateRandomOrder(currentTurn, state.difficulty, state.lastRecipeId);
 				return {
 					...state,
 					currentOrder: order,
-					orderConfirmed: false // 새 주문이므로 확인 안 됨 → 모달 표시
+					orderConfirmed: false, // 새 주문이므로 확인 안 됨 → 모달 표시
+					lastRecipeId: order?.recipe.id ?? state.lastRecipeId
 				};
 			});
 		},
@@ -722,14 +734,15 @@ function createCustomerStore() {
 
 				// 휴식턴이 0이면 새 손님 생성
 				if (newCooldown === 0) {
-					const order = generateRandomOrder(currentTurn, state.difficulty);
+					const order = generateRandomOrder(currentTurn, state.difficulty, state.lastRecipeId);
 					if (order) {
 						newCustomerArrived = true;
 						return {
 							...state,
 							currentOrder: order,
 							orderConfirmed: false,
-							cooldownTurns: 0
+							cooldownTurns: 0,
+							lastRecipeId: order.recipe.id
 						};
 					}
 				}
@@ -766,7 +779,8 @@ function createCustomerStore() {
 				showOrderFailModal: false,
 				lastCompletedOrder: null,
 				lastFailedOrder: null,
-				cooldownTurns: COOLDOWN_CONFIG.INITIAL // 첫 턴 끝나면 손님 등장
+				cooldownTurns: COOLDOWN_CONFIG.INITIAL, // 첫 턴 끝나면 손님 등장
+				lastRecipeId: null
 			};
 			saveCustomerState(newState);
 			set(newState);
