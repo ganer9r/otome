@@ -17,7 +17,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: true,
 		buyPrice: 50,
-		sellPrice: 110,
+		sellPrice: 50,
 		imageUrl: '/imgs/ingredients2/1.webp'
 	},
 	{
@@ -26,7 +26,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: true,
 		buyPrice: 40,
-		sellPrice: 90,
+		sellPrice: 40,
 		imageUrl: '/imgs/ingredients2/2.webp'
 	},
 	{
@@ -35,7 +35,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: true,
 		buyPrice: 60,
-		sellPrice: 140,
+		sellPrice: 60,
 		imageUrl: '/imgs/ingredients2/3.webp'
 	},
 	{
@@ -44,7 +44,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: true,
 		buyPrice: 50,
-		sellPrice: 120,
+		sellPrice: 50,
 		imageUrl: '/imgs/ingredients2/4.webp'
 	},
 	{
@@ -53,7 +53,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: true,
 		buyPrice: 40,
-		sellPrice: 100,
+		sellPrice: 40,
 		imageUrl: '/imgs/ingredients2/5.webp'
 	},
 	{
@@ -62,7 +62,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: true,
 		buyPrice: 50,
-		sellPrice: 110,
+		sellPrice: 50,
 		imageUrl: '/imgs/ingredients2/6.webp'
 	},
 	{
@@ -71,7 +71,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: true,
 		buyPrice: 40,
-		sellPrice: 90,
+		sellPrice: 40,
 		imageUrl: '/imgs/ingredients2/7.webp'
 	},
 	{
@@ -80,7 +80,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'G',
 		isIngredient: true,
 		buyPrice: 60,
-		sellPrice: 150,
+		sellPrice: 60,
 		imageUrl: '/imgs/ingredients2/8.webp'
 	},
 	// G등급 요리
@@ -213,7 +213,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 80,
-		sellPrice: 180,
+		sellPrice: 80,
 		imageUrl: '/imgs/ingredients2/101.webp'
 	},
 	{
@@ -222,7 +222,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 70,
-		sellPrice: 160,
+		sellPrice: 70,
 		imageUrl: '/imgs/ingredients2/102.webp'
 	},
 	{
@@ -231,7 +231,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 90,
-		sellPrice: 200,
+		sellPrice: 90,
 		imageUrl: '/imgs/ingredients2/103.webp'
 	},
 	{
@@ -240,7 +240,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 100,
-		sellPrice: 230,
+		sellPrice: 100,
 		imageUrl: '/imgs/ingredients2/104.webp'
 	},
 	{
@@ -249,7 +249,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 90,
-		sellPrice: 210,
+		sellPrice: 90,
 		imageUrl: '/imgs/ingredients2/105.webp'
 	},
 	{
@@ -258,7 +258,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 80,
-		sellPrice: 180,
+		sellPrice: 80,
 		imageUrl: '/imgs/ingredients2/106.webp'
 	},
 	{
@@ -267,7 +267,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 70,
-		sellPrice: 160,
+		sellPrice: 70,
 		imageUrl: '/imgs/ingredients2/107.webp'
 	},
 	{
@@ -276,7 +276,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 100,
-		sellPrice: 240,
+		sellPrice: 100,
 		imageUrl: '/imgs/ingredients2/108.webp'
 	},
 	{
@@ -285,7 +285,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 70,
-		sellPrice: 150,
+		sellPrice: 70,
 		imageUrl: '/imgs/ingredients2/109.webp'
 	},
 	{
@@ -294,7 +294,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 90,
-		sellPrice: 200,
+		sellPrice: 90,
 		imageUrl: '/imgs/ingredients2/111.webp'
 	},
 	{
