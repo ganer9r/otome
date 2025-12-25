@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { CustomerOrder } from '../lib/customer-store';
 	import { getCustomerImagePath } from '../lib/customer-store';
+	import { getSoundManager } from '$lib/domain/sound';
 	import AnticipationOverlay from './AnticipationOverlay.svelte';
 	import GameButton from './GameButton.svelte';
 	import SpeechBubble from './SpeechBubble.svelte';
@@ -36,8 +37,10 @@
 	let isExiting = $state(false);
 
 	function onAnticipationComplete() {
+		const sound = getSoundManager();
 		showAnticipation = false;
 		showContent = true;
+		sound.playSfx('fail');
 
 		setTimeout(() => {
 			showPenalty = true;

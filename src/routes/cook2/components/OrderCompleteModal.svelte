@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { CustomerOrder } from '../lib/customer-store';
 	import { getCustomerImagePath } from '../lib/customer-store';
+	import { getSoundManager } from '$lib/domain/sound';
 	import AnticipationOverlay from './AnticipationOverlay.svelte';
 	import GameButton from './GameButton.svelte';
 	import CoinFlyEffect from './CoinFlyEffect.svelte';
@@ -26,8 +27,10 @@
 	let canClose = $state(false);
 
 	function onAnticipationComplete() {
+		const sound = getSoundManager();
 		showAnticipation = false;
 		showContent = true;
+		sound.playSfx('tada');
 
 		setTimeout(() => {
 			animateBonus();

@@ -2,7 +2,18 @@
 import type { Howl as HowlType, HowlerGlobal } from 'howler';
 
 export type BgmKey = 'cook';
-export type SfxKey = 'button' | 'click' | 'coin' | 'coinBurst';
+export type SfxKey =
+	| 'button'
+	| 'click'
+	| 'coin'
+	| 'coinBurst'
+	| 'whoosh'
+	| 'tada'
+	| 'tada2'
+	| 'pop'
+	| 'thud'
+	| 'magicBurst'
+	| 'fail';
 
 interface SoundConfig {
 	src: string;
@@ -17,7 +28,14 @@ const SFX_CONFIG: Record<SfxKey, SoundConfig> = {
 	button: { src: '/sounds/sfx/button.mp3' },
 	click: { src: '/sounds/sfx/click.mp3' },
 	coin: { src: '/sounds/sfx/coin_collect.mp3' },
-	coinBurst: { src: '/sounds/sfx/coin_brust.mp3' }
+	coinBurst: { src: '/sounds/sfx/coin_brust.mp3' },
+	whoosh: { src: '/sounds/sfx/whoosh.mp3' },
+	tada: { src: '/sounds/sfx/tada.mp3' },
+	tada2: { src: '/sounds/sfx/tada2.mp3' },
+	pop: { src: '/sounds/sfx/bubble-pop.mp3' },
+	thud: { src: '/sounds/sfx/thud.mp3' },
+	magicBurst: { src: '/sounds/sfx/magic-brust.mp3' },
+	fail: { src: '/sounds/sfx/fail.mp3' }
 };
 
 // 볼륨 최대값 (유저 100% 설정 시 실제 볼륨)

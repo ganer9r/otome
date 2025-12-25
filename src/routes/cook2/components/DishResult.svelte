@@ -294,6 +294,7 @@
 
 	onMount(() => {
 		const timers: ReturnType<typeof setTimeout>[] = [];
+		const sound = getSoundManager();
 
 		// 1. 냄비 두근두근 (0.6초)
 		timers.push(setTimeout(() => (stage = 'steam'), 600));
@@ -303,6 +304,14 @@
 			setTimeout(() => {
 				stage = 'dish';
 				showDish = true;
+				// 요리 등장 사운드
+				if (cookResult.resultType === 'fail') {
+					sound.playSfx('fail');
+				} else if (cookResult.resultType === 'critical') {
+					sound.playSfx('tada2');
+				} else {
+					sound.playSfx('tada');
+				}
 			}, 1200)
 		);
 
@@ -311,6 +320,7 @@
 			setTimeout(() => {
 				stage = 'complete';
 				showChef = true;
+				sound.playSfx('whoosh');
 			}, 2000)
 		);
 
@@ -318,6 +328,7 @@
 		timers.push(
 			setTimeout(() => {
 				showBubble = true;
+				sound.playSfx('pop');
 			}, 2500)
 		);
 

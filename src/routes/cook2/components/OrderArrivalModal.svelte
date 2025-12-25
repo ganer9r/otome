@@ -2,6 +2,7 @@
 	import { GRADE_COLORS } from '../lib/types';
 	import type { CustomerOrder, OrderHint } from '../lib/customer-store';
 	import { getCustomerImagePath } from '../lib/customer-store';
+	import { getSoundManager } from '$lib/domain/sound';
 	import AnticipationOverlay from './AnticipationOverlay.svelte';
 	import GameButton from './GameButton.svelte';
 	import SpeechBubble from './SpeechBubble.svelte';
@@ -23,9 +24,11 @@
 	function onAnticipationComplete() {
 		showAnticipation = false;
 		animationPhase = 'show';
+		getSoundManager().playSfx('whoosh');
 
 		setTimeout(() => {
 			animationPhase = 'ready';
+			getSoundManager().playSfx('pop');
 		}, 300);
 	}
 

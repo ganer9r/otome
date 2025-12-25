@@ -6,6 +6,7 @@
 	import { findRecipesUsingIngredient } from '../lib/data/recipes';
 	import { unlockedIngredientsStore, runStore, upgradeStore } from '../lib/store';
 	import { getChefImage, getRandomDialogue, type ChefEmotion } from '../lib/chef-images';
+	import { getSoundManager } from '$lib/domain/sound';
 	import ResultCard from './ResultCard.svelte';
 	import DishResult from './DishResult.svelte';
 	import GameButton from './GameButton.svelte';
@@ -147,16 +148,21 @@
 
 	onMount(() => {
 		const timers: ReturnType<typeof setTimeout>[] = [];
+		const sound = getSoundManager();
 
+		// 폭발 이펙트
 		timers.push(
 			setTimeout(() => {
 				stage = 'explosion';
+				sound.playSfx('magicBurst');
 			}, 1200)
 		);
 
+		// 카드 등장
 		timers.push(
 			setTimeout(() => {
 				stage = 'card';
+				sound.playSfx('whoosh');
 				if (isCritical) {
 					cardShaking = true;
 				}
@@ -169,12 +175,14 @@
 				setTimeout(() => {
 					cardShaking = false;
 					cardFlipped = true;
+					sound.playSfx('pop');
 				}, 4000)
 			); // 2초 흔들림
 
 			timers.push(
 				setTimeout(() => {
 					stage = 'result';
+					sound.playSfx('tada2');
 					// 재료 획득 카드 등장할 때 화면 흔들림
 					screenShake = true;
 					setTimeout(() => (screenShake = false), 400);
@@ -185,12 +193,14 @@
 			timers.push(
 				setTimeout(() => {
 					cardFlipped = true;
+					sound.playSfx('pop');
 				}, 2500)
 			);
 
 			timers.push(
 				setTimeout(() => {
 					stage = 'result';
+					sound.playSfx('tada');
 					// 재료 획득 카드 등장할 때 화면 흔들림
 					screenShake = true;
 					setTimeout(() => (screenShake = false), 300);
