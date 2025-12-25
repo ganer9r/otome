@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import { getChefImage, getRandomDialogue } from '../lib/chef-images';
 	import GameButton from './GameButton.svelte';
+	import { runStore } from '../lib/store';
+	import CapitalHUD from './CapitalHUD.svelte';
 
 	interface Props {
 		/** 재료비 손실 */
@@ -10,6 +12,9 @@
 	}
 
 	let { ingredientCost = 0, onComplete }: Props = $props();
+
+	// 런 상태 (자본 표시용)
+	let runState = $derived($runStore);
 
 	// 단계: shake -> explosion -> result
 	let stage = $state<'shake' | 'explosion' | 'result'>('shake');
@@ -91,6 +96,11 @@
 	role="button"
 	tabindex="0"
 >
+	<!-- HUD -->
+	<div class="hud-area">
+		<CapitalHUD capital={runState.capital} earnedStars={runState.earnedStars} />
+	</div>
+
 	{#if stage === 'shake'}
 		<!-- 냄비 격렬하게 흔들림 -->
 		<div class="stage-shake">
@@ -198,6 +208,14 @@
 
 <style lang="postcss">
 	@reference '$styles/app.css';
+
+	/* HUD 영역 (IngredientSelectScreen과 동일 위치) */
+	.hud-area {
+		@apply absolute top-0 right-0;
+		@apply flex justify-end;
+		@apply px-2 py-1;
+		z-index: 60;
+	}
 
 	.explosion-fail-screen {
 		@apply fixed inset-0 z-50;

@@ -2,8 +2,9 @@
 	import { onMount } from 'svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { findRecipeByIngredients } from '../lib/data/recipes';
-	import { unlockedDishesStore } from '../lib/store';
+	import { unlockedDishesStore, runStore } from '../lib/store';
 	import { haptic } from '../lib/native-bridge';
+	import CapitalHUD from './CapitalHUD.svelte';
 
 	interface Props {
 		/** 조리 완료 시 콜백 */
@@ -15,6 +16,9 @@
 	}
 
 	let { onComplete, cookingTime = 5, selectedIngredients = [] }: Props = $props();
+
+	// 런 상태 (자본 표시용)
+	let runState = $derived($runStore);
 
 	let remainingTime = $state(cookingTime);
 	let progress = $state(0);
@@ -67,6 +71,11 @@
 </script>
 
 <div class="cooking-screen">
+	<!-- HUD -->
+	<div class="hud-area">
+		<CapitalHUD capital={runState.capital} earnedStars={runState.earnedStars} />
+	</div>
+
 	<!-- 상단: 조합 공식 -->
 	<div class="top-area">
 		<div class="recipe-formula">
@@ -160,10 +169,19 @@
 		@apply bg-gradient-to-br from-orange-100 via-amber-100 to-orange-200;
 	}
 
+	/* HUD 영역 (IngredientSelectScreen과 동일 위치) */
+	.hud-area {
+		@apply absolute top-0 right-0;
+		@apply flex justify-end;
+		@apply px-2 py-1;
+		z-index: 30;
+	}
+
 	/* ===== 상단 영역 ===== */
 	.top-area {
 		@apply flex flex-col items-center;
-		@apply px-3 pt-4;
+		@apply px-3;
+		padding-top: 60px; /* HUD 공간 확보 */
 		@apply gap-2;
 		z-index: 20;
 	}

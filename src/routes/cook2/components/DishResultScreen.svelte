@@ -8,6 +8,7 @@
 	import ResultCard from './ResultCard.svelte';
 	import DishResult from './DishResult.svelte';
 	import GameButton from './GameButton.svelte';
+	import CapitalHUD from './CapitalHUD.svelte';
 
 	interface Props {
 		resultIngredient: Ingredient;
@@ -219,6 +220,11 @@
 	}));
 </script>
 
+<!-- HUD -->
+<div class="hud-area">
+	<CapitalHUD capital={runState.capital} earnedStars={runState.earnedStars} />
+</div>
+
 <!-- 요리 또는 실패: DishResult 사용 -->
 {#if isDish || cookResult.resultType === 'fail'}
 	<DishResult {resultIngredient} {cookResult} {sellPrice} {profit} onComplete={handleConfirm} />
@@ -377,6 +383,14 @@
 
 <style lang="postcss">
 	@reference '$styles/app.css';
+
+	/* HUD 영역 (IngredientSelectScreen과 동일 위치) */
+	.hud-area {
+		@apply absolute top-0 right-0;
+		@apply flex justify-end;
+		@apply px-2 py-1;
+		z-index: 60;
+	}
 
 	.result-screen {
 		@apply fixed inset-0 z-50;

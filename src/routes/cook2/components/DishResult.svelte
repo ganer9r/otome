@@ -5,6 +5,12 @@
 	import { getChefImage, getRandomDialogue, type ChefEmotion } from '../lib/chef-images';
 	import GameButton from './GameButton.svelte';
 	import { getSoundManager } from '$lib/domain/sound';
+	import { runStore } from '../lib/store';
+	import CapitalHUD from './CapitalHUD.svelte';
+	import CoinFlyEffect from './CoinFlyEffect.svelte';
+
+	// 런 상태 (자본 표시용)
+	let runState = $derived($runStore);
 
 	interface Props {
 		resultIngredient: Ingredient;
@@ -361,17 +367,51 @@
 		}
 	}
 
+	// 코인 날아가기 효과 상태
+	let showCoinFly = $state(false);
+	let coinFlyStart = $state({ x: 0, y: 0 });
+	let coinFlyTarget = $state({ x: 0, y: 0 });
+
+	// DOM 요소 참조
+	let coinBurstEl: HTMLDivElement | undefined = $state();
+	let buttonEl: HTMLDivElement | undefined = $state();
+	let hudEl: HTMLDivElement | undefined = $state();
+
 	function handleConfirm() {
 		stopCoins();
+
+		// 실패면 바로 완료
+		if (isFail) {
+			onComplete?.();
+			return;
+		}
+
+		// 버튼 위치에서 HUD로 코인 날아가기
+		if (buttonEl && hudEl) {
+			const buttonRect = buttonEl.getBoundingClientRect();
+			const hudRect = hudEl.getBoundingClientRect();
+
+			coinFlyStart = {
+				x: buttonRect.left + buttonRect.width / 2,
+				y: buttonRect.top + buttonRect.height / 2
+			};
+			coinFlyTarget = {
+				x: hudRect.left + hudRect.width / 2,
+				y: hudRect.top + hudRect.height / 2
+			};
+			showCoinFly = true;
+		} else {
+			onComplete?.();
+		}
+	}
+
+	function handleCoinFlyComplete() {
+		showCoinFly = false;
 		onComplete?.();
 	}
 
 	// 미사용 변수 처리
 	void sellPrice;
-
-	// DOM 요소 참조
-	let walletEl: HTMLDivElement;
-	let coinBurstEl: HTMLDivElement;
 </script>
 
 <div
@@ -383,10 +423,21 @@
 	role="button"
 	tabindex="0"
 >
-	<!-- 지갑 아이콘 (우상단) -->
-	<div class="wallet-icon" bind:this={walletEl}>
-		<img src="/imgs/ui/coin.png" alt="지갑" />
+	<!-- HUD -->
+	<div class="hud-area" bind:this={hudEl}>
+		<CapitalHUD capital={runState.capital} earnedStars={runState.earnedStars} />
 	</div>
+
+	<!-- 코인 날아가기 효과 -->
+	{#if showCoinFly}
+		<CoinFlyEffect
+			startX={coinFlyStart.x}
+			startY={coinFlyStart.y}
+			targetX={coinFlyTarget.x}
+			targetY={coinFlyTarget.y}
+			onComplete={handleCoinFlyComplete}
+		/>
+	{/if}
 
 	{#if stage === 'pot'}
 		<!-- 냄비 두근두근 -->
@@ -538,7 +589,7 @@
 					</div>
 				</div>
 
-				<div class="button-content" class:visible={showButton}>
+				<div class="button-content" class:visible={showButton} bind:this={buttonEl}>
 					<GameButton variant={isFail ? 'secondary' : 'primary'} size="lg" onclick={handleConfirm}>
 						{isFail ? '다시 도전!' : `+${displayedProfit.toLocaleString()}원 획득하기`}
 					</GameButton>
@@ -554,6 +605,14 @@
 
 <style lang="postcss">
 	@reference '$styles/app.css';
+
+	/* HUD 영역 (IngredientSelectScreen과 동일 위치) */
+	.hud-area {
+		@apply absolute top-0 right-0;
+		@apply flex justify-end;
+		@apply px-2 py-1;
+		z-index: 60;
+	}
 
 	.dish-result-screen {
 		@apply fixed inset-0 z-50;
@@ -587,39 +646,6 @@
 		}
 		80% {
 			transform: translateX(4px) translateY(-2px);
-		}
-	}
-
-	/* ===== 지갑 아이콘 ===== */
-	.wallet-icon {
-		@apply absolute z-50;
-		top: 16px;
-		right: 16px;
-		width: 48px;
-		height: 48px;
-		background: rgba(255, 255, 255, 0.9);
-		border-radius: 50%;
-		padding: 8px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-	}
-
-	.wallet-icon img {
-		width: 100%;
-		height: 100%;
-		object-fit: contain;
-	}
-
-	.wallet-icon.pulse {
-		animation: walletPulse 0.2s ease-out 5;
-	}
-
-	@keyframes walletPulse {
-		0%,
-		100% {
-			transform: scale(1);
-		}
-		50% {
-			transform: scale(1.4);
 		}
 	}
 

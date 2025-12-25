@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { Flame, Coins, ChevronLeft, HelpCircle } from 'lucide-svelte';
+	import { Flame, ChevronLeft, HelpCircle } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import IngredientGrid from './IngredientGrid.svelte';
 	import GameButton from './GameButton.svelte';
+	import CapitalHUD from './CapitalHUD.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
 	import {
 		runStore,
@@ -188,22 +189,7 @@
 			<button class="back-button" onclick={handleBack}>
 				<ChevronLeft size={20} />
 			</button>
-			<div class="right-info">
-				<div class="capital-badge">
-					<Coins size={18} />
-					<span class:negative={capital < 0}>{capital.toLocaleString()}원</span>
-				</div>
-				{#if earnedStars > 0}
-					<div class="star-badge">
-						<img src="/imgs/ui/star.png" alt="star" class="star-icon" />
-						<span>{earnedStars}</span>
-					</div>
-				{/if}
-				<div class="tax-badge">
-					<span class="tax-label">세금</span>
-					<span class="tax-count">{turnsUntilTax}턴</span>
-				</div>
-			</div>
+			<CapitalHUD {capital} {earnedStars} />
 		</div>
 
 		<!-- 타이틀 -->
@@ -334,64 +320,6 @@
 	.back-button:active {
 		transform: scale(0.95);
 		background: rgba(255, 255, 255, 1);
-	}
-
-	.right-info {
-		@apply flex items-center gap-1;
-	}
-
-	.capital-badge {
-		@apply flex items-center gap-1;
-		@apply px-2 py-1;
-		@apply rounded-lg;
-		@apply font-bold;
-		background: rgba(255, 255, 255, 0.9);
-		border: 1px solid #e8d4a8;
-		color: #e65100;
-		font-size: 11px;
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-	}
-
-	.capital-badge span.negative {
-		color: #d32f2f;
-	}
-
-	.star-badge {
-		@apply flex items-center gap-0.5;
-		@apply px-1.5 py-1;
-		@apply rounded-lg;
-		@apply font-bold;
-		background: rgba(255, 255, 255, 0.9);
-		border: 1px solid #ffc107;
-		color: #e65100;
-		font-size: 11px;
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-	}
-
-	.star-icon {
-		width: 12px;
-		height: 12px;
-	}
-
-	.tax-badge {
-		@apply flex items-center gap-1;
-		@apply px-2 py-1;
-		@apply rounded-lg;
-		@apply font-bold;
-		background: linear-gradient(to bottom, rgba(255, 204, 128, 0.95), rgba(255, 183, 77, 0.95));
-		border: 1px solid #f57c00;
-		color: #5d4037;
-		font-size: 11px;
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-	}
-
-	.tax-label {
-		color: #795548;
-		font-size: 9px;
-	}
-
-	.tax-count {
-		color: #e65100;
 	}
 
 	/* 타이틀 섹션 */
