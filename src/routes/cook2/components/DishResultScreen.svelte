@@ -3,12 +3,14 @@
 	import type { Ingredient, Recipe, CookResult } from '../lib/types';
 	import { GRADE_COLORS } from '../lib/types';
 	import { getProgressByGrade } from '../lib/data/ingredients';
+	import { findRecipesUsingIngredient } from '../lib/data/recipes';
 	import { unlockedIngredientsStore, runStore, upgradeStore } from '../lib/store';
 	import { getChefImage, getRandomDialogue, type ChefEmotion } from '../lib/chef-images';
 	import ResultCard from './ResultCard.svelte';
 	import DishResult from './DishResult.svelte';
 	import GameButton from './GameButton.svelte';
 	import CapitalHUD from './CapitalHUD.svelte';
+	import SpeechBubble from './SpeechBubble.svelte';
 
 	interface Props {
 		resultIngredient: Ingredient;
@@ -58,6 +60,23 @@
 	let unlockedIds = $derived($unlockedIngredientsStore);
 	let gradeProgress = $derived(getProgressByGrade(unlockedIds, resultIngredient.grade));
 
+	// 런 중 새 발견 여부 (재료일 때만)
+	let isNewDiscovery = $state(false);
+
+	// 이 재료로 만들 수 있는 요리 개수
+	let possibleRecipeCount = $derived(() => {
+		if (!resultIngredient.isIngredient) return 0;
+		const recipes = findRecipesUsingIngredient(resultIngredient.id);
+		return recipes.length;
+	});
+
+	// 마운트 시 새 발견 여부 체크 및 기록
+	$effect(() => {
+		if (resultIngredient.isIngredient && runState.isRunning) {
+			isNewDiscovery = runStore.discoverIngredient(resultIngredient.id);
+		}
+	});
+
 	let stage = $state<'heartbeat' | 'explosion' | 'card' | 'cardShake' | 'result'>('heartbeat');
 	let cardFlipped = $state(false);
 	let cardShaking = $state(false);
@@ -86,29 +105,32 @@
 	let chefImage = $derived(getChefImage(chefEmotion()));
 	let chefDialogue = $state('');
 
-	$effect(() => {
-		chefDialogue = getRandomDialogue(chefEmotion());
-	});
-
-	// 재료 가이드 메시지
-	const INGREDIENT_GUIDE = {
+	// 재료 획득 시 메시지 (백종원 말투)
+	const INGREDIENT_DIALOGUE = {
 		normal: [
-			'다른 재료와 조합해보세요!',
-			'새로운 요리를 만들어보세요!',
-			'조합하면 요리가 완성돼요!',
-			'어떤 요리가 될까요?'
+			'어~ 이거 좋은 재료야~',
+			'자 이거 봐~ 신선하지?',
+			'이 재료 진짜 괜찮아~',
+			'어우~ 이거 맛있겠다~',
+			'자~ 이제 요리할 수 있어~'
 		],
-		critical: ['완벽한 품질의 재료!', '최상급 재료 획득!', '대박! 조합해보세요!', '황금 재료 발견!']
+		critical: [
+			'어어어~ 이거 대박이야!',
+			'와~ 이건 진짜 좋은 거야~',
+			'자 봐봐~ 이게 진짜야~',
+			'어우~ 완전 대박 재료!',
+			'이야~ 이건 특급이야~'
+		]
 	};
 
-	function getIngredientGuide(): string {
-		const messages = isCritical ? INGREDIENT_GUIDE.critical : INGREDIENT_GUIDE.normal;
-		return messages[Math.floor(Math.random() * messages.length)];
-	}
-
-	let ingredientGuide = $state('');
 	$effect(() => {
-		ingredientGuide = getIngredientGuide();
+		// 재료일 때는 요리 유도 문구
+		if (resultIngredient.isIngredient) {
+			const messages = isCritical ? INGREDIENT_DIALOGUE.critical : INGREDIENT_DIALOGUE.normal;
+			chefDialogue = messages[Math.floor(Math.random() * messages.length)];
+		} else {
+			chefDialogue = getRandomDialogue(chefEmotion());
+		}
 	});
 
 	let explosionTheme = $derived(() => {
@@ -338,14 +360,28 @@
 
 					<!-- 하단 정보: 설명 카드 -->
 					{#if stage === 'result'}
-						<div class="ingredient-card" class:critical={isCritical}>
+						<div
+							class="ingredient-card"
+							class:critical={isCritical}
+							class:new-discovery={isNewDiscovery}
+						>
 							{#if isCritical}
 								<div class="ingredient-card-badge">대성공!</div>
+							{:else if isNewDiscovery}
+								<div class="ingredient-card-badge new">NEW!</div>
 							{/if}
-							<div class="ingredient-card-header">재료 획득</div>
+							<div class="ingredient-card-header">
+								{#if isNewDiscovery}
+									새 재료 발견!
+								{:else}
+									재료 획득
+								{/if}
+							</div>
 							<div class="ingredient-card-name">{resultIngredient.name}</div>
 							<div class="ingredient-card-divider"></div>
-							<div class="ingredient-card-guide">다른 재료와 조합해서 요리를 만들어보세요!</div>
+							<div class="ingredient-card-guide has-recipes">
+								이 재료로 <strong>{possibleRecipeCount()}개</strong>의 요리를 만들 수 있어요!
+							</div>
 						</div>
 					{/if}
 				</div>
@@ -353,9 +389,18 @@
 				<!-- 하단 영역: 캐릭터 + 버튼 -->
 				{#if stage === 'result'}
 					<div class="bottom-area">
-						<!-- 캐릭터 -->
+						<!-- 대사 (왼쪽) -->
+						<div class="speech-section" class:critical={isCritical}>
+							<SpeechBubble
+								text={chefDialogue}
+								tailPosition="right"
+								variant={isCritical ? 'critical' : 'default'}
+								typingSpeed={40}
+							/>
+						</div>
+
+						<!-- 캐릭터 (오른쪽) -->
 						<div class="chef-section" class:critical={isCritical}>
-							<div class="chef-bubble" class:critical={isCritical}>{chefDialogue}</div>
 							<img src={chefImage} alt="셰프" class="chef-img" />
 						</div>
 
@@ -1027,6 +1072,25 @@
 		box-shadow: 0 4px 16px rgba(217, 119, 6, 0.2);
 	}
 
+	/* 새 발견 스타일 */
+	.ingredient-card.new-discovery {
+		border: 2px solid rgba(59, 130, 246, 0.8);
+		box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+	}
+
+	.ingredient-card.new-discovery .ingredient-card-header {
+		color: rgba(37, 99, 235, 0.9);
+	}
+
+	.ingredient-card.new-discovery .ingredient-card-name {
+		color: #1d4ed8;
+	}
+
+	.ingredient-card.new-discovery .ingredient-card-guide {
+		color: rgba(37, 99, 235, 0.7);
+		border-top-color: rgba(59, 130, 246, 0.3);
+	}
+
 	/* 대성공 뱃지 */
 	.ingredient-card-badge {
 		@apply absolute -top-3 left-1/2 -translate-x-1/2;
@@ -1038,6 +1102,23 @@
 		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 		box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
 		white-space: nowrap;
+	}
+
+	/* NEW 뱃지 */
+	.ingredient-card-badge.new {
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+		animation: newBadgePulse 1s ease-in-out infinite;
+	}
+
+	@keyframes newBadgePulse {
+		0%,
+		100% {
+			transform: translateX(-50%) scale(1);
+		}
+		50% {
+			transform: translateX(-50%) scale(1.1);
+		}
 	}
 
 	.ingredient-card-header {
@@ -1071,6 +1152,30 @@
 		padding-top: 8px;
 		border-top: 1px solid rgba(128, 128, 128, 0.2);
 		color: rgba(22, 101, 52, 0.6);
+	}
+
+	/* 요리 개수 가이드 - 카지노 스타일 깜빡임 */
+	.ingredient-card-guide.has-recipes {
+		@apply font-bold;
+		font-size: clamp(12px, 3vw, 14px);
+		color: #ea580c;
+		animation: casinoBlink 0.8s ease-in-out infinite;
+	}
+
+	.ingredient-card-guide.has-recipes strong {
+		@apply font-black;
+		color: #ea580c;
+		font-size: clamp(14px, 3.5vw, 18px);
+	}
+
+	@keyframes casinoBlink {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.3;
+		}
 	}
 
 	.ingredient-card.critical .ingredient-card-guide {
@@ -1395,27 +1500,62 @@
 		}
 	}
 
-	.chef-bubble {
-		@apply px-3 py-1.5;
-		@apply rounded-xl;
-		@apply font-bold;
-		font-size: clamp(11px, 3vw, 14px);
-		background: white;
-		border: 2px solid #5d4037;
-		color: #5d4037;
-		box-shadow: 0 2px 0 #3e2723;
-		margin-bottom: 4px;
-		max-width: 160px;
-		text-align: center;
+	/* 대사 영역 (왼쪽) */
+	.speech-section {
+		@apply absolute;
+		left: 16px;
+		bottom: 100px;
+		z-index: 10;
 	}
 
-	.chef-bubble.critical {
+	.speech-bubble {
+		@apply relative;
+		@apply px-4 py-2;
+		@apply rounded-2xl;
+		@apply font-black;
+		font-size: clamp(14px, 3.5vw, 18px);
+		background: white;
+		border: 3px solid #5d4037;
+		color: #5d4037;
+		box-shadow: 0 3px 0 #3e2723;
+		max-width: clamp(140px, 40vw, 200px);
+	}
+
+	.speech-bubble::before {
+		content: '';
+		@apply absolute;
+		right: -10px;
+		top: 50%;
+		transform: translateY(-50%);
+		border: 7px solid transparent;
+		border-left-color: #5d4037;
+	}
+
+	.speech-bubble::after {
+		content: '';
+		@apply absolute;
+		right: -5px;
+		top: 50%;
+		transform: translateY(-50%);
+		border: 5px solid transparent;
+		border-left-color: white;
+	}
+
+	.speech-bubble.critical {
 		background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
 		border-color: #f59e0b;
 		color: #92400e;
 		box-shadow:
-			0 2px 0 #d97706,
+			0 3px 0 #d97706,
 			0 0 15px rgba(251, 191, 36, 0.4);
+	}
+
+	.speech-bubble.critical::before {
+		border-left-color: #f59e0b;
+	}
+
+	.speech-bubble.critical::after {
+		border-left-color: #fffbeb;
 	}
 
 	/* ===== 하단 결과 정보 (심플) ===== */

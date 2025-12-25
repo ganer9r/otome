@@ -8,6 +8,7 @@
 	import { runStore } from '../lib/store';
 	import CapitalHUD from './CapitalHUD.svelte';
 	import CoinFlyEffect from './CoinFlyEffect.svelte';
+	import SpeechBubble from './SpeechBubble.svelte';
 
 	// 런 상태 (자본 표시용)
 	let runState = $derived($runStore);
@@ -579,14 +580,14 @@
 						{/if}
 						<img src={chefImage} alt="셰프" class="chef-image" />
 					</div>
-					<div
-						class="speech-bubble"
-						class:visible={showBubble}
-						class:critical={isCritical}
-						class:fail={isFail}
-					>
-						<span>{chefDialogue}</span>
-					</div>
+					{#if showBubble}
+						<SpeechBubble
+							text={chefDialogue}
+							tailPosition="left"
+							variant={isFail ? 'fail' : isCritical ? 'critical' : 'default'}
+							typingSpeed={40}
+						/>
+					{/if}
 				</div>
 
 				<div class="button-content" class:visible={showButton} bind:this={buttonEl}>

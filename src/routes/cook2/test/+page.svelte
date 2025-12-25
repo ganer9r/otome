@@ -5,6 +5,7 @@
 	import ExplosionFailScreen from '../components/ExplosionFailScreen.svelte';
 	import DishResultScreen from '../components/DishResultScreen.svelte';
 	import ResultSpinner from '../components/ResultSpinner.svelte';
+	import SpeechBubble from '../components/SpeechBubble.svelte';
 	import type { CustomerOrder } from '../lib/customer-store';
 	import type { CookResult, DishResultType, IngredientGrade, Recipe } from '../lib/types';
 	import { GRADE_ORDER } from '../lib/types';
@@ -174,6 +175,24 @@
 		showSpinner = true;
 	}
 
+	// 말풍선 테스트
+	let bubbleText = $state('안녕하세요! 반갑습니다~');
+	let bubbleTail = $state<'left' | 'right' | 'top' | 'bottom' | 'none'>('left');
+	let bubbleVariant = $state<'default' | 'critical' | 'fail' | 'customer'>('default');
+
+	const bubbleMessages = [
+		'안녕하세요! 반갑습니다~',
+		'오늘도 맛있는 요리 해주세요!',
+		'와~ 정말 맛있어 보여요!',
+		'이 요리는 어떻게 만드는 거예요?',
+		'최고의 셰프님이시네요!'
+	];
+
+	function randomMessage() {
+		const newMsg = bubbleMessages[Math.floor(Math.random() * bubbleMessages.length)];
+		bubbleText = newMsg;
+	}
+
 	function handleSpinnerComplete(result: DishResultType) {
 		console.log('스피너 결과:', result);
 		// 자동 닫기 비활성화 - 테스트용
@@ -309,6 +328,54 @@
 		<h2>스피너 테스트</h2>
 		<p class="spinner-desc">대성공 1% / 실패 30% / 성공 69%</p>
 		<button class="test-btn spinner" onclick={openSpinner}> 🎡 스피너 돌리기 </button>
+	</div>
+
+	<!-- 말풍선 테스트 섹션 -->
+	<div class="section bubble-section">
+		<h2>말풍선 테스트</h2>
+
+		<!-- 옵션 선택 -->
+		<div class="bubble-options">
+			<div class="option-row">
+				<label>말꼬리:</label>
+				<select bind:value={bubbleTail}>
+					<option value="left">왼쪽</option>
+					<option value="right">오른쪽</option>
+					<option value="top">위</option>
+					<option value="bottom">아래</option>
+					<option value="none">없음</option>
+				</select>
+			</div>
+			<div class="option-row">
+				<label>스타일:</label>
+				<select bind:value={bubbleVariant}>
+					<option value="default">기본</option>
+					<option value="critical">대성공</option>
+					<option value="fail">실패</option>
+					<option value="customer">손님</option>
+				</select>
+			</div>
+		</div>
+
+		<!-- 미리보기 -->
+		<div class="bubble-preview">
+			<div class="preview-character">
+				<img src="/imgs/character/chef_neutral.webp" alt="chef" class="preview-chef" />
+			</div>
+			<div class="preview-bubble">
+				{#key bubbleText + bubbleTail + bubbleVariant}
+					<SpeechBubble
+						text={bubbleText}
+						tailPosition={bubbleTail}
+						variant={bubbleVariant}
+						typingSpeed={40}
+						onTypingComplete={() => console.log('타이핑 완료!')}
+					/>
+				{/key}
+			</div>
+		</div>
+
+		<button class="test-btn bubble-btn" onclick={randomMessage}> 다른 대사 보기 </button>
 	</div>
 </div>
 
@@ -611,5 +678,64 @@
 
 	.test-btn.spinner {
 		background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%);
+	}
+
+	/* 말풍선 테스트 */
+	.bubble-section {
+		@apply w-full;
+	}
+
+	.bubble-options {
+		@apply flex flex-wrap gap-3;
+		@apply mb-4 rounded-lg p-3;
+		background: rgba(255, 255, 255, 0.7);
+		border: 1px solid #fcd34d;
+	}
+
+	.option-row {
+		@apply flex items-center gap-2;
+	}
+
+	.option-row label {
+		@apply text-sm font-bold;
+		color: #78350f;
+	}
+
+	.option-row select {
+		@apply rounded-lg px-2 py-1;
+		background: white;
+		border: 2px solid #d97706;
+		color: #78350f;
+		font-size: 13px;
+	}
+
+	.option-row input[type='checkbox'] {
+		width: 18px;
+		height: 18px;
+	}
+
+	.bubble-preview {
+		@apply flex items-center gap-4;
+		@apply mb-4 min-h-[120px] w-full rounded-xl p-4;
+		background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
+		border: 2px solid #fbbf24;
+	}
+
+	.preview-character {
+		@apply flex-shrink-0;
+	}
+
+	.preview-chef {
+		width: 80px;
+		height: 80px;
+		object-fit: contain;
+	}
+
+	.preview-bubble {
+		@apply flex flex-1 items-center justify-center;
+	}
+
+	.test-btn.bubble-btn {
+		background: linear-gradient(180deg, #06b6d4 0%, #0891b2 100%);
 	}
 </style>

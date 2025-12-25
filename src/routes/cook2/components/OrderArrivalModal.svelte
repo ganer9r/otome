@@ -4,6 +4,7 @@
 	import { getCustomerImagePath } from '../lib/customer-store';
 	import AnticipationOverlay from './AnticipationOverlay.svelte';
 	import GameButton from './GameButton.svelte';
+	import SpeechBubble from './SpeechBubble.svelte';
 
 	interface Props {
 		order: CustomerOrder;
@@ -65,7 +66,14 @@
 		<img class="customer-image" src={getCustomerImagePath(order.customerId, 'order')} alt="손님" />
 
 		<!-- 손님 대사 -->
-		<div class="customer-message">"{order.arrivalMessage}"</div>
+		<SpeechBubble
+			text={order.arrivalMessage}
+			tailPosition="top"
+			variant="customer"
+			typingSpeed={40}
+			fullWidth={false}
+			class="mb-3"
+		/>
 
 		<!-- 요리 정보 -->
 		<div class="dish-card">

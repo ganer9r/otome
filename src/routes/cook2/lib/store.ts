@@ -647,12 +647,14 @@ export interface RunState {
 	turn: number;
 	/** 런 진행 중 여부 */
 	isRunning: boolean;
-	/** 누적 수익 (세금 계산용) */
+	/** 현재 사이클 총 수익 (세금 계산용) */
 	totalEarned: number;
 	/** 파산 여부 */
 	isBankrupt: boolean;
 	/** 런 중 획득한 스타 (세금 생존 시마다 +1) */
 	earnedStars: number;
+	/** 런 중 새로 발견한 재료 ID 목록 */
+	discoveredIngredients: number[];
 }
 
 export interface TaxResult {
@@ -672,7 +674,8 @@ const initialRunState: RunState = {
 	isRunning: false,
 	totalEarned: 0,
 	isBankrupt: false,
-	earnedStars: 0
+	earnedStars: 0,
+	discoveredIngredients: []
 };
 
 function getStoredRunState(): RunState {
@@ -718,7 +721,8 @@ function createRunStore() {
 				isRunning: true,
 				totalEarned: 0,
 				isBankrupt: false,
-				earnedStars: 0
+				earnedStars: 0,
+				discoveredIngredients: []
 			};
 			saveRunState(newState);
 			set(newState);
@@ -798,6 +802,28 @@ function createRunStore() {
 		 */
 		getTurnsUntilTax: (currentTurn: number): number => {
 			return RUN_CONFIG.TAX_INTERVAL - (currentTurn % RUN_CONFIG.TAX_INTERVAL);
+		},
+		/**
+		 * 재료 발견 기록 (런 중 새 발견인 경우 true 반환)
+		 */
+		discoverIngredient: (ingredientId: number): boolean => {
+			const state = getStoredRunState();
+			if (!state.isRunning) return false;
+			if (state.discoveredIngredients?.includes(ingredientId)) return false;
+
+			updateAndSave((s) => ({
+				...s,
+				discoveredIngredients: [...(s.discoveredIngredients || []), ingredientId]
+			}));
+			return true;
+		},
+		/**
+		 * 런 중 새로 발견한 재료인지 확인
+		 */
+		isNewDiscovery: (ingredientId: number): boolean => {
+			const state = getStoredRunState();
+			if (!state.isRunning) return false;
+			return !state.discoveredIngredients?.includes(ingredientId);
 		},
 		/**
 		 * Store 새로고침

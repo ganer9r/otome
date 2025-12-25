@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { CustomerOrder } from '../lib/customer-store';
 	import { getCustomerImagePath } from '../lib/customer-store';
 	import AnticipationOverlay from './AnticipationOverlay.svelte';
 	import GameButton from './GameButton.svelte';
 	import CoinFlyEffect from './CoinFlyEffect.svelte';
+	import SpeechBubble from './SpeechBubble.svelte';
 
 	interface Props {
 		order: CustomerOrder;
@@ -137,7 +137,14 @@
 		/>
 
 		<!-- 손님 대사 -->
-		<div class="customer-message">"{order.completeMessage}"</div>
+		<SpeechBubble
+			text={order.completeMessage}
+			tailPosition="top"
+			variant="customer"
+			typingSpeed={40}
+			fullWidth={false}
+			class="mb-3"
+		/>
 
 		<!-- 보너스 카드 -->
 		<div class="bonus-card" bind:this={bonusCardRef}>
