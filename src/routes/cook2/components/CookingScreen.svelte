@@ -14,7 +14,7 @@
 		selectedIngredients?: number[];
 	}
 
-	let { onComplete, cookingTime = 8, selectedIngredients = [] }: Props = $props();
+	let { onComplete, cookingTime = 5, selectedIngredients = [] }: Props = $props();
 
 	let remainingTime = $state(cookingTime);
 	let progress = $state(0);
