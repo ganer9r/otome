@@ -191,13 +191,13 @@ export const CRITICAL_MULTIPLIER_BY_GRADE: Record<string, number> = {
  * 등급별 실패 배수
  */
 export const FAIL_MULTIPLIER_BY_GRADE: Record<string, number> = {
-	G: 0.3,
-	F: 0.35,
-	E: 0.4,
-	D: 0.45,
-	C: 0.5,
-	B: 0.55,
-	A: 0.6
+	G: 0.5,
+	F: 0.4,
+	E: 0.3,
+	D: 0.2,
+	C: 0.1,
+	B: 0.05,
+	A: 0
 };
 
 /**
