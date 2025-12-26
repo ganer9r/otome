@@ -68,8 +68,8 @@
 	// 다음 세금까지 남은 턴
 	let turnsUntilTax = $derived(runStore.getTurnsUntilTax(runState.turn));
 
-	// 세금률
-	let taxRate = $derived(customerStore.getTaxRate());
+	// 세금률 (store에서 reactive하게 가져옴)
+	let taxRate = $derived($customerStore.taxRate);
 
 	// 업그레이드 효과
 	let upgradeEffects = $derived(upgradeStore.getEffects());
