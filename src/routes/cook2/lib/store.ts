@@ -12,6 +12,7 @@ const FAILED_COMBINATIONS_KEY = 'cook2_failed_combinations';
 const TRIED_COMBINATIONS_KEY = 'cook2_tried_combinations';
 const SUCCESS_COMBINATIONS_KEY = 'cook2_success_combinations';
 const NEW_INGREDIENTS_KEY = 'cook2_new_ingredients';
+const COMBINATION_ATTEMPTS_KEY = 'cook2_combination_attempts';
 
 /**
  * 오픈된 재료 ID 목록 관리
@@ -240,6 +241,61 @@ function createTriedCombinationsStore() {
 }
 
 export const triedCombinationsStore = createTriedCombinationsStore();
+
+/**
+ * 조합 시도 횟수 관리 Store (같은 조합 반복 시 실패율 증가용)
+ */
+type CombinationAttempts = Record<string, number>;
+
+function getCombinationAttempts(): CombinationAttempts {
+	if (!browser) return {};
+	const stored = localStorage.getItem(COMBINATION_ATTEMPTS_KEY);
+	if (!stored) return {};
+	try {
+		return JSON.parse(stored);
+	} catch {
+		return {};
+	}
+}
+
+function saveCombinationAttempts(attempts: CombinationAttempts) {
+	if (!browser) return;
+	localStorage.setItem(COMBINATION_ATTEMPTS_KEY, JSON.stringify(attempts));
+}
+
+function createCombinationAttemptsStore() {
+	const { subscribe, set } = writable<CombinationAttempts>(getCombinationAttempts());
+
+	return {
+		subscribe,
+		increment: (ingredientIds: number[]) => {
+			const attempts = getCombinationAttempts();
+			const key = createCombinationKey(ingredientIds);
+			attempts[key] = (attempts[key] || 0) + 1;
+			saveCombinationAttempts(attempts);
+			set(attempts);
+		},
+		getAttempts: (ingredientIds: number[]): number => {
+			const attempts = getCombinationAttempts();
+			const key = createCombinationKey(ingredientIds);
+			return attempts[key] || 0;
+		},
+		getFailIncrease: (ingredientIds: number[]): number => {
+			const attempts = getCombinationAttempts();
+			const key = createCombinationKey(ingredientIds);
+			const count = attempts[key] || 0;
+			return Math.max(0, count) * 10;
+		},
+		reset: () => {
+			if (browser) {
+				localStorage.removeItem(COMBINATION_ATTEMPTS_KEY);
+			}
+			set({});
+		}
+	};
+}
+
+export const combinationAttemptsStore = createCombinationAttemptsStore();
 
 /**
  * 성공한 조합과 결과 저장 (조합키 -> 결과 재료 ID)

@@ -152,19 +152,8 @@ export interface DishEffects {
 	failReduction?: number;
 }
 
-/**
- * 등급별 기본 확률 (critical, success, fail)
- */
-export const GRADE_PROBABILITIES: Record<IngredientGrade, { critical: number; fail: number }> = {
-	G: { critical: 5, fail: 5 },
-	F: { critical: 5, fail: 7 },
-	E: { critical: 5, fail: 10 },
-	D: { critical: 5, fail: 15 },
-	C: { critical: 5, fail: 20 },
-	B: { critical: 5, fail: 25 },
-	A: { critical: 5, fail: 30 },
-	R: { critical: 5, fail: 35 }
-};
+// GRADE_PROBABILITIES는 dishes-data.ts에서 정의됨
+// 사용처: import { GRADE_PROBABILITIES } from './data/dishes-data';
 
 /**
  * 요리 결과 (계산 후)
