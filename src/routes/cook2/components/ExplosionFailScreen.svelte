@@ -4,6 +4,8 @@
 	import GameButton from './GameButton.svelte';
 	import { runStore } from '../lib/store';
 	import CapitalHUD from './CapitalHUD.svelte';
+	import SpeechBubble from './SpeechBubble.svelte';
+	import { getSoundManager } from '$lib/domain/sound';
 
 	interface Props {
 		/** 재료비 손실 */
@@ -12,6 +14,9 @@
 	}
 
 	let { ingredientCost = 0, onComplete }: Props = $props();
+
+	// 화면 흔들림
+	let screenShake = $state(false);
 
 	// 런 상태 (자본 표시용)
 	let runState = $derived($runStore);
@@ -62,19 +67,36 @@
 	}));
 
 	onMount(() => {
-		// 1. 냄비 흔들림 (0.8초)
-		const timer1 = setTimeout(() => {
-			stage = 'explosion';
-		}, 800);
+		const sound = getSoundManager();
+		const timers: ReturnType<typeof setTimeout>[] = [];
 
-		// 2. 폭발 (1초 후 결과)
-		const timer2 = setTimeout(() => {
-			stage = 'result';
-		}, 1800);
+		// 1. 냄비 흔들림 (0.8초) → 폭발
+		timers.push(
+			setTimeout(() => {
+				stage = 'explosion';
+				sound.playSfx('explosion');
+			}, 800)
+		);
+
+		// 2. 폭발 (1초 후 결과) + 화면 흔들림 + 쿵! (X마크)
+		timers.push(
+			setTimeout(() => {
+				stage = 'result';
+				screenShake = true;
+				sound.playSfx('thud'); // X마크 등장 시 쿵!
+				setTimeout(() => (screenShake = false), 500);
+			}, 1800)
+		);
+
+		// 3. 모든 영역 등장 후 실패 사운드 (1.0s 후 = bottom-section 등장 타이밍)
+		timers.push(
+			setTimeout(() => {
+				sound.playSfx('failNegative');
+			}, 2800)
+		);
 
 		return () => {
-			clearTimeout(timer1);
-			clearTimeout(timer2);
+			timers.forEach((t) => clearTimeout(t));
 		};
 	});
 
@@ -91,6 +113,7 @@
 
 <div
 	class="explosion-fail-screen"
+	class:shake={screenShake}
 	onclick={handleSkip}
 	onkeydown={(e) => e.key === 'Enter' && handleSkip()}
 	role="button"
@@ -160,43 +183,38 @@
 	{:else}
 		<!-- 결과 화면 -->
 		<div class="stage-result">
-			<!-- 상단: 실패 타이틀 -->
-			<div class="result-header">
-				<span class="header-icon">💥</span>
-				<span class="header-text">요리 실패!</span>
-				<span class="header-icon">💥</span>
+			<!-- 상단: 큰 X 마크 + 핵심 메시지 -->
+			<div class="fail-main">
+				<div class="x-mark-container">
+					<div class="x-mark">✕</div>
+					<div class="x-glow"></div>
+				</div>
+				<h1 class="fail-title">조합 실패!</h1>
+				<p class="fail-description">이 재료들로는 요리를 만들 수 없어요</p>
 			</div>
 
-			<!-- 중앙: 재 이미지 영역 -->
-			<div class="fail-image-container">
-				<div class="smoke-bg"></div>
-				<div class="ash-pile">🪨</div>
-				<div class="floating-smoke">💨</div>
-			</div>
-
-			<!-- 실패 메시지 -->
-			<div class="fail-info">
-				<h2 class="fail-name">{failMessage}</h2>
-				<div class="fail-description">이 조합으로는 요리를 만들 수 없어요</div>
-			</div>
-
-			<!-- 손실 표시 -->
+			<!-- 손실 표시 (애니메이션) -->
 			{#if ingredientCost > 0}
 				<div class="loss-section">
-					<span class="loss-icon">💸</span>
+					<div class="loss-coins">
+						<img src="/imgs/ui/coin.png" alt="coin" class="coin-fall coin-1" />
+						<img src="/imgs/ui/coin.png" alt="coin" class="coin-fall coin-2" />
+						<img src="/imgs/ui/coin.png" alt="coin" class="coin-fall coin-3" />
+					</div>
 					<span class="loss-amount">-{ingredientCost.toLocaleString()}원</span>
+					<span class="loss-label">재료비 손실</span>
 				</div>
 			{/if}
 
-			<!-- 하단: 셰프 + 버튼 -->
+			<!-- 하단: 셰프 (크게) + 버튼 -->
 			<div class="bottom-section">
 				<div class="chef-area">
-					<div class="chef-bubble">{chefDialogue}</div>
 					<img src={chefImage} alt="셰프" class="chef-img" />
+					<div class="bubble-wrapper">
+						<SpeechBubble text={chefDialogue} tailPosition="left" variant="fail" />
+					</div>
 				</div>
-				<GameButton variant="secondary" size="lg" class="w-full max-w-xs" onclick={handleConfirm}>
-					확인
-				</GameButton>
+				<GameButton variant="secondary" size="lg" onclick={handleConfirm}>다시 도전!</GameButton>
 			</div>
 		</div>
 	{/if}
@@ -445,196 +463,240 @@
 		@apply justify-between;
 	}
 
-	.result-header {
-		@apply flex items-center gap-2;
-		animation: headerSlide 0.5s ease-out;
+	/* 화면 흔들림 */
+	.explosion-fail-screen.shake {
+		animation: screenShake 0.5s ease-out;
 	}
 
-	@keyframes headerSlide {
+	@keyframes screenShake {
+		0%,
+		100% {
+			transform: translateX(0) translateY(0);
+		}
+		10% {
+			transform: translateX(-10px) translateY(5px);
+		}
+		20% {
+			transform: translateX(10px) translateY(-5px);
+		}
+		30% {
+			transform: translateX(-8px) translateY(4px);
+		}
+		40% {
+			transform: translateX(8px) translateY(-4px);
+		}
+		50% {
+			transform: translateX(-5px) translateY(2px);
+		}
+		60% {
+			transform: translateX(5px) translateY(-2px);
+		}
+		70% {
+			transform: translateX(-3px) translateY(1px);
+		}
+		80% {
+			transform: translateX(3px) translateY(-1px);
+		}
+	}
+
+	/* 메인 실패 영역 - 쿵! (1번째) */
+	.fail-main {
+		@apply flex flex-col items-center gap-3;
+		animation: slamDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0s both;
+	}
+
+	/* 쿵쿵쿵 공통 애니메이션 */
+	@keyframes slamDown {
 		0% {
 			opacity: 0;
-			transform: translateY(-30px);
+			transform: translateY(-80px) scale(1.2);
+		}
+		60% {
+			opacity: 1;
+			transform: translateY(10px) scale(0.95);
+		}
+		80% {
+			transform: translateY(-5px) scale(1.02);
 		}
 		100% {
 			opacity: 1;
-			transform: translateY(0);
+			transform: translateY(0) scale(1);
 		}
 	}
 
-	.header-icon {
-		font-size: clamp(24px, 6vw, 36px);
-	}
-
-	.header-text {
-		@apply font-black text-red-400;
-		font-size: clamp(28px, 7vw, 42px);
-		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-	}
-
-	/* 실패 이미지 영역 */
-	.fail-image-container {
+	/* X 마크 */
+	.x-mark-container {
 		@apply relative;
 		@apply flex items-center justify-center;
-		width: clamp(140px, 40vw, 200px);
-		height: clamp(140px, 40vw, 200px);
-		animation: failImagePop 0.5s ease-out 0.2s both;
+		width: clamp(100px, 28vw, 140px);
+		height: clamp(100px, 28vw, 140px);
 	}
 
-	@keyframes failImagePop {
-		0% {
-			opacity: 0;
-			transform: scale(0.5);
-		}
+	.x-mark {
+		@apply font-black;
+		font-size: clamp(80px, 22vw, 120px);
+		color: #ef4444;
+		text-shadow:
+			0 0 20px rgba(239, 68, 68, 0.6),
+			0 4px 8px rgba(0, 0, 0, 0.4);
+		animation: xPulse 1.5s ease-in-out infinite;
+		z-index: 10;
+	}
+
+	.x-glow {
+		@apply absolute inset-0;
+		background: radial-gradient(circle, rgba(239, 68, 68, 0.3) 0%, transparent 70%);
+		animation: glowPulse 1.5s ease-in-out infinite;
+	}
+
+	@keyframes xPulse {
+		0%,
 		100% {
-			opacity: 1;
 			transform: scale(1);
 		}
+		50% {
+			transform: scale(1.05);
+		}
 	}
 
-	.smoke-bg {
-		@apply absolute inset-0 rounded-full;
-		background: radial-gradient(circle, rgba(80, 80, 80, 0.4) 0%, transparent 70%);
-		animation: smokeBg 2s ease-in-out infinite;
-	}
-
-	@keyframes smokeBg {
+	@keyframes glowPulse {
 		0%,
 		100% {
 			transform: scale(1);
 			opacity: 0.5;
 		}
 		50% {
-			transform: scale(1.2);
-			opacity: 0.3;
+			transform: scale(1.3);
+			opacity: 0.8;
 		}
 	}
 
-	.ash-pile {
-		@apply relative z-10;
-		font-size: clamp(80px, 20vw, 120px);
-		filter: grayscale(0.5) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
-	}
-
-	.floating-smoke {
-		@apply absolute;
-		top: 10%;
-		right: 10%;
-		font-size: clamp(30px, 8vw, 50px);
-		animation: floatSmoke 1.5s ease-in-out infinite;
-		opacity: 0.7;
-	}
-
-	@keyframes floatSmoke {
-		0%,
-		100% {
-			transform: translateY(0) rotate(0deg);
-		}
-		50% {
-			transform: translateY(-15px) rotate(10deg);
-		}
-	}
-
-	/* 실패 정보 */
-	.fail-info {
-		@apply flex flex-col items-center gap-2;
-		animation: infoFade 0.4s ease-out 0.3s both;
-	}
-
-	@keyframes infoFade {
-		0% {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-		100% {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	.fail-name {
-		@apply font-black text-gray-200;
-		font-size: clamp(22px, 5.5vw, 32px);
+	.fail-title {
+		@apply font-black;
+		font-size: clamp(32px, 8vw, 48px);
+		color: #fca5a5;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 	}
 
 	.fail-description {
-		@apply text-gray-400;
+		@apply text-center;
 		font-size: clamp(14px, 3.5vw, 18px);
+		color: rgba(255, 255, 255, 0.7);
+		max-width: 280px;
 	}
 
-	/* 손실 표시 */
+	/* 손실 표시 - 쿵! (2번째) */
 	.loss-section {
-		@apply flex items-center gap-2;
-		animation: lossPop 0.4s ease-out 0.4s both;
+		@apply flex flex-col items-center gap-1;
+		@apply relative;
+		animation: slamDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s both;
 	}
 
-	@keyframes lossPop {
+	/* 떨어지는 코인 애니메이션 - 쿵쿵쿵 */
+	.loss-coins {
+		@apply relative;
+		height: 50px;
+		width: 120px;
+	}
+
+	.coin-fall {
+		@apply absolute;
+		width: 32px;
+		height: 32px;
+		top: 0;
+		opacity: 0;
+		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+	}
+
+	.coin-1 {
+		left: 10%;
+		animation:
+			coinBounce 0.8s cubic-bezier(0.33, 1, 0.68, 1) 0s forwards,
+			coinShake 0.1s ease-in-out 0.5s;
+	}
+	.coin-2 {
+		left: 45%;
+		animation:
+			coinBounce 0.8s cubic-bezier(0.33, 1, 0.68, 1) 0.25s forwards,
+			coinShake 0.1s ease-in-out 0.75s;
+	}
+	.coin-3 {
+		left: 80%;
+		animation:
+			coinBounce 0.8s cubic-bezier(0.33, 1, 0.68, 1) 0.5s forwards,
+			coinShake 0.1s ease-in-out 1s;
+	}
+
+	@keyframes coinBounce {
 		0% {
-			opacity: 0;
-			transform: scale(0.5);
+			opacity: 1;
+			transform: translateY(-60px) rotate(0deg) scale(0.8);
 		}
-		50% {
-			transform: scale(1.1);
+		45% {
+			transform: translateY(20px) rotate(180deg) scale(1);
+		}
+		55% {
+			transform: translateY(5px) rotate(200deg) scale(1.1);
+		}
+		65% {
+			transform: translateY(18px) rotate(220deg) scale(1);
+		}
+		75% {
+			transform: translateY(12px) rotate(230deg) scale(1.05);
+		}
+		85% {
+			transform: translateY(18px) rotate(240deg) scale(1);
 		}
 		100% {
 			opacity: 1;
-			transform: scale(1);
+			transform: translateY(18px) rotate(250deg) scale(1);
 		}
 	}
 
-	.loss-icon {
-		font-size: clamp(28px, 7vw, 40px);
+	@keyframes coinShake {
+		0%,
+		100% {
+			transform: translateY(18px) translateX(0) rotate(250deg);
+		}
+		50% {
+			transform: translateY(18px) translateX(-3px) rotate(250deg);
+		}
 	}
 
 	.loss-amount {
-		@apply font-black text-red-400;
-		font-size: clamp(32px, 8vw, 48px);
-		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+		@apply font-black;
+		font-size: clamp(36px, 10vw, 56px);
+		color: #ef4444;
+		text-shadow:
+			0 0 10px rgba(239, 68, 68, 0.4),
+			0 2px 4px rgba(0, 0, 0, 0.3);
 	}
 
-	/* 하단: 셰프 + 버튼 */
+	.loss-label {
+		font-size: clamp(12px, 3vw, 14px);
+		color: rgba(255, 255, 255, 0.5);
+	}
+
+	/* 하단: 셰프 + 버튼 - 쿵! (3번째) */
 	.bottom-section {
 		@apply relative;
-		@apply flex flex-col items-center;
+		@apply flex flex-col items-center gap-4;
 		@apply w-full;
-		animation: bottomFade 0.4s ease-out 0.5s both;
-	}
-
-	@keyframes bottomFade {
-		0% {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-		100% {
-			opacity: 1;
-			transform: translateY(0);
-		}
+		animation: slamDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1s both;
 	}
 
 	.chef-area {
-		@apply absolute;
-		@apply flex flex-col items-center;
-		right: 8px;
-		bottom: 60px;
-	}
-
-	.chef-bubble {
-		@apply px-3 py-1.5;
-		@apply rounded-xl;
-		@apply font-bold;
-		font-size: clamp(11px, 3vw, 14px);
-		background: white;
-		border: 2px solid #5d4037;
-		color: #5d4037;
-		box-shadow: 0 2px 0 #3e2723;
-		margin-bottom: 4px;
-		max-width: 120px;
-		text-align: center;
+		@apply flex items-end gap-2;
 	}
 
 	.chef-img {
-		width: clamp(100px, 28vw, 140px);
+		width: clamp(140px, 38vw, 200px);
 		height: auto;
-		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+		filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+	}
+
+	.bubble-wrapper {
+		@apply mb-8;
 	}
 
 	/* 스킵 힌트 */

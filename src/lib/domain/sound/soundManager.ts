@@ -13,7 +13,9 @@ export type SfxKey =
 	| 'pop'
 	| 'thud'
 	| 'magicBurst'
-	| 'fail';
+	| 'fail'
+	| 'failNegative'
+	| 'explosion';
 
 interface SoundConfig {
 	src: string;
@@ -35,7 +37,9 @@ const SFX_CONFIG: Record<SfxKey, SoundConfig> = {
 	pop: { src: '/sounds/sfx/bubble-pop.mp3' },
 	thud: { src: '/sounds/sfx/thud.mp3' },
 	magicBurst: { src: '/sounds/sfx/magic-brust.mp3' },
-	fail: { src: '/sounds/sfx/fail.mp3' }
+	fail: { src: '/sounds/sfx/fail.mp3' },
+	failNegative: { src: '/sounds/sfx/fail_negative.mp3' },
+	explosion: { src: '/sounds/sfx/explosion.mp3' }
 };
 
 // 볼륨 최대값 (유저 100% 설정 시 실제 볼륨)

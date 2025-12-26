@@ -24,7 +24,7 @@
 	let { resultIngredient, cookResult, sellPrice, profit, onComplete }: Props = $props();
 
 	// 결과 타입
-	let isFail = $derived(cookResult.resultType === 'fail');
+	let isFail = $derived(cookResult.resultType === 'fail' || cookResult.resultType === 'total_fail');
 	let isCritical = $derived(cookResult.resultType === 'critical');
 	let displayName = $derived(cookResult.displayName);
 	let description = $derived(cookResult.description);
@@ -125,6 +125,8 @@
 	let coinIntervalId: ReturnType<typeof setInterval> | null = null;
 
 	function initCoins() {
+		if (isFail) return;
+
 		if (isCritical) {
 			// 대박: 폭발 이펙트 반복
 			startCriticalCoins();
@@ -305,7 +307,7 @@
 				stage = 'dish';
 				showDish = true;
 				// 요리 등장 사운드
-				if (cookResult.resultType === 'fail') {
+				if (cookResult.resultType === 'fail' || cookResult.resultType === 'total_fail') {
 					sound.playSfx('fail');
 				} else if (cookResult.resultType === 'critical') {
 					sound.playSfx('tada2');
@@ -523,6 +525,9 @@
 						<div class="result-card fail">
 							<div class="result-card-header">요리 실패</div>
 							<div class="result-card-name">{displayName}</div>
+							{#if profit < 0}
+								<div class="result-card-loss">-{Math.abs(profit).toLocaleString()}원 손실</div>
+							{/if}
 							<div class="result-card-guide">{guideMessage()}</div>
 						</div>
 					{:else if isCritical}
@@ -1105,6 +1110,13 @@
 		margin-top: 8px;
 		padding-top: 8px;
 		border-top: 1px solid rgba(128, 128, 128, 0.2);
+	}
+
+	.result-card-loss {
+		@apply text-center font-bold;
+		font-size: clamp(14px, 3.5vw, 18px);
+		color: #fca5a5;
+		margin-top: 4px;
 	}
 
 	.result-card.fail .result-card-guide {
