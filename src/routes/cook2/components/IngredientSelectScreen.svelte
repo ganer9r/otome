@@ -5,12 +5,8 @@
 	import GameButton from './GameButton.svelte';
 	import CapitalHUD from './CapitalHUD.svelte';
 	import { findIngredientById } from '../lib/data/ingredients';
-	import {
-		runStore,
-		upgradeStore,
-		triedCombinationsStore,
-		successCombinationsStore
-	} from '../lib/store';
+	import { findRecipeByIngredients } from '../lib/data/recipes';
+	import { runStore, upgradeStore, triedCombinationsStore } from '../lib/store';
 	import type { Ingredient } from '../lib/types';
 	import type { Snippet } from 'svelte';
 	import { getSoundManager } from '$lib/domain/sound';
@@ -98,17 +94,14 @@
 			return { type: 'unknown' as const };
 		}
 
-		// 성공한 조합인지 확인
-		const successMap = $successCombinationsStore;
-		const sortedIds = [...selectedIds].sort((a, b) => a - b);
-		const key = sortedIds.join(',');
-		const resultId = successMap[key];
-
-		if (resultId) {
-			const resultIngredient = findIngredientById(resultId);
+		// 레시피가 존재하는지 확인 (실패해도 레시피가 있으면 성공 표시)
+		const recipe = findRecipeByIngredients(selectedIds);
+		if (recipe) {
+			const resultIngredient = findIngredientById(recipe.resultIngredientId);
 			return { type: 'success' as const, ingredient: resultIngredient };
 		}
 
+		// 레시피가 없는 조합 (폭발 실패)
 		return { type: 'failed' as const };
 	});
 

@@ -13,6 +13,8 @@ export const STAGE_CONFIG = {
 	ORDER_TARGETS: [2, 3, 3, 4, 4, 5, 5, 6, 6, 7], // 스테이지 1~10
 	/** 기본 세금률 */
 	BASE_TAX_RATE: 0.3,
+	/** 최소 세금률 */
+	MIN_TAX_RATE: 0.1,
 	/** 주문 실패 시 세금률 증가량 */
 	TAX_RATE_PENALTY: 0.05,
 	/** 최대 세금률 */
@@ -615,14 +617,8 @@ function createCustomerStore() {
 				const orderFailed = state.currentOrder !== null && !state.currentOrder.completed;
 				const failedOrder = orderFailed ? state.currentOrder : null;
 
-				// 세금률 계산: 목표 미달 시 증가
-				let newTaxRate = state.taxRate;
-				if (!stageSuccess) {
-					newTaxRate = Math.min(
-						state.taxRate + STAGE_CONFIG.TAX_RATE_PENALTY,
-						STAGE_CONFIG.MAX_TAX_RATE
-					);
-				}
+				// 세금률은 closeOrderFailModal에서 증가시킴 (중복 방지)
+				const newTaxRate = state.taxRate;
 
 				const newDifficulty = survived ? state.difficulty + 1 : state.difficulty;
 
@@ -704,16 +700,23 @@ function createCustomerStore() {
 		},
 
 		/**
-		 * 주문 실패 모달 닫기 (휴식턴 설정, 휴식 후 새 손님 등장)
+		 * 주문 실패 모달 닫기 (세금률 +5% 증가)
 		 */
 		closeOrderFailModal: () => {
-			updateAndSave((state) => ({
-				...state,
-				currentOrder: null, // 실패한 주문 제거
-				showOrderFailModal: false,
-				lastFailedOrder: null,
-				cooldownTurns: getRandomCooldown() // 2~5턴 휴식 후 새 손님
-			}));
+			updateAndSave((state) => {
+				// 세금률 증가 (최대 MAX_TAX_RATE까지)
+				const newTaxRate = Math.min(
+					state.taxRate + STAGE_CONFIG.TAX_RATE_PENALTY,
+					STAGE_CONFIG.MAX_TAX_RATE
+				);
+
+				return {
+					...state,
+					showOrderFailModal: false,
+					lastFailedOrder: null,
+					taxRate: newTaxRate
+				};
+			});
 		},
 
 		/**

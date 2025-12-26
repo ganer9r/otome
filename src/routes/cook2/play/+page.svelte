@@ -94,6 +94,8 @@
 	let showTaxModal = $state(false);
 	let showRunEndModal = $state(false);
 	let lastTaxResult = $state<TaxResult | null>(null);
+	// 손님 실패 모달 후 런 종료 모달 표시 대기
+	let pendingRunEndModal = $state(false);
 
 	// 손님 상태
 	let customerState = $derived($customerStore);
@@ -240,12 +242,24 @@
 		if (taxResult.collected) {
 			lastTaxResult = taxResult;
 
-			if (taxResult.isBankrupt) {
-				// 파산 → 런 종료 모달 표시
-				showRunEndModal = true;
+			// 세금 주기 종료 → 미완료 주문 실패 처리
+			customerStore.onTaxPeriodEnd(!taxResult.isBankrupt, runState.turn);
+
+			// 손님 실패 모달이 있으면 먼저 표시, 없으면 바로 세금/런종료 모달
+			if (customerState.showOrderFailModal) {
+				// 손님 실패 모달 먼저, 런종료는 대기
+				if (taxResult.isBankrupt) {
+					pendingRunEndModal = true;
+				} else {
+					showTaxModal = true;
+				}
 			} else {
-				// 세금 모달 표시
-				showTaxModal = true;
+				// 손님 실패 없음 → 바로 세금/런종료 모달
+				if (taxResult.isBankrupt) {
+					showRunEndModal = true;
+				} else {
+					showTaxModal = true;
+				}
 			}
 			return; // 모달 닫힌 후 계속 진행
 		}
@@ -278,10 +292,22 @@
 		if (taxResult.collected) {
 			lastTaxResult = taxResult;
 
-			if (taxResult.isBankrupt) {
-				showRunEndModal = true;
+			// 세금 주기 종료 → 미완료 주문 실패 처리
+			customerStore.onTaxPeriodEnd(!taxResult.isBankrupt, runState.turn);
+
+			// 손님 실패 모달이 있으면 먼저 표시
+			if (customerState.showOrderFailModal) {
+				if (taxResult.isBankrupt) {
+					pendingRunEndModal = true;
+				} else {
+					showTaxModal = true;
+				}
 			} else {
-				showTaxModal = true;
+				if (taxResult.isBankrupt) {
+					showRunEndModal = true;
+				} else {
+					showTaxModal = true;
+				}
 			}
 			selectedIngredients = [];
 			step = 'ingredient';
@@ -361,6 +387,12 @@
 	// 주문 실패 모달 닫기
 	function handleOrderFailClose() {
 		customerStore.closeOrderFailModal();
+
+		// 런 종료 모달 대기 중이면 표시
+		if (pendingRunEndModal) {
+			pendingRunEndModal = false;
+			showRunEndModal = true;
+		}
 		// orderConfirmed가 false로 유지되므로 새 주문 모달이 자동으로 표시됨
 	}
 
