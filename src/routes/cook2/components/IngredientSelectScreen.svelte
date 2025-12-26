@@ -25,8 +25,14 @@
 		capital?: number;
 		/** 획득한 스타 */
 		earnedStars?: number;
+		/** 현재 턴 */
+		turn?: number;
 		/** 세금까지 남은 턴 */
 		turnsUntilTax?: number;
+		/** 이번 주기 수익 */
+		totalEarned?: number;
+		/** 세금률 */
+		taxRate?: number;
 		/** 손님 뱃지 슬롯 */
 		customerBadge?: Snippet;
 	}
@@ -36,7 +42,10 @@
 		onCook,
 		capital = 0,
 		earnedStars = 0,
+		turn = 0,
 		turnsUntilTax = 0,
+		totalEarned = 0,
+		taxRate = 0.3,
 		customerBadge
 	}: Props = $props();
 
@@ -189,7 +198,7 @@
 			<button class="back-button" onclick={handleBack}>
 				<ChevronLeft size={20} />
 			</button>
-			<CapitalHUD {capital} {earnedStars} />
+			<CapitalHUD {capital} {earnedStars} {turn} {turnsUntilTax} {totalEarned} {taxRate} />
 		</div>
 
 		<!-- 타이틀 -->

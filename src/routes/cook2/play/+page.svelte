@@ -68,6 +68,9 @@
 	// 다음 세금까지 남은 턴
 	let turnsUntilTax = $derived(runStore.getTurnsUntilTax(runState.turn));
 
+	// 세금률
+	let taxRate = $derived(customerStore.getTaxRate());
+
 	// 업그레이드 효과
 	let upgradeEffects = $derived(upgradeStore.getEffects());
 
@@ -474,7 +477,10 @@
 				onCook={handleCookRequest}
 				capital={runState.capital}
 				earnedStars={runState.earnedStars}
+				turn={runState.turn}
 				{turnsUntilTax}
+				totalEarned={runState.totalEarned}
+				{taxRate}
 			>
 				{#snippet customerBadge()}
 					<CustomerOrderBadge {turnsUntilTax} {testUrgency} visible={!!showOrderBadge} />

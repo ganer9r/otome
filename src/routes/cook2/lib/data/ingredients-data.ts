@@ -303,6 +303,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 60,
+		sellPrice: 80,
 		imageUrl: '/imgs/ingredients2/112.webp'
 	},
 	{
@@ -311,6 +312,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'F',
 		isIngredient: true,
 		buyPrice: 80,
+		sellPrice: 100,
 		imageUrl: '/imgs/ingredients2/123.webp'
 	},
 	// F등급 요리
@@ -715,6 +717,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 120,
+		sellPrice: 140,
 		imageUrl: '/imgs/ingredients2/201.webp'
 	},
 	{
@@ -723,6 +726,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 130,
+		sellPrice: 160,
 		imageUrl: '/imgs/ingredients2/202.webp'
 	},
 	{
@@ -731,6 +735,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 150,
+		sellPrice: 180,
 		imageUrl: '/imgs/ingredients2/203.webp'
 	},
 	{
@@ -739,6 +744,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 100,
+		sellPrice: 140,
 		imageUrl: '/imgs/ingredients2/204.webp'
 	},
 	{
@@ -747,6 +753,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 140,
+		sellPrice: 200,
 		imageUrl: '/imgs/ingredients2/205.webp'
 	},
 	{
@@ -755,6 +762,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 100,
+		sellPrice: 160,
 		imageUrl: '/imgs/ingredients2/206.webp'
 	},
 	{
@@ -763,6 +771,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 140,
+		sellPrice: 160,
 		imageUrl: '/imgs/ingredients2/207.webp'
 	},
 	{
@@ -771,6 +780,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 110,
+		sellPrice: 150,
 		imageUrl: '/imgs/ingredients2/208.webp'
 	},
 	{
@@ -779,6 +789,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 140,
+		sellPrice: 170,
 		imageUrl: '/imgs/ingredients2/209.webp'
 	},
 	{
@@ -787,6 +798,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 130,
+		sellPrice: 150,
 		imageUrl: '/imgs/ingredients2/210.webp'
 	},
 	{
@@ -795,6 +807,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 130,
+		sellPrice: 190,
 		imageUrl: '/imgs/ingredients2/211.webp'
 	},
 	{
@@ -803,6 +816,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 140,
+		sellPrice: 180,
 		imageUrl: '/imgs/ingredients2/212.webp'
 	},
 	{
@@ -811,6 +825,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 120,
+		sellPrice: 150,
 		imageUrl: '/imgs/ingredients2/213.webp'
 	},
 	{
@@ -819,6 +834,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'E',
 		isIngredient: true,
 		buyPrice: 140,
+		sellPrice: 170,
 		imageUrl: '/imgs/ingredients2/214.webp'
 	},
 	// E등급 요리
@@ -1103,6 +1119,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 200,
+		sellPrice: 300,
 		imageUrl: '/imgs/ingredients2/301.webp'
 	},
 	{
@@ -1111,6 +1128,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 180,
+		sellPrice: 260,
 		imageUrl: '/imgs/ingredients2/302.webp'
 	},
 	{
@@ -1119,6 +1137,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 190,
+		sellPrice: 280,
 		imageUrl: '/imgs/ingredients2/303.webp'
 	},
 	{
@@ -1127,6 +1146,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 200,
+		sellPrice: 280,
 		imageUrl: '/imgs/ingredients2/304.webp'
 	},
 	{
@@ -1135,6 +1155,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 180,
+		sellPrice: 260,
 		imageUrl: '/imgs/ingredients2/305.webp'
 	},
 	{
@@ -1143,6 +1164,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 210,
+		sellPrice: 280,
 		imageUrl: '/imgs/ingredients2/306.webp'
 	},
 	{
@@ -1151,6 +1173,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 200,
+		sellPrice: 270,
 		imageUrl: '/imgs/ingredients2/307.webp'
 	},
 	{
@@ -1159,6 +1182,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 170,
+		sellPrice: 240,
 		imageUrl: '/imgs/ingredients2/308.webp'
 	},
 	{
@@ -1167,6 +1191,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 190,
+		sellPrice: 270,
 		imageUrl: '/imgs/ingredients2/309.webp'
 	},
 	{
@@ -1175,6 +1200,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 170,
+		sellPrice: 230,
 		imageUrl: '/imgs/ingredients2/310.webp'
 	},
 	{
@@ -1183,6 +1209,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 180,
+		sellPrice: 260,
 		imageUrl: '/imgs/ingredients2/311.webp'
 	},
 	{
@@ -1191,6 +1218,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 170,
+		sellPrice: 200,
 		imageUrl: '/imgs/ingredients2/312.webp'
 	},
 	{
@@ -1199,6 +1227,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'D',
 		isIngredient: true,
 		buyPrice: 180,
+		sellPrice: 270,
 		imageUrl: '/imgs/ingredients2/313.webp'
 	},
 	// D등급 요리
@@ -1427,6 +1456,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 280,
+		sellPrice: 600,
 		imageUrl: '/imgs/ingredients2/401.webp'
 	},
 	{
@@ -1435,6 +1465,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 260,
+		sellPrice: 380,
 		imageUrl: '/imgs/ingredients2/402.webp'
 	},
 	{
@@ -1443,6 +1474,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 300,
+		sellPrice: 410,
 		imageUrl: '/imgs/ingredients2/403.webp'
 	},
 	{
@@ -1451,6 +1483,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 270,
+		sellPrice: 390,
 		imageUrl: '/imgs/ingredients2/404.webp'
 	},
 	{
@@ -1459,6 +1492,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 290,
+		sellPrice: 370,
 		imageUrl: '/imgs/ingredients2/405.webp'
 	},
 	{
@@ -1467,6 +1501,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 300,
+		sellPrice: 340,
 		imageUrl: '/imgs/ingredients2/406.webp'
 	},
 	{
@@ -1475,6 +1510,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 250,
+		sellPrice: 360,
 		imageUrl: '/imgs/ingredients2/407.webp'
 	},
 	{
@@ -1483,6 +1519,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 280,
+		sellPrice: 370,
 		imageUrl: '/imgs/ingredients2/408.webp'
 	},
 	{
@@ -1491,6 +1528,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 270,
+		sellPrice: 480,
 		imageUrl: '/imgs/ingredients2/409.webp'
 	},
 	{
@@ -1499,6 +1537,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 230,
+		sellPrice: 380,
 		imageUrl: '/imgs/ingredients2/410.webp'
 	},
 	{
@@ -1507,6 +1546,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 240,
+		sellPrice: 360,
 		imageUrl: '/imgs/ingredients2/411.webp'
 	},
 	{
@@ -1515,6 +1555,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'C',
 		isIngredient: true,
 		buyPrice: 250,
+		sellPrice: 340,
 		imageUrl: '/imgs/ingredients2/412.webp'
 	},
 	// C등급 요리
@@ -1687,6 +1728,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 380,
+		sellPrice: 1200,
 		imageUrl: '/imgs/ingredients2/501.webp'
 	},
 	{
@@ -1695,6 +1737,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 400,
+		sellPrice: 520,
 		imageUrl: '/imgs/ingredients2/502.webp'
 	},
 	{
@@ -1703,6 +1746,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 420,
+		sellPrice: 590,
 		imageUrl: '/imgs/ingredients2/503.webp'
 	},
 	{
@@ -1711,6 +1755,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 380,
+		sellPrice: 600,
 		imageUrl: '/imgs/ingredients2/504.webp'
 	},
 	{
@@ -1719,6 +1764,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 350,
+		sellPrice: 540,
 		imageUrl: '/imgs/ingredients2/505.webp'
 	},
 	{
@@ -1727,6 +1773,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 360,
+		sellPrice: 870,
 		imageUrl: '/imgs/ingredients2/506.webp'
 	},
 	{
@@ -1735,6 +1782,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 400,
+		sellPrice: 560,
 		imageUrl: '/imgs/ingredients2/507.webp'
 	},
 	{
@@ -1743,6 +1791,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 380,
+		sellPrice: 590,
 		imageUrl: '/imgs/ingredients2/508.webp'
 	},
 	{
@@ -1751,6 +1800,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 390,
+		sellPrice: 500,
 		imageUrl: '/imgs/ingredients2/509.webp'
 	},
 	{
@@ -1759,6 +1809,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 340,
+		sellPrice: 540,
 		imageUrl: '/imgs/ingredients2/510.webp'
 	},
 	{
@@ -1767,6 +1818,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'B',
 		isIngredient: true,
 		buyPrice: 350,
+		sellPrice: 490,
 		imageUrl: '/imgs/ingredients2/511.webp'
 	},
 	// B등급 요리
@@ -1923,6 +1975,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 550,
+		sellPrice: 2400,
 		imageUrl: '/imgs/ingredients2/601.webp'
 	},
 	{
@@ -1931,6 +1984,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 560,
+		sellPrice: 800,
 		imageUrl: '/imgs/ingredients2/602.webp'
 	},
 	{
@@ -1939,6 +1993,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 540,
+		sellPrice: 760,
 		imageUrl: '/imgs/ingredients2/603.webp'
 	},
 	{
@@ -1947,6 +2002,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 560,
+		sellPrice: 760,
 		imageUrl: '/imgs/ingredients2/604.webp'
 	},
 	{
@@ -1955,6 +2011,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 580,
+		sellPrice: 800,
 		imageUrl: '/imgs/ingredients2/605.webp'
 	},
 	{
@@ -1963,6 +2020,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 600,
+		sellPrice: 840,
 		imageUrl: '/imgs/ingredients2/606.webp'
 	},
 	{
@@ -1971,6 +2029,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 520,
+		sellPrice: 720,
 		imageUrl: '/imgs/ingredients2/607.webp'
 	},
 	{
@@ -1979,6 +2038,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 500,
+		sellPrice: 700,
 		imageUrl: '/imgs/ingredients2/608.webp'
 	},
 	{
@@ -1987,6 +2047,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 570,
+		sellPrice: 760,
 		imageUrl: '/imgs/ingredients2/609.webp'
 	},
 	{
@@ -1995,6 +2056,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 480,
+		sellPrice: 780,
 		imageUrl: '/imgs/ingredients2/610.webp'
 	},
 	{
@@ -2003,6 +2065,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 590,
+		sellPrice: 800,
 		imageUrl: '/imgs/ingredients2/611.webp'
 	},
 	{
@@ -2011,6 +2074,7 @@ export const INGREDIENTS_DATA: Ingredient[] = [
 		grade: 'A',
 		isIngredient: true,
 		buyPrice: 450,
+		sellPrice: 700,
 		imageUrl: '/imgs/ingredients2/612.webp'
 	},
 	// A등급 요리

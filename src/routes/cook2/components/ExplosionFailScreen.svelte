@@ -3,6 +3,7 @@
 	import { getChefImage, getRandomDialogue } from '../lib/chef-images';
 	import GameButton from './GameButton.svelte';
 	import { runStore } from '../lib/store';
+	import { customerStore } from '../lib/customer-store';
 	import CapitalHUD from './CapitalHUD.svelte';
 	import SpeechBubble from './SpeechBubble.svelte';
 	import { getSoundManager } from '$lib/domain/sound';
@@ -20,6 +21,8 @@
 
 	// 런 상태 (자본 표시용)
 	let runState = $derived($runStore);
+	let turnsUntilTax = $derived(runStore.getTurnsUntilTax(runState.turn));
+	let taxRate = $derived(customerStore.getTaxRate());
 
 	// 단계: shake -> explosion -> result
 	let stage = $state<'shake' | 'explosion' | 'result'>('shake');
@@ -121,7 +124,14 @@
 >
 	<!-- HUD -->
 	<div class="hud-area">
-		<CapitalHUD capital={runState.capital} earnedStars={runState.earnedStars} />
+		<CapitalHUD
+			capital={runState.capital}
+			earnedStars={runState.earnedStars}
+			turn={runState.turn}
+			{turnsUntilTax}
+			totalEarned={runState.totalEarned}
+			{taxRate}
+		/>
 	</div>
 
 	{#if stage === 'shake'}

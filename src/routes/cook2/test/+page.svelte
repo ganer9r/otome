@@ -6,6 +6,9 @@
 	import DishResultScreen from '../components/DishResultScreen.svelte';
 	import ResultSpinner from '../components/ResultSpinner.svelte';
 	import SpeechBubble from '../components/SpeechBubble.svelte';
+	import TaxModal from '../components/TaxModal.svelte';
+	import TaxInfoModal from '../components/TaxInfoModal.svelte';
+	import RunEndModal from '../components/RunEndModal.svelte';
 	import type { CustomerOrder } from '../lib/customer-store';
 	import type { CookResult, DishResultType, IngredientGrade, Recipe } from '../lib/types';
 	import { GRADE_ORDER } from '../lib/types';
@@ -175,6 +178,20 @@
 		showSpinner = true;
 	}
 
+	// 세금/시스템 모달 테스트
+	let showTaxModal = $state(false);
+	let showTaxInfoModal = $state(false);
+	let showRunEndModal = $state(false);
+	let showRunEndBankruptModal = $state(false);
+
+	// 테스트용 세금 데이터
+	let testTaxAmount = $state(300);
+	let testCapitalAfterTax = $state(700);
+	let testTurn = $state(8);
+	let testTurnsUntilTax = $state(2);
+	let testTotalEarned = $state(1500);
+	let testTaxRate = $state(0.3);
+
 	// 말풍선 테스트
 	let bubbleText = $state('안녕하세요! 반갑습니다~');
 	let bubbleTail = $state<'left' | 'right' | 'top' | 'bottom' | 'none'>('left');
@@ -330,6 +347,25 @@
 		<button class="test-btn spinner" onclick={openSpinner}> 🎡 스피너 돌리기 </button>
 	</div>
 
+	<!-- 세금/시스템 모달 테스트 섹션 -->
+	<div class="section">
+		<h2>세금/시스템 모달 테스트</h2>
+		<div class="button-group">
+			<button class="test-btn tax" onclick={() => (showTaxModal = true)}>
+				💰 세금 징수 모달
+			</button>
+			<button class="test-btn tax-info" onclick={() => (showTaxInfoModal = true)}>
+				📋 세금 안내 모달
+			</button>
+			<button class="test-btn run-end" onclick={() => (showRunEndModal = true)}>
+				🏁 런 종료 (생존)
+			</button>
+			<button class="test-btn run-end-fail" onclick={() => (showRunEndBankruptModal = true)}>
+				🏁 런 종료 (파산)
+			</button>
+		</div>
+	</div>
+
 	<!-- 말풍선 테스트 섹션 -->
 	<div class="section bubble-section">
 		<h2>말풍선 테스트</h2>
@@ -477,14 +513,57 @@
 	/>
 {/if}
 
+<!-- 세금 징수 모달 -->
+{#if showTaxModal}
+	<TaxModal
+		taxAmount={testTaxAmount}
+		capitalAfterTax={testCapitalAfterTax}
+		onConfirm={() => (showTaxModal = false)}
+	/>
+{/if}
+
+<!-- 세금 안내 모달 -->
+{#if showTaxInfoModal}
+	<TaxInfoModal
+		turn={testTurn}
+		turnsUntilTax={testTurnsUntilTax}
+		totalEarned={testTotalEarned}
+		taxRate={testTaxRate}
+		onClose={() => (showTaxInfoModal = false)}
+	/>
+{/if}
+
+<!-- 런 종료 모달 (생존) -->
+{#if showRunEndModal}
+	<RunEndModal
+		isBankrupt={false}
+		survivedTurns={25}
+		earnedStars={3}
+		finalCapital={2500}
+		onConfirm={() => (showRunEndModal = false)}
+	/>
+{/if}
+
+<!-- 런 종료 모달 (파산) -->
+{#if showRunEndBankruptModal}
+	<RunEndModal
+		isBankrupt={true}
+		survivedTurns={8}
+		earnedStars={0}
+		finalCapital={-300}
+		onConfirm={() => (showRunEndBankruptModal = false)}
+	/>
+{/if}
+
 <style lang="postcss">
 	@reference '$styles/app.css';
 
 	.test-container {
 		@apply flex flex-col items-center gap-6;
 		@apply min-h-screen;
-		@apply p-4 pt-16;
+		@apply p-4 pt-16 pb-20;
 		background: linear-gradient(to bottom, #fff8e1, #ffecb3);
+		overflow-y: auto;
 	}
 
 	.section {
@@ -737,5 +816,22 @@
 
 	.test-btn.bubble-btn {
 		background: linear-gradient(180deg, #06b6d4 0%, #0891b2 100%);
+	}
+
+	/* 세금/시스템 모달 버튼 스타일 */
+	.test-btn.tax {
+		background: linear-gradient(180deg, #5d4037 0%, #4e342e 100%);
+	}
+
+	.test-btn.tax-info {
+		background: linear-gradient(180deg, #8d6e63 0%, #6d4c41 100%);
+	}
+
+	.test-btn.run-end {
+		background: linear-gradient(180deg, #059669 0%, #047857 100%);
+	}
+
+	.test-btn.run-end-fail {
+		background: linear-gradient(180deg, #dc2626 0%, #b91c1c 100%);
 	}
 </style>

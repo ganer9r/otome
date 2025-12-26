@@ -5,6 +5,7 @@
 	import { getProgressByGrade } from '../lib/data/ingredients';
 	import { findRecipesUsingIngredient } from '../lib/data/recipes';
 	import { unlockedIngredientsStore, runStore, upgradeStore } from '../lib/store';
+	import { customerStore } from '../lib/customer-store';
 	import { getChefImage, getRandomDialogue, type ChefEmotion } from '../lib/chef-images';
 	import { getSoundManager } from '$lib/domain/sound';
 	import ResultCard from './ResultCard.svelte';
@@ -38,6 +39,8 @@
 
 	// 런 상태
 	let runState = $derived($runStore);
+	let turnsUntilTax = $derived(runStore.getTurnsUntilTax(runState.turn));
+	let taxRate = $derived(customerStore.getTaxRate());
 
 	// 업그레이드 효과
 	let upgradeEffects = $derived(upgradeStore.getEffects());
@@ -254,7 +257,14 @@
 
 <!-- HUD -->
 <div class="hud-area">
-	<CapitalHUD capital={runState.capital} earnedStars={runState.earnedStars} />
+	<CapitalHUD
+		capital={runState.capital}
+		earnedStars={runState.earnedStars}
+		turn={runState.turn}
+		{turnsUntilTax}
+		totalEarned={runState.totalEarned}
+		{taxRate}
+	/>
 </div>
 
 <!-- 요리 또는 실패: DishResult 사용 -->

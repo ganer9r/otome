@@ -3,6 +3,7 @@
 	import { findIngredientById } from '../lib/data/ingredients';
 	import { findRecipeByIngredients } from '../lib/data/recipes';
 	import { unlockedDishesStore, runStore } from '../lib/store';
+	import { customerStore } from '../lib/customer-store';
 	import { haptic } from '../lib/native-bridge';
 	import CapitalHUD from './CapitalHUD.svelte';
 
@@ -19,6 +20,8 @@
 
 	// 런 상태 (자본 표시용)
 	let runState = $derived($runStore);
+	let turnsUntilTax = $derived(runStore.getTurnsUntilTax(runState.turn));
+	let taxRate = $derived(customerStore.getTaxRate());
 
 	let remainingTime = $state(cookingTime);
 	let progress = $state(0);
@@ -73,7 +76,14 @@
 <div class="cooking-screen">
 	<!-- HUD -->
 	<div class="hud-area">
-		<CapitalHUD capital={runState.capital} earnedStars={runState.earnedStars} />
+		<CapitalHUD
+			capital={runState.capital}
+			earnedStars={runState.earnedStars}
+			turn={runState.turn}
+			{turnsUntilTax}
+			totalEarned={runState.totalEarned}
+			{taxRate}
+		/>
 	</div>
 
 	<!-- 상단: 조합 공식 -->

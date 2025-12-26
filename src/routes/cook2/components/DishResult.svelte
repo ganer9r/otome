@@ -6,12 +6,15 @@
 	import GameButton from './GameButton.svelte';
 	import { getSoundManager } from '$lib/domain/sound';
 	import { runStore } from '../lib/store';
+	import { customerStore } from '../lib/customer-store';
 	import CapitalHUD from './CapitalHUD.svelte';
 	import CoinFlyEffect from './CoinFlyEffect.svelte';
 	import SpeechBubble from './SpeechBubble.svelte';
 
 	// 런 상태 (자본 표시용)
 	let runState = $derived($runStore);
+	let turnsUntilTax = $derived(runStore.getTurnsUntilTax(runState.turn));
+	let taxRate = $derived(customerStore.getTaxRate());
 
 	interface Props {
 		resultIngredient: Ingredient;
@@ -40,8 +43,8 @@
 	let showCoins = $state(false);
 	let showButton = $state(false);
 
-	// 버튼 숫자 카운트업
-	let displayedProfit = $state(0);
+	// 버튼 숫자 카운트업 (판매가 표시)
+	let displayedSellPrice = $state(0);
 
 	// 화면 흔들림
 	let screenShake = $state(false);
@@ -351,19 +354,19 @@
 	function startProfitCounting() {
 		const duration = 1500; // 1.5초
 		const startTime = performance.now();
-		const target = profit;
+		const target = sellPrice;
 
 		function animate(currentTime: number) {
 			const elapsed = currentTime - startTime;
 			const progress = Math.min(elapsed / duration, 1);
 			// easeOutCubic - 자연스럽게 감속
 			const eased = 1 - Math.pow(1 - progress, 3);
-			displayedProfit = Math.round(target * eased);
+			displayedSellPrice = Math.round(target * eased);
 
 			if (progress < 1) {
 				requestAnimationFrame(animate);
 			} else {
-				displayedProfit = target;
+				displayedSellPrice = target;
 			}
 		}
 		requestAnimationFrame(animate);
@@ -377,7 +380,7 @@
 			showBubble = true;
 			showCoins = true;
 			showButton = true;
-			displayedProfit = profit;
+			displayedSellPrice = sellPrice;
 		}
 	}
 
@@ -439,7 +442,14 @@
 >
 	<!-- HUD -->
 	<div class="hud-area" bind:this={hudEl}>
-		<CapitalHUD capital={runState.capital} earnedStars={runState.earnedStars} />
+		<CapitalHUD
+			capital={runState.capital}
+			earnedStars={runState.earnedStars}
+			turn={runState.turn}
+			{turnsUntilTax}
+			totalEarned={runState.totalEarned}
+			{taxRate}
+		/>
 	</div>
 
 	<!-- 코인 날아가기 효과 -->
@@ -608,7 +618,7 @@
 
 				<div class="button-content" class:visible={showButton} bind:this={buttonEl}>
 					<GameButton variant={isFail ? 'secondary' : 'primary'} size="lg" onclick={handleConfirm}>
-						{isFail ? '다시 도전!' : `+${displayedProfit.toLocaleString()}원 획득하기`}
+						{isFail ? '다시 도전!' : `+${displayedSellPrice.toLocaleString()}원 획득하기`}
 					</GameButton>
 				</div>
 			</div>
