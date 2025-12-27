@@ -313,7 +313,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.3
 	},
-	{ ingredientId: 11, resultType: 'fail', name: '풀떼기', probability: 5, priceMultiplier: 0.5 },
+	{ ingredientId: 11, resultType: 'fail', name: '풀떼기', probability: 20, priceMultiplier: 0.5 },
 	{
 		ingredientId: 12,
 		resultType: 'critical',
@@ -329,7 +329,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.3
 	},
-	{ ingredientId: 13, resultType: 'fail', name: '설탕물', probability: 5, priceMultiplier: 0.5 },
+	{ ingredientId: 13, resultType: 'fail', name: '설탕물', probability: 20, priceMultiplier: 0.5 },
 	{
 		ingredientId: 14,
 		resultType: 'critical',
@@ -399,7 +399,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 19,
 		resultType: 'fail',
 		name: '딱딱한 과자',
-		probability: 5,
+		probability: 20,
 		priceMultiplier: 0.5
 	},
 	{
@@ -501,7 +501,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 104,
 		resultType: 'fail',
 		name: '으깬 고기',
-		probability: 7,
+		probability: 22,
 		priceMultiplier: 0.4
 	},
 	{
@@ -535,7 +535,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.35
 	},
-	{ ingredientId: 108, resultType: 'fail', name: '날생선', probability: 7, priceMultiplier: 0.4 },
+	{ ingredientId: 108, resultType: 'fail', name: '날생선', probability: 22, priceMultiplier: 0.4 },
 	{
 		ingredientId: 109,
 		resultType: 'critical',
@@ -569,7 +569,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 112,
 		resultType: 'fail',
 		name: '녹은 얼음',
-		probability: 7,
+		probability: 22,
 		priceMultiplier: 0.4
 	},
 	{
@@ -583,7 +583,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 123,
 		resultType: 'fail',
 		name: '찐 쌀 뭉치',
-		probability: 7,
+		probability: 22,
 		priceMultiplier: 0.4
 	},
 
@@ -595,7 +595,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.35
 	},
-	{ ingredientId: 124, resultType: 'fail', name: '뭉친 밥', probability: 7, priceMultiplier: 0.4 },
+	{ ingredientId: 124, resultType: 'fail', name: '뭉친 밥', probability: 22, priceMultiplier: 0.4 },
 	{
 		ingredientId: 125,
 		resultType: 'critical',
@@ -771,7 +771,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 138,
 		resultType: 'fail',
 		name: '딱딱한 쿠키',
-		probability: 7,
+		probability: 22,
 		priceMultiplier: 0.4
 	},
 	{
@@ -813,7 +813,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 141,
 		resultType: 'fail',
 		name: '고기 경단 국',
-		probability: 7,
+		probability: 22,
 		priceMultiplier: 0.4
 	},
 	{
@@ -1071,7 +1071,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.35
 	},
-	{ ingredientId: 164, resultType: 'fail', name: '신 채소', probability: 7, priceMultiplier: 0.4 },
+	{ ingredientId: 164, resultType: 'fail', name: '신 채소', probability: 22, priceMultiplier: 0.4 },
 	{
 		ingredientId: 165,
 		resultType: 'critical',
@@ -1105,7 +1105,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 167,
 		resultType: 'fail',
 		name: '흐물한 것',
-		probability: 7,
+		probability: 22,
 		priceMultiplier: 0.4
 	},
 	{
@@ -1141,7 +1141,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 170,
 		resultType: 'fail',
 		name: '얼음에 팥',
-		probability: 7,
+		probability: 22,
 		priceMultiplier: 0.4
 	},
 	{
@@ -1185,7 +1185,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 201,
 		resultType: 'fail',
 		name: '늘어난 면',
-		probability: 10,
+		probability: 25,
 		priceMultiplier: 0.3
 	},
 	{
@@ -1209,7 +1209,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.4
 	},
-	{ ingredientId: 203, resultType: 'fail', name: '탄 고기', probability: 10, priceMultiplier: 0.3 },
+	{ ingredientId: 203, resultType: 'fail', name: '탄 고기', probability: 25, priceMultiplier: 0.3 },
 	{
 		ingredientId: 204,
 		resultType: 'critical',
@@ -1221,7 +1221,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 204,
 		resultType: 'fail',
 		name: '뜨거운 물',
-		probability: 10,
+		probability: 25,
 		priceMultiplier: 0.3
 	},
 	{
@@ -1235,7 +1235,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 205,
 		resultType: 'fail',
 		name: '차가운 생선',
-		probability: 10,
+		probability: 25,
 		priceMultiplier: 0.3
 	},
 	{
@@ -1245,7 +1245,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.4
 	},
-	{ ingredientId: 206, resultType: 'fail', name: '긴 떡', probability: 10, priceMultiplier: 0.3 },
+	{ ingredientId: 206, resultType: 'fail', name: '긴 떡', probability: 25, priceMultiplier: 0.3 },
 	{
 		ingredientId: 207,
 		resultType: 'critical',
@@ -1689,7 +1689,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 242,
 		resultType: 'fail',
 		name: '크림 범벅',
-		probability: 10,
+		probability: 25,
 		priceMultiplier: 0.3
 	},
 	{
@@ -1703,7 +1703,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 243,
 		resultType: 'fail',
 		name: '이탈리안 아이스',
-		probability: 10,
+		probability: 25,
 		priceMultiplier: 0.3
 	},
 	{
@@ -1749,7 +1749,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.4
 	},
-	{ ingredientId: 247, resultType: 'fail', name: '구운 떡', probability: 10, priceMultiplier: 0.3 },
+	{ ingredientId: 247, resultType: 'fail', name: '구운 떡', probability: 25, priceMultiplier: 0.3 },
 	{
 		ingredientId: 248,
 		resultType: 'critical',
@@ -1771,7 +1771,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 301,
 		resultType: 'fail',
 		name: '질긴 스테이크',
-		probability: 15,
+		probability: 30,
 		priceMultiplier: 0.2
 	},
 	{
@@ -1799,7 +1799,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 303,
 		resultType: 'fail',
 		name: '김밥 같은 것',
-		probability: 15,
+		probability: 30,
 		priceMultiplier: 0.2
 	},
 	{
@@ -1827,7 +1827,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 305,
 		resultType: 'fail',
 		name: '밥 위 생선들',
-		probability: 15,
+		probability: 30,
 		priceMultiplier: 0.2
 	},
 	{
@@ -1907,7 +1907,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 312,
 		resultType: 'fail',
 		name: '하얀 덩어리',
-		probability: 15,
+		probability: 30,
 		priceMultiplier: 0.2
 	},
 	{
@@ -1993,7 +1993,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 318,
 		resultType: 'fail',
 		name: '치킨 튀김',
-		probability: 15,
+		probability: 30,
 		priceMultiplier: 0.2
 	},
 	{
@@ -2021,7 +2021,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 320,
 		resultType: 'fail',
 		name: '조개 범벅',
-		probability: 15,
+		probability: 30,
 		priceMultiplier: 0.2
 	},
 	{
@@ -2067,7 +2067,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.45
 	},
-	{ ingredientId: 324, resultType: 'fail', name: '찐 게', probability: 15, priceMultiplier: 0.2 },
+	{ ingredientId: 324, resultType: 'fail', name: '찐 게', probability: 30, priceMultiplier: 0.2 },
 	{
 		ingredientId: 325,
 		resultType: 'critical',
@@ -2141,7 +2141,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.45
 	},
-	{ ingredientId: 331, resultType: 'fail', name: '조개 면', probability: 15, priceMultiplier: 0.2 },
+	{ ingredientId: 331, resultType: 'fail', name: '조개 면', probability: 30, priceMultiplier: 0.2 },
 	{
 		ingredientId: 332,
 		resultType: 'critical',
@@ -2149,7 +2149,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.45
 	},
-	{ ingredientId: 332, resultType: 'fail', name: '부대 국', probability: 15, priceMultiplier: 0.2 },
+	{ ingredientId: 332, resultType: 'fail', name: '부대 국', probability: 30, priceMultiplier: 0.2 },
 	{
 		ingredientId: 333,
 		resultType: 'critical',
@@ -2171,7 +2171,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.45
 	},
-	{ ingredientId: 334, resultType: 'fail', name: '파 부침', probability: 15, priceMultiplier: 0.2 },
+	{ ingredientId: 334, resultType: 'fail', name: '파 부침', probability: 30, priceMultiplier: 0.2 },
 	{
 		ingredientId: 335,
 		resultType: 'critical',
@@ -2257,7 +2257,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 401,
 		resultType: 'fail',
 		name: '질긴 갈비',
-		probability: 20,
+		probability: 35,
 		priceMultiplier: 0.1
 	},
 	{
@@ -2271,7 +2271,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 402,
 		resultType: 'fail',
 		name: '생선 모음',
-		probability: 20,
+		probability: 35,
 		priceMultiplier: 0.1
 	},
 	{
@@ -2367,7 +2367,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 411,
 		resultType: 'fail',
 		name: '과일 타르트',
-		probability: 20,
+		probability: 35,
 		priceMultiplier: 0.1
 	},
 	{
@@ -2377,7 +2377,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.5
 	},
-	{ ingredientId: 412, resultType: 'fail', name: '탄 크림', probability: 20, priceMultiplier: 0.1 },
+	{ ingredientId: 412, resultType: 'fail', name: '탄 크림', probability: 35, priceMultiplier: 0.1 },
 
 	// ========== C등급 요리 (413-432) ==========
 	{
@@ -2597,7 +2597,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 429,
 		resultType: 'fail',
 		name: '해물 볶음',
-		probability: 20,
+		probability: 35,
 		priceMultiplier: 0.1
 	},
 	{
@@ -2611,7 +2611,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 430,
 		resultType: 'fail',
 		name: '사과 타르트',
-		probability: 20,
+		probability: 35,
 		priceMultiplier: 0.1
 	},
 	{
@@ -2625,7 +2625,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 431,
 		resultType: 'fail',
 		name: '무스 케이크',
-		probability: 20,
+		probability: 35,
 		priceMultiplier: 0.1
 	},
 	{
@@ -2655,7 +2655,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 501,
 		resultType: 'fail',
 		name: '채끝 고기',
-		probability: 25,
+		probability: 40,
 		priceMultiplier: 0.05
 	},
 	{
@@ -2669,7 +2669,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 502,
 		resultType: 'fail',
 		name: '참치 회',
-		probability: 25,
+		probability: 40,
 		priceMultiplier: 0.05
 	},
 	{
@@ -2697,7 +2697,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 504,
 		resultType: 'fail',
 		name: '트러플 밥',
-		probability: 25,
+		probability: 40,
 		priceMultiplier: 0.05
 	},
 	{
@@ -2711,7 +2711,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 505,
 		resultType: 'fail',
 		name: '오리 다리',
-		probability: 25,
+		probability: 40,
 		priceMultiplier: 0.05
 	},
 	{
@@ -2739,7 +2739,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 507,
 		resultType: 'fail',
 		name: '스시 모음',
-		probability: 25,
+		probability: 40,
 		priceMultiplier: 0.05
 	},
 	{
@@ -2767,7 +2767,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 509,
 		resultType: 'fail',
 		name: '궁중 떡갈비',
-		probability: 25,
+		probability: 40,
 		priceMultiplier: 0.05
 	},
 	{
@@ -2781,7 +2781,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 510,
 		resultType: 'fail',
 		name: '전복 스테이크',
-		probability: 25,
+		probability: 40,
 		priceMultiplier: 0.05
 	},
 	{
@@ -3061,7 +3061,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.6
 	},
-	{ ingredientId: 601, resultType: 'fail', name: 'T본 고기', probability: 30, priceMultiplier: 0 },
+	{ ingredientId: 601, resultType: 'fail', name: 'T본 고기', probability: 45, priceMultiplier: 0 },
 	{
 		ingredientId: 602,
 		resultType: 'critical',
@@ -3069,7 +3069,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.6
 	},
-	{ ingredientId: 602, resultType: 'fail', name: '참치 구이', probability: 30, priceMultiplier: 0 },
+	{ ingredientId: 602, resultType: 'fail', name: '참치 구이', probability: 45, priceMultiplier: 0 },
 	{
 		ingredientId: 603,
 		resultType: 'critical',
@@ -3081,7 +3081,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 603,
 		resultType: 'fail',
 		name: '트러플 수프',
-		probability: 30,
+		probability: 45,
 		priceMultiplier: 0
 	},
 	{
@@ -3117,7 +3117,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 606,
 		resultType: 'fail',
 		name: '킹크랩 버터',
-		probability: 30,
+		probability: 45,
 		priceMultiplier: 0
 	},
 	{
@@ -3131,7 +3131,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 607,
 		resultType: 'fail',
 		name: '프랑스 스튜',
-		probability: 30,
+		probability: 45,
 		priceMultiplier: 0
 	},
 	{
@@ -3141,7 +3141,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.6
 	},
-	{ ingredientId: 608, resultType: 'fail', name: '오리 요리', probability: 30, priceMultiplier: 0 },
+	{ ingredientId: 608, resultType: 'fail', name: '오리 요리', probability: 45, priceMultiplier: 0 },
 	{
 		ingredientId: 609,
 		resultType: 'critical',
@@ -3153,7 +3153,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 609,
 		resultType: 'fail',
 		name: '해물 플래터',
-		probability: 30,
+		probability: 45,
 		priceMultiplier: 0
 	},
 	{
@@ -3163,7 +3163,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.6
 	},
-	{ ingredientId: 610, resultType: 'fail', name: '궁중 잡채', probability: 30, priceMultiplier: 0 },
+	{ ingredientId: 610, resultType: 'fail', name: '궁중 잡채', probability: 45, priceMultiplier: 0 },
 	{
 		ingredientId: 611,
 		resultType: 'critical',
@@ -3171,7 +3171,7 @@ export const DISH_TABLE: DishEntry[] = [
 		probability: 5,
 		priceMultiplier: 1.6
 	},
-	{ ingredientId: 611, resultType: 'fail', name: '일본 회', probability: 30, priceMultiplier: 0 },
+	{ ingredientId: 611, resultType: 'fail', name: '일본 회', probability: 45, priceMultiplier: 0 },
 	{
 		ingredientId: 612,
 		resultType: 'critical',
@@ -3183,7 +3183,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 612,
 		resultType: 'fail',
 		name: '파리 디저트',
-		probability: 30,
+		probability: 45,
 		priceMultiplier: 0
 	},
 
@@ -3359,7 +3359,7 @@ export const DISH_TABLE: DishEntry[] = [
 		ingredientId: 627,
 		resultType: 'fail',
 		name: '오페라 케이크',
-		probability: 30,
+		probability: 45,
 		priceMultiplier: 0
 	},
 	{
